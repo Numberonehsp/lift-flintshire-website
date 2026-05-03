@@ -37,15 +37,30 @@ export function Button({
   disabled = false,
   className = '',
 }: ButtonProps) {
-  const base = 'inline-flex items-center justify-center font-body font-semibold rounded-btn min-h-[44px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2'
-  const classes = `${base} ${variantClasses[variant]} ${sizeClasses[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`
+  const base = 'inline-flex items-center justify-center font-body font-semibold rounded-btn min-h-[44px] min-w-[44px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2'
+  const classes = [
+    base,
+    variantClasses[variant],
+    sizeClasses[size],
+    disabled && 'opacity-50 cursor-not-allowed',
+    className,
+  ].filter(Boolean).join(' ')
 
   if (href) {
+    const handleAnchorClick = (e: MouseEvent<HTMLAnchorElement>) => {
+      if (disabled) {
+        e.preventDefault()
+        return
+      }
+      onClick?.(e)
+    }
+
     return (
       <a
         href={disabled ? undefined : href}
         aria-disabled={disabled || undefined}
-        onClick={disabled ? (e) => { e.preventDefault() } : (onClick as any)}
+        tabIndex={disabled ? -1 : undefined}
+        onClick={handleAnchorClick}
         className={classes}
       >
         {children}
