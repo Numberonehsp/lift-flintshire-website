@@ -49,7 +49,7 @@ function ProgrammeCard({ title, description, badge, href }: ProgrammeCardProps) 
 }
 
 function EventCard({ title, date, time, location, price, description, onRegister }: EventCardProps) {
-  const dateObj = new Date(date)
+  const dateObj = new Date(date + 'T00:00:00')
   const day = dateObj.toLocaleDateString('en-GB', { day: 'numeric' })
   const month = dateObj.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase()
   const isFree = price === 0
