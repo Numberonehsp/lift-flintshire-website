@@ -42,7 +42,12 @@ export function Button({
 
   if (href) {
     return (
-      <a href={href} className={classes} onClick={onClick as any}>
+      <a
+        href={disabled ? undefined : href}
+        aria-disabled={disabled || undefined}
+        onClick={disabled ? (e) => { e.preventDefault() } : (onClick as any)}
+        className={classes}
+      >
         {children}
       </a>
     )
