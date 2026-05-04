@@ -20,12 +20,13 @@ function parseSheetRows(values: string[][]): SheetRow[] {
     programme: row[1] || '',
     sessionType: row[2] || '',
     totalParticipants: parseInt(row[3]) || 0,
-    ageUnder30: parseInt(row[4]) || 0,
-    age30to60: parseInt(row[5]) || 0,
-    ageOver60: parseInt(row[6]) || 0,
-    genderMale: parseInt(row[7]) || 0,
-    genderFemale: parseInt(row[8]) || 0,
-    genderOther: parseInt(row[9]) || 0,
+    ageUnder18: parseInt(row[4]) || 0,
+    age18to30: parseInt(row[5]) || 0,
+    age30to60: parseInt(row[6]) || 0,
+    ageOver60: parseInt(row[7]) || 0,
+    genderMale: parseInt(row[8]) || 0,
+    genderFemale: parseInt(row[9]) || 0,
+    genderOther: parseInt(row[10]) || 0,
   }))
 }
 
@@ -56,11 +57,17 @@ export function aggregateData(rows: SheetRow[]): SheetData {
   ]
 
   const ageTotals = rows.reduce(
-    (acc, r) => ({ under30: acc.under30 + r.ageUnder30, mid: acc.mid + r.age30to60, over60: acc.over60 + r.ageOver60 }),
-    { under30: 0, mid: 0, over60: 0 }
+    (acc, r) => ({
+      under18: acc.under18 + r.ageUnder18,
+      age18to30: acc.age18to30 + r.age18to30,
+      mid: acc.mid + r.age30to60,
+      over60: acc.over60 + r.ageOver60,
+    }),
+    { under18: 0, age18to30: 0, mid: 0, over60: 0 }
   )
   const byAge = [
-    { name: 'Under 30', participants: ageTotals.under30 },
+    { name: 'Under 18', participants: ageTotals.under18 },
+    { name: '18–30', participants: ageTotals.age18to30 },
     { name: '30–60', participants: ageTotals.mid },
     { name: 'Over 60', participants: ageTotals.over60 },
   ]
