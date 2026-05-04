@@ -7,6 +7,10 @@ import { StatCard } from '../components/ui/StatCard'
 import { programmes } from '../data/programmes'
 import { events } from '../data/events'
 
+const programmeImages: Record<string, string> = {
+  'run-club': '/images/run-club-1.jpeg',
+}
+
 function HeroStats() {
   return (
     <div className="border-t border-white/10 mt-10 pt-8 grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -80,6 +84,7 @@ export default function Home() {
               description={p.tagline}
               badge={p.badge}
               href={`/programmes-events#${p.id}`}
+              imageSrc={programmeImages[p.id]}
             />
           ))}
         </div>

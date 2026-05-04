@@ -26,7 +26,13 @@ function SessionDetails({ sessions }: { sessions: Programme['sessions'] }) {
   )
 }
 
+const programmeImages: Record<string, string[]> = {
+  'run-club': ['/images/run-club-1.jpeg', '/images/run-club-2.jpeg'],
+}
+
 function ProgrammeSection({ programme, imageLeft = false }: { programme: Programme; imageLeft?: boolean }) {
+  const images = programmeImages[programme.id]
+
   const content = (
     <div className="flex-1">
       <Badge className="mb-4">{programme.badge}</Badge>
@@ -46,8 +52,20 @@ function ProgrammeSection({ programme, imageLeft = false }: { programme: Program
   )
 
   const image = (
-    <div className="flex-1">
-      <ImagePlaceholder aspectRatio="4/3" label={`${programme.title} — photography coming soon`} />
+    <div className="flex-1 space-y-4">
+      {images ? (
+        images.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt={`${programme.title} session`}
+            className="w-full aspect-[4/3] object-cover rounded-card"
+            loading="lazy"
+          />
+        ))
+      ) : (
+        <ImagePlaceholder aspectRatio="4/3" label={`${programme.title} — photography coming soon`} />
+      )}
     </div>
   )
 
