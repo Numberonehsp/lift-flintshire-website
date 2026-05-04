@@ -23,7 +23,14 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0 min-h-[44px] flex items-center">
-            <span className="font-display font-black text-white text-xl leading-none tracking-tight">
+            <img
+              src="/logo-white.png"
+              alt="Lift Flintshire CIC"
+              className="h-10 w-auto"
+              style={{ mixBlendMode: 'screen' }}
+              onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block' }}
+            />
+            <span className="font-display font-black text-white text-xl leading-none tracking-tight" style={{ display: 'none' }}>
               LIFT <span className="text-teal">FLINTSHIRE</span>
               <span className="block text-[10px] font-body font-semibold text-white/50 tracking-[0.1em] uppercase mt-0.5">
                 Community Interest Company

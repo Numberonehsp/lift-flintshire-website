@@ -33,7 +33,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
           {/* Col 1: Brand */}
           <div>
-            <span className="font-display font-black text-xl leading-none tracking-tight block mb-3">
+            <img
+              src="/logo-white.png"
+              alt="Lift Flintshire CIC"
+              className="h-10 w-auto mb-3"
+              style={{ mixBlendMode: 'screen' }}
+              onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block' }}
+            />
+            <span className="font-display font-black text-xl leading-none tracking-tight block mb-3" style={{ display: 'none' }}>
               LIFT <span className="text-teal">FLINTSHIRE</span>
             </span>
             <p className="font-body text-sm text-white/60 leading-relaxed mb-4">
@@ -41,7 +48,7 @@ export function Footer() {
             </p>
             <p className="font-body text-xs text-white/40">
               Community Interest Company registered in Wales.<br />
-              CIC Reg No: [Registration number]
+              CIC Reg No: 09379840
             </p>
           </div>
 
@@ -67,7 +74,7 @@ export function Footer() {
             <h3 className="font-display font-bold text-base text-white mb-4 uppercase tracking-wider">Connect</h3>
             <div className="flex gap-4 mb-4">
               <a
-                href="https://instagram.com/liftflintshire"
+                href="https://instagram.com/LiftFlintshire"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white/60 hover:text-teal transition-colors min-h-[44px] flex items-center"

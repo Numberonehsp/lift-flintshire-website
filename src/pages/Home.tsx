@@ -123,7 +123,7 @@ export default function Home() {
         </h2>
         <div className="flex justify-center gap-6">
           <a
-            href="https://instagram.com/liftflintshire"
+            href="https://instagram.com/LiftFlintshire"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 font-body font-semibold text-white/80 hover:text-teal transition-colors min-h-[44px]"
