@@ -5,24 +5,28 @@ import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { StatCard } from '../components/ui/StatCard'
 import { programmes } from '../data/programmes'
-import { events } from '../data/events'
+import { useGoogleSheets } from '../hooks/useGoogleSheets'
+import type { HeroStat } from '../hooks/useGoogleSheets'
+import { useContentSheets } from '../hooks/useContentSheets'
 
 const programmeImages: Record<string, string> = {
   'run-club': '/images/run-club-1.jpeg',
 }
 
-function HeroStats() {
+function HeroStats({ stats }: { stats: HeroStat[] }) {
   return (
     <div className="border-t border-white/10 mt-10 pt-8 grid grid-cols-2 md:grid-cols-4 gap-6">
-      <StatCard value="1,200+" label="Participants supported" />
-      <StatCard value="340+" label="Sessions delivered" />
-      <StatCard value="3" label="Active programmes" />
-      <StatCard value="60+" label="Age groups served" />
+      {stats.map(s => (
+        <StatCard key={s.label} value={s.value} label={s.label} />
+      ))}
     </div>
   )
 }
 
 export default function Home() {
+  const { data: sheetsData } = useGoogleSheets()
+  const { events } = useContentSheets()
+  const heroStats = sheetsData?.heroStats ?? []
   const upcomingEvents = events.slice(0, 3)
 
   return (
@@ -53,7 +57,7 @@ export default function Home() {
             <Button variant="primary" href="/programmes-events" size="lg">View our programmes</Button>
             <Button variant="outline" href="/contact" size="lg" className="border-white/40 text-white hover:bg-white/10">Refer a client</Button>
           </div>
-          <HeroStats />
+          {heroStats.length > 0 && <HeroStats stats={heroStats} />}
         </div>
       </section>
 

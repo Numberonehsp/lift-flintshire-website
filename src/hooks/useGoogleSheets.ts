@@ -2,6 +2,18 @@ import { useState, useEffect } from 'react'
 import { mockRows } from '../data/mockData'
 import type { SheetRow } from '../data/mockData'
 
+export interface HeroStat {
+  value: string
+  label: string
+}
+
+const defaultHeroStats: HeroStat[] = [
+  { value: '1,200+', label: 'Participants supported' },
+  { value: '340+', label: 'Sessions delivered' },
+  { value: '3', label: 'Active programmes' },
+  { value: '60+', label: 'Age groups served' },
+]
+
 export interface SheetData {
   totalParticipants: number
   totalSessions: number
@@ -10,6 +22,7 @@ export interface SheetData {
   byGender: { name: string; value: number }[]
   byAge: { name: string; participants: number }[]
   lastUpdated: string
+  heroStats: HeroStat[]
 }
 
 function parseSheetRows(values: string[][]): SheetRow[] {
@@ -80,7 +93,17 @@ export function aggregateData(rows: SheetRow[]): SheetData {
     byGender,
     byAge,
     lastUpdated: now.toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }),
+    heroStats: defaultHeroStats,
   }
+}
+
+function parseSummarySheet(values: string[][]): HeroStat[] {
+  if (!values || values.length < 2) return defaultHeroStats
+  const [, ...rows] = values
+  const parsed = rows
+    .filter(row => row[0] && row[1])
+    .map(row => ({ value: row[0], label: row[1] }))
+  return parsed.length > 0 ? parsed : defaultHeroStats
 }
 
 export function useGoogleSheets() {
@@ -98,16 +121,17 @@ export function useGoogleSheets() {
       return
     }
 
-    fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1?key=${apiKey}`
-    )
-      .then(res => {
-        if (!res.ok) throw new Error('Sheet fetch failed')
-        return res.json()
-      })
-      .then((json: { values: string[][] }) => {
-        const rows = parseSheetRows(json.values)
-        setData(aggregateData(rows))
+    const base = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values`
+
+    Promise.all([
+      fetch(`${base}/Sheet1?key=${apiKey}`).then(r => { if (!r.ok) throw new Error(); return r.json() }),
+      fetch(`${base}/Summary?key=${apiKey}`).then(r => r.json()).catch(() => ({ values: [] })),
+    ])
+      .then(([impactJson, summaryJson]: [{ values: string[][] }, { values: string[][] }]) => {
+        const rows = parseSheetRows(impactJson.values)
+        const aggregated = aggregateData(rows)
+        aggregated.heroStats = parseSummarySheet(summaryJson.values)
+        setData(aggregated)
         setLoading(false)
       })
       .catch(() => {

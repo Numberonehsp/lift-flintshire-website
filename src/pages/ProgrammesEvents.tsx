@@ -7,8 +7,8 @@ import { Badge } from '../components/ui/Badge'
 import { ImagePlaceholder } from '../components/ui/ImagePlaceholder'
 import { programmes } from '../data/programmes'
 import type { Programme } from '../data/programmes'
-import { events } from '../data/events'
 import type { Event } from '../data/events'
+import { useContentSheets } from '../hooks/useContentSheets'
 
 function SessionDetails({ sessions }: { sessions: Programme['sessions'] }) {
   return (
@@ -155,6 +155,13 @@ function EventRegistrationForm({ event }: { event: Event }) {
 }
 
 export default function ProgrammesEvents() {
+  const { events, sessionsByProgramme } = useContentSheets()
+
+  const programmesWithSessions = programmes.map(p => ({
+    ...p,
+    sessions: sessionsByProgramme[p.id]?.length ? sessionsByProgramme[p.id] : p.sessions,
+  }))
+
   return (
     <>
       <Helmet>
@@ -176,7 +183,7 @@ export default function ProgrammesEvents() {
       </SectionWrapper>
 
       {/* Programme sections */}
-      {programmes.map((p, i) => (
+      {programmesWithSessions.map((p, i) => (
         <ProgrammeSection key={p.id} programme={p} imageLeft={i % 2 !== 0} />
       ))}
 
