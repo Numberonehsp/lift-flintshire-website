@@ -93,10 +93,10 @@ export function Footer() {
               </a>
             </div>
             <a
-              href="mailto:hello@liftflintshire.org"
+              href="mailto:hello@liftflintshire.co.uk"
               className="font-body text-sm text-white/60 hover:text-white transition-colors"
             >
-              hello@liftflintshire.org
+              hello@liftflintshire.co.uk
             </a>
           </div>
         </div>

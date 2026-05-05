@@ -3,9 +3,16 @@ import { events as staticEvents } from '../data/events'
 import type { Event } from '../data/events'
 import type { SessionDetail } from '../data/programmes'
 
+export interface RegistrationSummary {
+  programme: string
+  label: string
+  total: number
+}
+
 interface ContentSheetsData {
   events: Event[]
   sessionsByProgramme: Record<string, SessionDetail[]>
+  registrations: RegistrationSummary[]
   loading: boolean
 }
 
@@ -28,6 +35,22 @@ function parseEventsSheet(values: string[][]): Event[] {
   return parsed.length > 0 ? parsed : staticEvents
 }
 
+function parseRegistrationsSheet(values: string[][]): RegistrationSummary[] {
+  if (!values || values.length < 2) return []
+  const [, ...rows] = values
+  const counts: Record<string, { label: string; total: number }> = {}
+  rows
+    .filter(row => row[0])
+    .forEach(row => {
+      const id = row[0]
+      const label = row[1] || id
+      const count = parseInt(row[2]) || 1
+      if (!counts[id]) counts[id] = { label, total: 0 }
+      counts[id].total += count
+    })
+  return Object.entries(counts).map(([programme, { label, total }]) => ({ programme, label, total }))
+}
+
 function parseSessionsSheet(values: string[][]): Record<string, SessionDetail[]> {
   if (!values || values.length < 2) return {}
   const [, ...rows] = values
@@ -45,6 +68,7 @@ function parseSessionsSheet(values: string[][]): Record<string, SessionDetail[]>
 export function useContentSheets(): ContentSheetsData {
   const [events, setEvents] = useState<Event[]>(staticEvents)
   const [sessionsByProgramme, setSessionsByProgramme] = useState<Record<string, SessionDetail[]>>({})
+  const [registrations, setRegistrations] = useState<RegistrationSummary[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -61,14 +85,16 @@ export function useContentSheets(): ContentSheetsData {
     Promise.all([
       fetch(`${base}/Events?key=${apiKey}`).then(r => r.json()),
       fetch(`${base}/Programme_Sessions?key=${apiKey}`).then(r => r.json()),
+      fetch(`${base}/Registrations?key=${apiKey}`).then(r => r.json()).catch(() => ({ values: [] })),
     ])
-      .then(([eventsJson, sessionsJson]) => {
+      .then(([eventsJson, sessionsJson, registrationsJson]) => {
         setEvents(parseEventsSheet(eventsJson.values))
         setSessionsByProgramme(parseSessionsSheet(sessionsJson.values))
+        setRegistrations(parseRegistrationsSheet(registrationsJson.values))
       })
       .catch(() => { /* fall back to static data */ })
       .finally(() => setLoading(false))
   }, [])
 
-  return { events, sessionsByProgramme, loading }
+  return { events, sessionsByProgramme, registrations, loading }
 }

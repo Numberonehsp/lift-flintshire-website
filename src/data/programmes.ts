@@ -6,7 +6,7 @@ export interface SessionDetail {
 }
 
 export interface Programme {
-  id: 'stay-strong' | 'run-club' | 'weightlifting'
+  id: 'stay-strong' | 'run-club' | 'weightlifting' | 'couch-to-5k' | 'womens-run-club'
   title: string
   tagline: string
   badge: string
@@ -17,6 +17,36 @@ export interface Programme {
 }
 
 export const programmes: Programme[] = [
+  {
+    id: 'couch-to-5k',
+    title: 'Couch to 5K',
+    tagline: 'From first steps to 5 kilometres in 9 weeks',
+    badge: 'All Ages · Beginners Welcome',
+    description:
+      'Our free Couch to 5K programme takes complete beginners from no running experience to comfortably completing a 5K in just nine weeks. Guided by qualified running coaches, sessions are friendly, social, and never competitive.',
+    targetAudience:
+      'Designed for adults who have never run before, or who are returning to running after a long break. If you can walk for 30 minutes, you can start Couch to 5K. All ages welcome — no fitness test required.',
+    whatToExpect:
+      "Each session follows a structured run/walk interval plan that gradually increases over 9 weeks. You'll be supported by a coach throughout and run as part of a small group. Sessions include a warm-up walk, intervals, and a cool-down stretch.",
+    sessions: [
+      { day: 'TBC', time: 'TBC', location: 'Flintshire', cost: 'Free' },
+    ],
+  },
+  {
+    id: 'womens-run-club',
+    title: "Women's Run Club",
+    tagline: 'A safe, social space to run every first Saturday',
+    badge: 'Women & Non-Binary · All Abilities',
+    description:
+      "Our Women's Run Club meets on the first Saturday of every month for a social group run across Flintshire. It's a welcoming, low-pressure environment led by a female coach — walkers are always included.",
+    targetAudience:
+      "Open to women and non-binary people of all abilities. Whether you're a complete beginner or a regular runner, you'll find your pace here. No one gets left behind.",
+    whatToExpect:
+      "Sessions run for approximately one hour, starting with a group walk-up and ending with a cool-down together. Routes vary each month across Flintshire's parks and countryside. We often finish with a coffee nearby.",
+    sessions: [
+      { day: 'First Saturday of each month', time: '9:00–10:00am', location: 'Mold Town Centre', cost: 'Free' },
+    ],
+  },
   {
     id: 'stay-strong',
     title: 'Stay Strong',

@@ -45,8 +45,16 @@ function ProgrammeSection({ programme, imageLeft = false }: { programme: Program
       <p className="font-body text-sm text-ink-light mb-4 leading-relaxed">{programme.whatToExpect}</p>
       <h3 className="font-display font-bold text-h3 text-ink mb-1">Sessions</h3>
       <SessionDetails sessions={programme.sessions} />
-      <div className="mt-6">
-        <Button variant="primary" href="/contact">Register your interest</Button>
+      <div className="mt-6 flex flex-wrap gap-3">
+        {programme.id === 'couch-to-5k' && (
+          <Button variant="primary" href="/register/couch-to-5k">Register now — it's free</Button>
+        )}
+        {programme.id === 'womens-run-club' && (
+          <Button variant="primary" href="/register/womens-run-club">Register now — it's free</Button>
+        )}
+        {programme.id !== 'couch-to-5k' && programme.id !== 'womens-run-club' && (
+          <Button variant="primary" href="/contact">Register your interest</Button>
+        )}
       </div>
     </div>
   )
@@ -71,7 +79,7 @@ function ProgrammeSection({ programme, imageLeft = false }: { programme: Program
 
   return (
     <section id={programme.id}>
-      <SectionWrapper variant={programme.id === 'run-club' ? 'muted' : 'light'}>
+      <SectionWrapper variant={['run-club', 'weightlifting'].includes(programme.id) ? 'muted' : 'light'}>
         <div className={`flex flex-col ${imageLeft ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-10 lg:gap-16 items-start`}>
           {content}
           {image}
