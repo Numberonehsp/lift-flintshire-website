@@ -42,7 +42,8 @@ export const programmes: Programme[] = [
     targetAudience:
       "Open to women and girls of all abilities. Whether you're a complete beginner or a regular runner, you'll find your pace here. No one gets left behind.",
     whatToExpect:
-      "Sessions run for approximately one hour, starting with a group walk-up and ending with a cool-down and coffee together. Most sessions will be based at Deeside Athletics Track but we may ventrue a bit further out as the community grows.",: [
+      "Sessions run for approximately one hour, starting with a group walk-up and ending with a cool-down and coffee together. Most sessions will be based at Deeside Athletics Track but we may venture a bit further out as the community grows.",
+    sessions: [
       { day: 'First Saturday of each month', time: '10:00–11:00am', location: 'Deeside Athletics Track', cost: 'Free' },
     ],
   },
@@ -91,7 +92,7 @@ export const programmes: Programme[] = [
       'Sessions include technical coaching on the Olympic lifts, strength accessory work, and programming support for those looking to compete. All equipment is provided. Affiliated with British Weightlifting.',
     sessions: [
       { day: 'Monday', time: '19:30–20:30', location: 'Number One HSP, CH5 2TF', cost: '£9 per session, or £25 per month' },
-      { day: 'Wedneday', time: '16:30–17:30', location: 'Number One HSP, CH5 2TF', cost: '£9 per session or £25 per month' },
+      { day: 'Wednesday', time: '16:30–17:30', location: 'Number One HSP, CH5 2TF', cost: '£9 per session or £25 per month' },
       { day: 'Friday', time: '16:30–17:30', location: 'Number One HSP, CH5 2TF', cost: '£9 per session or £25 per month' },
     ],
   },
