@@ -11,6 +11,10 @@ import { useContentSheets } from '../hooks/useContentSheets'
 
 const programmeImages: Record<string, string> = {
   'run-club': '/images/run-club-1.jpeg',
+  'couch-to-5k':    '/images/c25k26.jpeg',
+  'womens-run-club': '/images/women-track-frc-flag.jpeg',
+  'stay-strong':     '/images/paul-sled-pull.jpeg',
+  'weightlifting':   '/images/oly-coaching2.jpeg',
 }
 
 function HeroStats({ stats }: { stats: HeroStat[] }) {

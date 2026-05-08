@@ -27,7 +27,7 @@ function SessionDetails({ sessions }: { sessions: Programme['sessions'] }) {
 }
 
 const programmeImages: Record<string, string[]> = {
-  'run-club': ['/images/run-club-1.jpeg', '/images/run-club-2.jpeg'],
+  'run-club': ['/images/run-.jpeg', '/images/run-club-2.jpeg'],
 }
 
 function ProgrammeSection({ programme, imageLeft = false }: { programme: Programme; imageLeft?: boolean }) {
