@@ -18,13 +18,6 @@ function InstagramIcon() {
   )
 }
 
-function FacebookIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
-    </svg>
-  )
-}
 
 export function Footer() {
   return (
@@ -83,15 +76,6 @@ export function Footer() {
                 aria-label="Lift Flintshire on Instagram"
               >
                 <InstagramIcon />
-              </a>
-              <a
-                href="https://facebook.com/liftflintshire"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/60 hover:text-teal transition-colors min-h-[44px] flex items-center"
-                aria-label="Lift Flintshire on Facebook"
-              >
-                <FacebookIcon />
               </a>
             </div>
             <a

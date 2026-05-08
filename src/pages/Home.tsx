@@ -150,17 +150,6 @@ export default function Home() {
             </svg>
             Instagram
           </a>
-          <a
-            href="https://facebook.com/liftflintshire"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 font-body font-semibold text-white/80 hover:text-teal transition-colors min-h-[44px]"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
-            </svg>
-            Facebook
-          </a>
         </div>
       </SectionWrapper>
     </>
