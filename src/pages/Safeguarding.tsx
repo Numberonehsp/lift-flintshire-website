@@ -43,7 +43,7 @@ export default function Safeguarding() {
           <AlertBox>
             <p className="font-body font-semibold text-sm text-teal mb-1">Designated Safeguarding Lead (DSL)</p>
             <p className="font-body text-sm text-ink-light mb-1">
-              <strong className="text-ink">[Name — update before publishing]</strong><br />
+              <strong className="text-ink">Mark Hanson</strong><br />
               Email: <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">hello@liftflintshire.co.uk</a>
             </p>
             <p className="font-body text-xs text-ink-light mt-3 pt-3 border-t border-teal/20">
