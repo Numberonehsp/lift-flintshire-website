@@ -26,7 +26,7 @@ export function Header() {
             <img
               src="/logo-white.png"
               alt="Lift Flintshire CIC"
-              className="h-10 w-auto"
+              className="h-10 w-auto max-w-[180px]"
               style={{ mixBlendMode: 'screen' }}
               onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block' }}
             />

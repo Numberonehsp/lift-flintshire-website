@@ -126,8 +126,11 @@ export function useGoogleSheets() {
 
     const base = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values`
 
+    // Reads from the "Form Responses 1" tab that Google Forms creates automatically.
+    // If you rename that tab, update the name here to match.
+    const sessionTab = encodeURIComponent('Form Responses 1')
     Promise.all([
-      fetch(`${base}/Sheet1?key=${apiKey}`).then(r => { if (!r.ok) throw new Error(); return r.json() }),
+      fetch(`${base}/${sessionTab}?key=${apiKey}`).then(r => { if (!r.ok) throw new Error(); return r.json() }),
       fetch(`${base}/Summary?key=${apiKey}`).then(r => r.json()).catch(() => ({ values: [] })),
     ])
       .then(([impactJson, summaryJson]: [{ values: string[][] }, { values: string[][] }]) => {

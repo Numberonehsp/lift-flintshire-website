@@ -39,6 +39,11 @@ const config: Config = {
     },
   },
   plugins: [],
+  safelist: [
+    'object-top',
+    'object-center',
+    'object-bottom',
+  ],
 }
 
 export default config
