@@ -5,7 +5,7 @@ const navLinks = [
   { label: 'Programmes & Events', to: '/programmes-events' },
   { label: 'Impact Dashboard', to: '/impact' },
   { label: 'About Us', to: '/about' },
-  { label: 'Contact & Referral', to: '/contact' },
+  { label: 'Contact', to: '/contact' },
 ]
 
 function InstagramIcon() {
@@ -46,9 +46,11 @@ export function Footer() {
             <p className="font-body text-sm text-white/60 leading-relaxed mb-4">
               Building stronger communities through inclusive strength, fitness, and wellbeing programmes across Flintshire, North Wales.
             </p>
-            <p className="font-body text-xs text-white/40">
-              Community Interest Company registered in Wales.<br />
-              CIC Reg No: 09379840
+            <p className="font-body text-xs text-white/40 leading-relaxed">
+              Community Interest Company registered in England &amp; Wales.<br />
+              Company No: 09379840<br />
+              Registered office: M.01 Tomorrow Blue,<br />
+              MediaCityUK, Salford, M50 2AB
             </p>
           </div>
 
@@ -105,9 +107,14 @@ export function Footer() {
           <p className="font-body text-xs text-white/40">
             © {new Date().getFullYear()} Lift Flintshire CIC. All rights reserved. Community Interest Company registered in Wales.
           </p>
-          <a href="/privacy" className="font-body text-xs text-white/40 hover:text-white/70 transition-colors">
-            Privacy Policy
-          </a>
+          <div className="flex gap-6">
+            <a href="/privacy" className="font-body text-xs text-white/40 hover:text-white/70 transition-colors">
+              Privacy Policy
+            </a>
+            <a href="/safeguarding" className="font-body text-xs text-white/40 hover:text-white/70 transition-colors">
+              Safeguarding
+            </a>
+          </div>
         </div>
       </div>
     </footer>
