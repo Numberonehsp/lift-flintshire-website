@@ -10,6 +10,7 @@ interface ProgrammeCardProps {
   badge?: string
   href: string
   imageSrc?: string
+  imagePosition?: string
 }
 
 // Event card
@@ -35,11 +36,11 @@ type CardProps = ProgrammeCardProps | EventCardProps | TeamCardProps
 
 const base = 'rounded-card border border-border bg-surface shadow-sm overflow-hidden'
 
-function ProgrammeCard({ title, description, badge, href, imageSrc }: ProgrammeCardProps) {
+function ProgrammeCard({ title, description, badge, href, imageSrc, imagePosition = 'object-center' }: ProgrammeCardProps) {
   return (
     <div className={base}>
       {imageSrc ? (
-        <img src={imageSrc} alt={title} className="w-full aspect-video object-cover" loading="lazy" />
+        <img src={imageSrc} alt={title} className={`w-full aspect-video object-cover ${imagePosition}`} loading="lazy" />
       ) : (
         <ImagePlaceholder aspectRatio="video" />
       )}

@@ -22,22 +22,28 @@ export interface SheetData {
   heroStats: HeroStat[]
 }
 
+// Columns match the Google Form response sheet layout:
+// A: Timestamp (auto)  B: Date  C: Programme  D: Session Type
+// E: Total Participants  F: Under 18  G: 18–30  H: 30–60  I: Over 60
+// J: Gender Male  K: Gender Female  L: Gender Other/Not stated
 function parseSheetRows(values: string[][]): SheetRow[] {
   if (!values || values.length < 2) return []
   const [, ...rows] = values
-  return rows.map(row => ({
-    date: row[0] || '',
-    programme: row[1] || '',
-    sessionType: row[2] || '',
-    totalParticipants: parseInt(row[3]) || 0,
-    ageUnder18: parseInt(row[4]) || 0,
-    age18to30: parseInt(row[5]) || 0,
-    age30to60: parseInt(row[6]) || 0,
-    ageOver60: parseInt(row[7]) || 0,
-    genderMale: parseInt(row[8]) || 0,
-    genderFemale: parseInt(row[9]) || 0,
-    genderOther: parseInt(row[10]) || 0,
-  }))
+  return rows
+    .filter(row => row.length > 1)
+    .map(row => ({
+      date: row[1] || '',
+      programme: row[2] || '',
+      sessionType: row[3] || '',
+      totalParticipants: parseInt(row[4]) || 0,
+      ageUnder18: parseInt(row[5]) || 0,
+      age18to30: parseInt(row[6]) || 0,
+      age30to60: parseInt(row[7]) || 0,
+      ageOver60: parseInt(row[8]) || 0,
+      genderMale: parseInt(row[9]) || 0,
+      genderFemale: parseInt(row[10]) || 0,
+      genderOther: parseInt(row[11]) || 0,
+    }))
 }
 
 export function aggregateData(rows: SheetRow[]): SheetData {

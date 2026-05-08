@@ -1,6 +1,5 @@
 import { Helmet } from 'react-helmet-async'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
-import { ImagePlaceholder } from '../components/ui/ImagePlaceholder'
 import { Badge } from '../components/ui/Badge'
 
 const values = [
@@ -66,8 +65,19 @@ export default function About() {
               As a Community Interest Company, our asset lock means that any surplus we generate is reinvested into the organisation. We exist to serve Flintshire — full stop.
             </p>
           </div>
-          <div className="flex-1 w-full">
-            <ImagePlaceholder aspectRatio="4/3" label="Lift Flintshire in action — photography coming soon" />
+          <div className="flex-1 w-full space-y-4">
+            <img
+              src="/images/strong-paul-josh-coaching.jpg"
+              alt="Lift Flintshire coach working with a participant"
+              className="w-full aspect-[4/3] object-cover rounded-card"
+              loading="lazy"
+            />
+            <img
+              src="/images/frc-park-run.jpeg"
+              alt="Flintshire Run Club at a local parkrun"
+              className="w-full aspect-[4/3] object-cover rounded-card"
+              loading="lazy"
+            />
           </div>
         </div>
       </SectionWrapper>
@@ -105,11 +115,17 @@ export default function About() {
 
       {/* Team */}
       <SectionWrapper variant="muted">
-        <h2 className="font-display font-extrabold text-h2 text-ink mb-10 text-center">Meet the Team</h2>
+        <h2 className="font-display font-extrabold text-h2 text-ink mb-4 text-center">Meet the Team</h2>
+        <p className="font-body text-sm text-ink-light text-center mb-10">Team photos coming soon — watch this space.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {team.map((member, i) => (
             <div key={i} className="rounded-card border border-border bg-surface shadow-sm overflow-hidden">
-              <ImagePlaceholder aspectRatio="square" label="Team photo coming soon" />
+              <div className="aspect-square bg-surface-muted flex items-center justify-center">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-border" aria-hidden="true">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>
+              </div>
               <div className="p-4 text-center">
                 <h3 className="font-display font-bold text-h3 text-ink">{member.name}</h3>
                 <Badge className="mt-2">{member.role}</Badge>

@@ -17,6 +17,10 @@ const programmeImages: Record<string, string> = {
   'weightlifting':   '/images/oly-coaching2.jpg',
 }
 
+const programmeImagePositions: Record<string, string> = {
+  'stay-strong': 'object-top',
+}
+
 function HeroStats({ stats }: { stats: HeroStat[] }) {
   return (
     <div className="border-t border-white/10 mt-10 pt-8 grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -93,6 +97,7 @@ export default function Home() {
               badge={p.badge}
               href={`/programmes-events#${p.id}`}
               imageSrc={programmeImages[p.id]}
+              imagePosition={programmeImagePositions[p.id]}
             />
           ))}
         </div>

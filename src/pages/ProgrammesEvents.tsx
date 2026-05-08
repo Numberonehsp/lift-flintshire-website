@@ -49,6 +49,16 @@ function ProgrammeSection({ programme, imageLeft = false }: { programme: Program
       <p className="font-body text-sm text-ink-light mb-4 leading-relaxed">{programme.whatToExpect}</p>
       <h3 className="font-display font-bold text-h3 text-ink mb-1">Sessions</h3>
       <SessionDetails sessions={programme.sessions} />
+      {programme.id === 'weightlifting' && (
+        <div className="flex items-center gap-3 mt-6 p-4 bg-teal-pale rounded-card border border-teal/20">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-teal flex-shrink-0" aria-hidden="true">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+          </svg>
+          <p className="font-body text-sm text-ink-light">
+            <strong className="text-ink">Affiliated with British Weightlifting</strong> — our coaches hold British Weightlifting qualifications and our athletes can compete in sanctioned competitions.
+          </p>
+        </div>
+      )}
       <div className="mt-6 flex flex-wrap gap-3">
         {programme.id === 'couch-to-5k' && (
           <Button variant="primary" href="/register/couch-to-5k">Register now — it's free</Button>
