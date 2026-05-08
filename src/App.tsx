@@ -10,6 +10,7 @@ import Contact from './pages/Contact'
 import RegisterCouchTo5k from './pages/RegisterCouchTo5k'
 import RegisterWomensRunClub from './pages/RegisterWomensRunClub'
 import Questionnaire from './pages/Questionnaire'
+import Privacy from './pages/Privacy'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -32,6 +33,7 @@ function Layout() {
           <Route path="/register/couch-to-5k" element={<RegisterCouchTo5k />} />
           <Route path="/register/womens-run-club" element={<RegisterWomensRunClub />} />
           <Route path="/questionnaire" element={<Questionnaire />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </main>
       <Footer />

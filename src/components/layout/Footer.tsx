@@ -101,10 +101,13 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-10 pt-6 text-center">
+        <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="font-body text-xs text-white/40">
             © {new Date().getFullYear()} Lift Flintshire CIC. All rights reserved. Community Interest Company registered in Wales.
           </p>
+          <a href="/privacy" className="font-body text-xs text-white/40 hover:text-white/70 transition-colors">
+            Privacy Policy
+          </a>
         </div>
       </div>
     </footer>

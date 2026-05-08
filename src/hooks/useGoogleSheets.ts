@@ -7,12 +7,9 @@ export interface HeroStat {
   label: string
 }
 
-const defaultHeroStats: HeroStat[] = [
-  { value: '1,200+', label: 'Participants supported' },
-  { value: '340+', label: 'Sessions delivered' },
-  { value: '3', label: 'Active programmes' },
-  { value: '60+', label: 'Age groups served' },
-]
+// These defaults show when the Google Sheet Summary tab is not yet set up.
+// Update them by adding a 'Summary' tab to your Google Sheet (value | label columns).
+const defaultHeroStats: HeroStat[] = []
 
 export interface SheetData {
   totalParticipants: number

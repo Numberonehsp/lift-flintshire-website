@@ -55,7 +55,7 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap gap-4">
             <Button variant="primary" href="/programmes-events" size="lg">View our programmes</Button>
-            <Button variant="outline" href="/contact" size="lg" className="border-white/40 text-white hover:bg-white/10">Refer a client</Button>
+            <Button variant="outline" href="/contact" size="lg" className="border-white/40 text-white hover:bg-white/10">Get in touch</Button>
           </div>
           {heroStats.length > 0 && <HeroStats stats={heroStats} />}
         </div>
@@ -97,32 +97,34 @@ export default function Home() {
         </div>
       </SectionWrapper>
 
-      {/* Events preview */}
-      <SectionWrapper variant="light">
-        <div className="flex items-end justify-between mb-10">
-          <h2 className="font-display font-extrabold text-h2 text-ink">Upcoming Events</h2>
-          <Link to="/programmes-events#events" className="font-body font-medium text-sm text-teal hover:underline hidden md:block">
-            View all events →
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {upcomingEvents.map(event => (
-            <Card
-              key={event.id}
-              variant="event"
-              title={event.title}
-              date={event.date}
-              time={event.time}
-              location={event.location}
-              price={event.price}
-              description={event.description}
-            />
-          ))}
-        </div>
-        <div className="mt-8 text-center md:hidden">
-          <Button variant="outline" href="/programmes-events#events">View all events</Button>
-        </div>
-      </SectionWrapper>
+      {/* Events preview — only shown when events exist */}
+      {upcomingEvents.length > 0 && (
+        <SectionWrapper variant="light">
+          <div className="flex items-end justify-between mb-10">
+            <h2 className="font-display font-extrabold text-h2 text-ink">Upcoming Events</h2>
+            <Link to="/programmes-events#events" className="font-body font-medium text-sm text-teal hover:underline hidden md:block">
+              View all events →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {upcomingEvents.map(event => (
+              <Card
+                key={event.id}
+                variant="event"
+                title={event.title}
+                date={event.date}
+                time={event.time}
+                location={event.location}
+                price={event.price}
+                description={event.description}
+              />
+            ))}
+          </div>
+          <div className="mt-8 text-center md:hidden">
+            <Button variant="outline" href="/programmes-events#events">View all events</Button>
+          </div>
+        </SectionWrapper>
+      )}
 
       {/* Social strip */}
       <SectionWrapper variant="dark" innerClassName="text-center">

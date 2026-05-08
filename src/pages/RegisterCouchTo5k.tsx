@@ -31,7 +31,7 @@ export default function RegisterCouchTo5k() {
         <title>Register — Couch to 5K · Lift Flintshire CIC</title>
         <meta
           name="description"
-          content="Register for the free Lift Flintshire Couch to 5K programme. A 8-week beginner running programme in Flintshire, North Wales."
+          content="Register for the free Lift Flintshire Couch to 5K programme. An 8-week beginner running programme in Flintshire, North Wales."
         />
         <meta property="og:title" content="Register for Couch to 5K — Lift Flintshire CIC" />
         <meta property="og:type" content="website" />

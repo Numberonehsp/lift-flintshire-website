@@ -30,7 +30,7 @@ function parseEventsSheet(values: string[][]): Event[] {
       price: parseFloat(row[5]) || 0,
       description: row[6] || '',
       programme: (row[7] as Event['programme']) || undefined,
-      stripeLink: row[8] || undefined,
+      bookingLink: row[8] || undefined,
     }))
   return parsed.length > 0 ? parsed : staticEvents
 }
