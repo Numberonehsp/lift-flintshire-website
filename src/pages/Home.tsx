@@ -10,11 +10,11 @@ import type { HeroStat } from '../hooks/useGoogleSheets'
 import { useContentSheets } from '../hooks/useContentSheets'
 
 const programmeImages: Record<string, string> = {
-  'run-club': '/images/run-club-1.jpeg',
-  'couch-to-5k':    '/images/c25k26.jpeg',
-  'womens-run-club': '/images/women-track-frc-flag.jpeg',
-  'stay-strong':     '/images/paul-sled-pull.jpeg',
-  'weightlifting':   '/images/oly-coaching2.jpeg',
+  'run-club':        '/images/frc-castle.jpeg',
+  'couch-to-5k':    '/images/c25k-26.jpg',
+  'womens-run-club': '/images/women-run-club-2.jpeg',
+  'stay-strong':     '/images/strong-paul-sled-pull.jpg',
+  'weightlifting':   '/images/oly-coaching2.jpg',
 }
 
 function HeroStats({ stats }: { stats: HeroStat[] }) {

@@ -27,7 +27,11 @@ function SessionDetails({ sessions }: { sessions: Programme['sessions'] }) {
 }
 
 const programmeImages: Record<string, string[]> = {
-  'run-club': ['/images/run-club-1.jpeg', '/images/run-club-2.jpeg'],
+  'run-club':        ['/images/frc-castle.jpeg', '/images/frc-half-maz.jpeg'],
+  'couch-to-5k':    ['/images/c25k-26.jpg'],
+  'womens-run-club': ['/images/women-run-club-2.jpeg', '/images/women-track-frc-flag.jpg'],
+  'stay-strong':     ['/images/strong-paul-sled-pull.jpg', '/images/strong-gail-deadlift.jpg'],
+  'weightlifting':   ['/images/oly-coaching2.jpg', '/images/oly-coaching-tripext2.jpg'],
 }
 
 function ProgrammeSection({ programme, imageLeft = false }: { programme: Programme; imageLeft?: boolean }) {
