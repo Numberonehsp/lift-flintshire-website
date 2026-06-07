@@ -35,7 +35,7 @@ function NextSessionInfo() {
       </p>
       <ul className="font-body text-sm text-ink-light space-y-1">
         <li><strong className="text-ink">Time:</strong> 9:00–10:00am</li>
-        <li><strong className="text-ink">Location:</strong> Mold Town Centre</li>
+        <li><strong className="text-ink">Location:</strong> Deeside Athletics Track</li>
         <li><strong className="text-ink">Cost:</strong> Free</li>
         <li><strong className="text-ink">Who:</strong> Women and non-binary people of all abilities</li>
       </ul>

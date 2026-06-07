@@ -9,6 +9,7 @@ import ImpactDashboard from './pages/ImpactDashboard'
 import Contact from './pages/Contact'
 import RegisterCouchTo5k from './pages/RegisterCouchTo5k'
 import RegisterWomensRunClub from './pages/RegisterWomensRunClub'
+import RegisterGirlsGymSession from './pages/RegisterGirlsGymSession'
 import Questionnaire from './pages/Questionnaire'
 import Privacy from './pages/Privacy'
 import Safeguarding from './pages/Safeguarding'
@@ -33,6 +34,7 @@ function Layout() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/register/couch-to-5k" element={<RegisterCouchTo5k />} />
           <Route path="/register/womens-run-club" element={<RegisterWomensRunClub />} />
+          <Route path="/register/girls-gym-session" element={<RegisterGirlsGymSession />} />
           <Route path="/questionnaire" element={<Questionnaire />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/safeguarding" element={<Safeguarding />} />
