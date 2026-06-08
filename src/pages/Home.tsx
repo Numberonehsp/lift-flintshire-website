@@ -1,20 +1,21 @@
 import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router-dom'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
+import { WaveDivider } from '../components/layout/WaveDivider'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { StatCard } from '../components/ui/StatCard'
 import { programmes } from '../data/programmes'
 import { useGoogleSheets } from '../hooks/useGoogleSheets'
 import type { HeroStat } from '../hooks/useGoogleSheets'
-import { useContentSheets } from '../hooks/useContentSheets'
 
 const programmeImages: Record<string, string> = {
-  'run-club':        '/images/frc-castle.jpeg',
-  'couch-to-5k':    '/images/c25k-26.jpg',
-  'womens-run-club': '/images/women-run-club-2.jpeg',
-  'stay-strong':     '/images/strong-paul-sled-pull.jpg',
-  'weightlifting':   '/images/oly-coaching2.jpg',
+  'run-club':          '/images/frc-castle.jpeg',
+  'couch-to-5k':       '/images/c25k-26.jpg',
+  'womens-run-club':   '/images/women-run-club-2.jpeg',
+  'stay-strong':       '/images/strong-paul-sled-pull.jpg',
+  'weightlifting':     '/images/oly-coaching2.jpg',
+  'girls-gym-session': '/images/oly-ohs.jpg',
 }
 
 const programmeImagePositions: Record<string, string> = {
@@ -33,9 +34,7 @@ function HeroStats({ stats }: { stats: HeroStat[] }) {
 
 export default function Home() {
   const { data: sheetsData } = useGoogleSheets()
-  const { events } = useContentSheets()
   const heroStats = sheetsData?.heroStats ?? []
-  const upcomingEvents = events.slice(0, 3)
 
   return (
     <>
@@ -47,9 +46,16 @@ export default function Home() {
         <meta property="og:type" content="website" />
       </Helmet>
 
-      {/* Hero */}
-      <section className="bg-ink">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      {/* Hero — atmospheric photo background */}
+      <section className="relative bg-ink overflow-hidden">
+        <img
+          src="/images/frc-castle.jpeg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-20"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30" aria-hidden="true" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">
             Strength · Fitness · Wellbeing · Flintshire
           </p>
@@ -69,6 +75,8 @@ export default function Home() {
         </div>
       </section>
 
+      <WaveDivider fromColor="#111111" toColor="#376A6B" />
+
       {/* Mission strip */}
       <SectionWrapper variant="teal" innerClassName="text-center">
         <h2 className="font-display font-extrabold text-h2 text-white mb-4">
@@ -78,6 +86,8 @@ export default function Home() {
           We're a Community Interest Company — which means every penny we raise goes back into delivering more sessions, reaching more people, and making Flintshire a healthier place to live.
         </p>
       </SectionWrapper>
+
+      <WaveDivider fromColor="#376A6B" toColor="#F0EFEA" />
 
       {/* Programmes preview */}
       <SectionWrapper variant="muted">
@@ -106,34 +116,7 @@ export default function Home() {
         </div>
       </SectionWrapper>
 
-      {/* Events preview — only shown when events exist */}
-      {upcomingEvents.length > 0 && (
-        <SectionWrapper variant="light">
-          <div className="flex items-end justify-between mb-10">
-            <h2 className="font-display font-extrabold text-h2 text-ink">Upcoming Events</h2>
-            <Link to="/programmes-events#events" className="font-body font-medium text-sm text-teal hover:underline hidden md:block">
-              View all events →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {upcomingEvents.map(event => (
-              <Card
-                key={event.id}
-                variant="event"
-                title={event.title}
-                date={event.date}
-                time={event.time}
-                location={event.location}
-                price={event.price}
-                description={event.description}
-              />
-            ))}
-          </div>
-          <div className="mt-8 text-center md:hidden">
-            <Button variant="outline" href="/programmes-events#events">View all events</Button>
-          </div>
-        </SectionWrapper>
-      )}
+      <WaveDivider fromColor="#F0EFEA" toColor="#111111" />
 
       {/* Social strip */}
       <SectionWrapper variant="dark" innerClassName="text-center">

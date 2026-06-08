@@ -4,31 +4,50 @@ import { Badge } from '../components/ui/Badge'
 
 const values = [
   {
-    icon: '🤝',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
     title: 'Community First',
     body: 'Every decision we make starts with the community. We consult, listen, and adapt — because the people we serve know what they need better than anyone.',
   },
   {
-    icon: '🌍',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+        <path d="M2 12h20" />
+      </svg>
+    ),
     title: 'Inclusive by Design',
     body: 'Our programmes are built for everyone. We actively remove barriers — financial, physical, and social — so that nobody in Flintshire is left behind.',
   },
   {
-    icon: '📊',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+        <line x1="18" y1="20" x2="18" y2="10" strokeLinecap="round" />
+        <line x1="12" y1="20" x2="12" y2="4" strokeLinecap="round" />
+        <line x1="6" y1="20" x2="6" y2="14" strokeLinecap="round" />
+        <line x1="2" y1="20" x2="22" y2="20" strokeLinecap="round" />
+      </svg>
+    ),
     title: 'Evidence-Led',
     body: 'We track our impact, publish our data, and use evidence to improve. Our Impact Dashboard is public because we believe in accountability.',
   },
   {
-    icon: '📍',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+        <circle cx="12" cy="10" r="3" />
+      </svg>
+    ),
     title: 'Locally Rooted',
     body: 'We live and work here. Lift Flintshire exists because of Flintshire — and we reinvest everything we earn back into the communities that support us.',
   },
-]
-
-const team = [
-  { name: 'Team Member', role: 'Director' },
-  { name: 'Team Member', role: 'Head Coach' },
-  { name: 'Team Member', role: 'Programme Coordinator' },
 ]
 
 export default function About() {
@@ -88,7 +107,9 @@ export default function About() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {values.map(v => (
             <div key={v.title} className="bg-surface rounded-card border border-border p-6 shadow-sm">
-              <span className="text-3xl mb-4 block" aria-hidden="true">{v.icon}</span>
+              <div className="w-12 h-12 rounded-xl bg-teal-pale flex items-center justify-center text-teal mb-4">
+                {v.icon}
+              </div>
               <h3 className="font-display font-bold text-h3 text-ink mb-2">{v.title}</h3>
               <p className="font-body text-sm text-ink-light leading-relaxed">{v.body}</p>
             </div>
@@ -111,41 +132,6 @@ export default function About() {
             CICs are regulated by the CIC Regulator and Companies House. We publish annual impact reports and welcome scrutiny of our work.
           </p>
         </div>
-      </SectionWrapper>
-
-      {/* Team */}
-      <SectionWrapper variant="muted">
-        <h2 className="font-display font-extrabold text-h2 text-ink mb-4 text-center">Meet the Team</h2>
-        <p className="font-body text-sm text-ink-light text-center mb-10">Team photos coming soon — watch this space.</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {team.map((member, i) => (
-            <div key={i} className="rounded-card border border-border bg-surface shadow-sm overflow-hidden">
-              <div className="aspect-square bg-surface-muted flex items-center justify-center">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-border" aria-hidden="true">
-                  <circle cx="12" cy="8" r="4" />
-                  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-                </svg>
-              </div>
-              <div className="p-4 text-center">
-                <h3 className="font-display font-bold text-h3 text-ink">{member.name}</h3>
-                <Badge className="mt-2">{member.role}</Badge>
-              </div>
-            </div>
-          ))}
-        </div>
-      </SectionWrapper>
-
-      {/* Partners */}
-      <SectionWrapper variant="light">
-        <h2 className="font-display font-extrabold text-h2 text-ink mb-8 text-center">Our Partners</h2>
-        <div className="flex flex-wrap justify-center gap-8">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="w-36 h-16 bg-surface-muted border-2 border-dashed border-border rounded-card flex items-center justify-center">
-              <span className="font-body text-xs text-ink-light">Partner logo {i}</span>
-            </div>
-          ))}
-        </div>
-        <p className="font-body text-xs text-ink-light text-center mt-6">Partner logos to be added.</p>
       </SectionWrapper>
     </>
   )

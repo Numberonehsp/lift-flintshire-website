@@ -34,23 +34,45 @@ interface TeamCardProps {
 
 type CardProps = ProgrammeCardProps | EventCardProps | TeamCardProps
 
-const base = 'rounded-card border border-border bg-surface shadow-sm overflow-hidden'
-
 function ProgrammeCard({ title, description, badge, href, imageSrc, imagePosition = 'object-center' }: ProgrammeCardProps) {
   return (
-    <div className={base}>
+    <a
+      href={href}
+      className="group relative block rounded-card overflow-hidden shadow-sm hover:-translate-y-1.5 transition-transform duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2"
+      style={{ aspectRatio: '4/3' }}
+    >
+      {/* Background image */}
       {imageSrc ? (
-        <img src={imageSrc} alt={title} className={`w-full aspect-video object-cover ${imagePosition}`} loading="lazy" />
+        <img
+          src={imageSrc}
+          alt=""
+          aria-hidden="true"
+          className={`absolute inset-0 w-full h-full object-cover ${imagePosition} transition-transform duration-500 ease-out group-hover:scale-105`}
+          loading="lazy"
+        />
       ) : (
-        <ImagePlaceholder aspectRatio="video" />
+        <div className="absolute inset-0 bg-surface-muted flex items-center justify-center">
+          <span className="font-body text-xs text-ink-light">Photography coming soon</span>
+        </div>
       )}
-      <div className="p-5">
-        {badge && <Badge className="mb-3">{badge}</Badge>}
-        <h3 className="font-display font-bold text-h3 text-ink mb-2">{title}</h3>
-        <p className="font-body text-sm text-ink-light mb-4 leading-relaxed">{description}</p>
-        <Button variant="ghost" href={href} size="sm">Find out more →</Button>
+
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent transition-opacity duration-300 group-hover:opacity-90" />
+
+      {/* Content */}
+      <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
+        {badge && (
+          <span className="inline-block font-body font-semibold text-[10px] uppercase tracking-[0.1em] text-teal-light bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 mb-3">
+            {badge}
+          </span>
+        )}
+        <h3 className="font-display font-bold text-h3 text-white leading-tight mb-1">{title}</h3>
+        <p className="font-body text-sm text-white/75 leading-relaxed mb-3 line-clamp-2">{description}</p>
+        <span className="font-body text-sm font-semibold text-teal-light group-hover:text-white transition-colors duration-200">
+          Find out more →
+        </span>
       </div>
-    </div>
+    </a>
   )
 }
 
@@ -61,7 +83,7 @@ function EventCard({ title, date, time, location, price, description, onRegister
   const isFree = price === 0
 
   return (
-    <div className={base}>
+    <div className="rounded-card border border-border bg-surface shadow-sm overflow-hidden">
       <div className="p-5">
         <div className="flex items-start gap-4 mb-3">
           <div className="flex-shrink-0 w-12 h-12 bg-teal-pale rounded-lg flex flex-col items-center justify-center">
@@ -90,7 +112,7 @@ function EventCard({ title, date, time, location, price, description, onRegister
 
 function TeamCard({ name, role }: TeamCardProps) {
   return (
-    <div className={base}>
+    <div className="rounded-card border border-border bg-surface shadow-sm overflow-hidden">
       <ImagePlaceholder aspectRatio="square" />
       <div className="p-4 text-center">
         <h3 className="font-display font-bold text-h3 text-ink">{name}</h3>

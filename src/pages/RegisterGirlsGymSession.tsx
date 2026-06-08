@@ -61,22 +61,54 @@ function RegistrationFormContent() {
 
   if (formState === 'success') {
     return (
-      <div className="bg-teal-pale rounded-card p-10 text-center max-w-xl mx-auto">
-        <div className="w-12 h-12 rounded-full bg-teal flex items-center justify-center mx-auto mb-4">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" aria-hidden="true">
+      <div className="bg-teal-pale rounded-card p-10 max-w-xl mx-auto">
+        <div className="w-14 h-14 rounded-full bg-teal flex items-center justify-center mb-6">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" aria-hidden="true">
             <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <h2 className="font-display font-bold text-h2 text-teal mb-3">Registration received!</h2>
-        <p className="font-body text-sm text-ink-light mb-2 leading-relaxed">
-          Thank you for registering. We'll be in touch shortly to confirm your place and share session details.
+        <p className="font-body text-base text-ink-light mb-6 leading-relaxed">
+          Thank you for registering. We're looking forward to welcoming the young person to a Girls Gym Session.
         </p>
-        <p className="font-body text-xs text-ink-light">
-          Questions? Email us at{' '}
-          <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
+        <div className="mb-6">
+          <p className="font-body font-semibold text-sm text-ink mb-3">What happens next</p>
+          <ol className="space-y-2">
+            {[
+              "We'll confirm the registration by email within 2 working days.",
+              "We'll share the exact date, time, and location of the session.",
+              "Turn up in comfortable clothes and trainers — we'll handle the rest.",
+            ].map((step, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal text-white font-display font-bold text-xs flex items-center justify-center mt-0.5">
+                  {i + 1}
+                </span>
+                <span className="font-body text-sm text-ink-light leading-relaxed">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <a
+            href="https://instagram.com/LiftFlintshire"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 font-body font-semibold text-sm text-white bg-teal hover:bg-teal-dark rounded-btn px-5 py-3 transition-colors min-h-[44px]"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+            </svg>
+            Follow us on Instagram
+          </a>
+          <a
+            href="mailto:hello@liftflintshire.co.uk"
+            className="flex items-center justify-center font-body font-semibold text-sm text-teal border border-teal/40 rounded-btn px-5 py-3 hover:bg-teal/5 transition-colors min-h-[44px]"
+          >
             hello@liftflintshire.co.uk
           </a>
-        </p>
+        </div>
       </div>
     )
   }
@@ -141,12 +173,37 @@ function RegistrationFormContent() {
       </div>
 
       <div>
+        <label htmlFor="yp-gender" className={labelClass}>Gender</label>
+        <select id="yp-gender" name="yp-gender" required className={inputClass}>
+          <option value="">Select gender</option>
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+          <option value="non-binary">Non-binary</option>
+          <option value="prefer-not-to-say">Prefer not to say</option>
+        </select>
+      </div>
+
+      <div>
         <label htmlFor="yp-school-year" className={labelClass}>School year</label>
         <select id="yp-school-year" name="yp-school-year" required className={inputClass}>
           <option value="">Select school year</option>
           {SCHOOL_YEARS.map(y => (
             <option key={y} value={y}>{y}</option>
           ))}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="referral-source" className={labelClass}>How did you hear about us?</label>
+        <select id="referral-source" name="referral-source" required className={inputClass}>
+          <option value="">Select an option</option>
+          <option value="social-media">Social media</option>
+          <option value="word-of-mouth">Word of mouth</option>
+          <option value="school">School</option>
+          <option value="gp-referral">GP referral</option>
+          <option value="flintshire-council">Flintshire Council</option>
+          <option value="internet-search">Internet search</option>
+          <option value="other">Other</option>
         </select>
       </div>
 
