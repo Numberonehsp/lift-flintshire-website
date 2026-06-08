@@ -29,13 +29,13 @@ function SessionDetails({ sessions }: { sessions: Programme['sessions'] }) {
 const programmeImages: Record<string, string[]> = {
   'run-club':          ['/images/frc-castle.jpeg', '/images/frc-half-maz.jpeg'],
   'couch-to-5k':       ['/images/c25k-26.jpg'],
-  'womens-run-club':   ['/images/women-run-club-1.jpeg', '/images/women-track-social.jpg'],
+  'womens-run-club':   ['/images/women-track-frc-flag.jpg', '/images/women-track-social.jpg'],
   'stay-strong':       ['/images/strong-paul-sled-pull.jpg', '/images/strong-gail-deadlift.jpg'],
   'weightlifting':     ['/images/oly-coaching2.jpg', '/images/oly-coaching-tripext2.jpg'],
   'girls-gym-session': ['/images/oly-ohs.jpg'],
 }
 
-const REGISTER_DIRECTLY = ['couch-to-5k', 'womens-run-club', 'girls-gym-session']
+const REGISTER_DIRECTLY = ['couch-to-5k', 'womens-run-club']
 
 function ProgrammeSection({ programme, imageLeft = false }: { programme: Programme; imageLeft?: boolean }) {
   const images = programmeImages[programme.id]
@@ -69,6 +69,8 @@ function ProgrammeSection({ programme, imageLeft = false }: { programme: Program
           <Button variant="primary" href={`/register/${programme.id}`}>
             Register now — it's free
           </Button>
+        ) : programme.id === 'girls-gym-session' ? (
+          <Button variant="primary" href="/contact">Contact us to arrange a session for your school</Button>
         ) : (
           <Button variant="primary" href="/contact">Register your interest</Button>
         )}

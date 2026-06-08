@@ -11,11 +11,19 @@ export interface HeroStat {
 // Update them by adding a 'Summary' tab to your Google Sheet (value | label columns).
 const defaultHeroStats: HeroStat[] = []
 
+export interface MonthPoint {
+  month: string
+  total: number
+  [programme: string]: number | string
+}
+
 export interface SheetData {
   totalParticipants: number
   totalSessions: number
   activeThisMonth: number
   byProgramme: { name: string; participants: number }[]
+  byMonth: MonthPoint[]
+  allProgrammes: string[]
   byGender: { name: string; value: number }[]
   byAge: { name: string; participants: number }[]
   lastUpdated: string
@@ -88,11 +96,53 @@ export function aggregateData(rows: SheetRow[]): SheetData {
     { name: 'Over 60', participants: ageTotals.over60 },
   ]
 
+  const MONTH_LABELS: Record<string, string> = {
+    '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr', '05': 'May', '06': 'Jun',
+    '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec',
+  }
+
+  // Normalise a date string to YYYY-MM regardless of input format.
+  // Handles: YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY, D/M/YYYY, M/D/YYYY (with or without leading zeros).
+  // Disambiguation: if the first segment is > 12 it must be the day → DD/MM; if the second is > 12
+  // it must be the day → MM/DD; otherwise defaults to DD/MM (UK convention).
+  function toYearMonth(raw: string): string {
+    if (!raw) return ''
+    if (/^\d{4}-\d{2}/.test(raw)) return raw.slice(0, 7)
+    const parts = raw.split('/')
+    if (parts.length === 3) {
+      const [a, b, y] = parts
+      const fullYear = y.length <= 2 ? `20${y.padStart(2, '0')}` : y
+      const month = parseInt(a) > 12 ? b : a   // if a>12 it's a day → b is month (DD/MM); else a is month
+      return `${fullYear}-${month.padStart(2, '0')}`
+    }
+    return raw.slice(0, 7)
+  }
+
+  const monthlyMap: Record<string, Record<string, number>> = {}
+  rows.forEach(r => {
+    const key = toYearMonth(r.date)
+    if (!key) return
+    if (!monthlyMap[key]) monthlyMap[key] = {}
+    monthlyMap[key][r.programme] = (monthlyMap[key][r.programme] || 0) + r.totalParticipants
+    monthlyMap[key]['_total'] = (monthlyMap[key]['_total'] || 0) + r.totalParticipants
+  })
+  const byMonth: MonthPoint[] = Object.entries(monthlyMap)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, d]) => {
+      const [year, month] = key.split('-')
+      const { _total, ...programmes } = d
+      return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, total: _total || 0, ...programmes }
+    })
+
+  const allProgrammes = Array.from(new Set(rows.map(r => r.programme))).sort()
+
   return {
     totalParticipants,
     totalSessions,
     activeThisMonth,
     byProgramme,
+    byMonth,
+    allProgrammes,
     byGender,
     byAge,
     lastUpdated: now.toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }),
