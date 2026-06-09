@@ -6,9 +6,9 @@ import { Button } from '../components/ui/Button'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 
-async function submitNetlifyForm(formName: string, data: Record<string, string>) {
+async function submitForm(formName: string, data: Record<string, string>) {
   const body = new URLSearchParams({ 'form-name': formName, ...data }).toString()
-  const res = await fetch('/', {
+  const res = await fetch('/api/submit-form', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
@@ -85,7 +85,7 @@ function QuestionnaireForm() {
     setFormState('submitting')
     const fd = new FormData(e.currentTarget)
     try {
-      await submitNetlifyForm('programme-questionnaire', Object.fromEntries(fd.entries()) as Record<string, string>)
+      await submitForm('programme-questionnaire', Object.fromEntries(fd.entries()) as Record<string, string>)
       setFormState('success')
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch {
@@ -112,7 +112,6 @@ function QuestionnaireForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      data-netlify="true"
       name="programme-questionnaire"
       className="space-y-6 max-w-2xl"
     >

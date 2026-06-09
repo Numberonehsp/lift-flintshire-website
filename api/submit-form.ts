@@ -41,6 +41,42 @@ const FORM_LABELS: Record<string, string> = {
 }
 
 // Ordered columns for the Registrations sheet
+const FEEDBACK_SHEET_COLUMNS = [
+  'Timestamp',
+  'Programme',
+  'Session Date',
+  'Rating — Overall',
+  'Rating — Coaching',
+  'Rating — Welcome',
+  'Rating — Venue',
+  'Would Recommend',
+  'Wellbeing Impact',
+  'What Went Well',
+  'Improvements',
+  'Name',
+  'Email',
+  'Contact Consent',
+]
+
+function buildFeedbackRow(fields: Record<string, string>): string[] {
+  return [
+    new Date().toISOString(),
+    fields['programme']          ?? '',
+    fields['session-date']       ?? '',
+    fields['rating-overall']     ?? '',
+    fields['rating-coaching']    ?? '',
+    fields['rating-welcome']     ?? '',
+    fields['rating-venue']       ?? '',
+    fields['would-recommend']    ?? '',
+    fields['wellbeing-impact']   ?? '',
+    fields['what-went-well']     ?? '',
+    fields['improvements']       ?? '',
+    fields['name']               ?? '',
+    fields['email']              ?? '',
+    fields['contact-consent']    ?? '',
+  ]
+}
+
 const SHEET_COLUMNS = [
   'Timestamp',
   'Form',
@@ -128,7 +164,7 @@ function buildSheetRow(fields: Record<string, string>): string[] {
   ]
 }
 
-async function appendToSheet(row: string[]) {
+async function appendToSheet(row: string[], tab: string, headers: string[]) {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY
   const sheetId = process.env.GOOGLE_SHEET_ID
   if (!keyJson || !sheetId) {
@@ -147,21 +183,21 @@ async function appendToSheet(row: string[]) {
   // Check if header row exists, add if not
   const existing = await sheets.spreadsheets.values.get({
     spreadsheetId: sheetId,
-    range: 'Registrations!A1:A1',
+    range: `${tab}!A1:A1`,
   })
 
   if (!existing.data.values?.length) {
     await sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
-      range: 'Registrations!A1',
+      range: `${tab}!A1`,
       valueInputOption: 'RAW',
-      requestBody: { values: [SHEET_COLUMNS] },
+      requestBody: { values: [headers] },
     })
   }
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: sheetId,
-    range: 'Registrations!A1',
+    range: `${tab}!A1`,
     valueInputOption: 'RAW',
     requestBody: { values: [row] },
   })
@@ -199,7 +235,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 2 — Save to Google Sheet (non-fatal if it fails)
     try {
-      await appendToSheet(buildSheetRow(fields))
+      const isQuestionnaire = formName === 'programme-questionnaire'
+      if (isQuestionnaire) {
+        await appendToSheet(buildFeedbackRow(fields), 'Feedback', FEEDBACK_SHEET_COLUMNS)
+      } else {
+        await appendToSheet(buildSheetRow(fields), 'Registrations', SHEET_COLUMNS)
+      }
     } catch (sheetErr) {
       console.error('Sheet write error (non-fatal):', sheetErr)
     }
