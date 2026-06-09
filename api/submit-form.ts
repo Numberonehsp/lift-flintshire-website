@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Resend } from 'resend'
+import { google } from 'googleapis'
 
 const FORM_LABELS: Record<string, string> = {
   'form-name':                      'Form',
@@ -26,20 +27,44 @@ const FORM_LABELS: Record<string, string> = {
   'photo-consent':                  'Photo consent',
   'waiver-agreed':                  'Waiver agreed',
   'guardian-initials':              'Guardian initials',
-  // Couch to 5K / Women's Run Club shared fields
   'first-name':                     'First name',
   'last-name':                      'Last name',
   'email':                          'Email',
   'phone':                          'Phone',
-  'dob':                            'Date of birth',
+  'date-of-birth':                  'Date of birth',
   gender:                           'Gender',
-  'age-group':                      'Age group',
-  'health-conditions':              'Health conditions?',
-  'health-details':                 'Health details',
   'emergency-name':                 'Emergency contact name',
   'emergency-phone':                'Emergency contact phone',
-  consent:                          'Consent',
+  'has-medical-conditions':         'Medical conditions?',
+  'medical-conditions-details':     'Medical details',
+  'waiver-initials':                'Initials',
 }
+
+// Ordered columns for the Registrations sheet
+const SHEET_COLUMNS = [
+  'Timestamp',
+  'Form',
+  'Programme',
+  'First Name',
+  'Last Name',
+  'Date of Birth',
+  'Gender',
+  'School Year',
+  'Guardian Name',
+  'Guardian Email',
+  'Guardian Phone',
+  'Emergency Contact',
+  'Emergency Phone',
+  'Medical Conditions',
+  'Medical Details',
+  'Injuries',
+  'Injury Details',
+  'GDPR Consent',
+  'Photo Consent',
+  'Waiver Agreed',
+  'Initials',
+  'Referral Source',
+]
 
 function buildHtml(fields: Record<string, string>): string {
   const formName = fields['form-name'] ?? 'Registration'
@@ -69,6 +94,79 @@ function buildHtml(fields: Record<string, string>): string {
     </div>`
 }
 
+function buildSheetRow(fields: Record<string, string>): string[] {
+  // Handles both Girls Gym (yp-* fields) and general forms (first-name etc.)
+  const firstName = fields['yp-first-name'] ?? fields['first-name'] ?? ''
+  const lastName  = fields['yp-last-name']  ?? fields['last-name']  ?? ''
+  const guardianFirst = fields['guardian-first-name'] ?? ''
+  const guardianLast  = fields['guardian-last-name']  ?? ''
+  const guardianName  = [guardianFirst, guardianLast].filter(Boolean).join(' ')
+
+  return [
+    new Date().toISOString(),
+    fields['form-name']                    ?? '',
+    fields['programme']                    ?? '',
+    firstName,
+    lastName,
+    fields['yp-date-of-birth']             ?? fields['date-of-birth'] ?? '',
+    fields['yp-gender']                    ?? fields['gender']        ?? '',
+    fields['yp-school-year']               ?? '',
+    guardianName,
+    fields['guardian-email']               ?? fields['email']         ?? '',
+    fields['guardian-phone']               ?? fields['phone']         ?? '',
+    fields['emergency-contact-name']       ?? fields['emergency-name']  ?? '',
+    fields['emergency-contact-phone']      ?? fields['emergency-phone'] ?? '',
+    fields['has-medical-conditions']       ?? '',
+    fields['medical-conditions-details']   ?? '',
+    fields['has-injuries']                 ?? '',
+    fields['injury-details']               ?? '',
+    fields['gdpr-consent']                 ?? '',
+    fields['photo-consent']                ?? '',
+    fields['waiver-agreed']                ?? '',
+    fields['guardian-initials']            ?? fields['waiver-initials'] ?? '',
+    fields['referral-source']              ?? '',
+  ]
+}
+
+async function appendToSheet(row: string[]) {
+  const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY
+  const sheetId = process.env.GOOGLE_SHEET_ID
+  if (!keyJson || !sheetId) {
+    console.warn('Google Sheets env vars not set — skipping sheet write')
+    return
+  }
+
+  const credentials = JSON.parse(keyJson)
+  const auth = new google.auth.GoogleAuth({
+    credentials,
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  })
+
+  const sheets = google.sheets({ version: 'v4', auth })
+
+  // Check if header row exists, add if not
+  const existing = await sheets.spreadsheets.values.get({
+    spreadsheetId: sheetId,
+    range: 'Registrations!A1:A1',
+  })
+
+  if (!existing.data.values?.length) {
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: 'Registrations!A1',
+      valueInputOption: 'RAW',
+      requestBody: { values: [SHEET_COLUMNS] },
+    })
+  }
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: sheetId,
+    range: 'Registrations!A1',
+    valueInputOption: 'RAW',
+    requestBody: { values: [row] },
+  })
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -84,6 +182,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const formName = fields['form-name'] ?? 'Registration'
 
   try {
+    // 1 — Send email
     const resend = new Resend(apiKey)
     const { error } = await resend.emails.send({
       from: 'Lift Flintshire Website <forms@liftflintshire.co.uk>',
@@ -96,6 +195,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (error) {
       console.error('Resend error:', error)
       return res.status(500).json({ error: 'Email failed' })
+    }
+
+    // 2 — Save to Google Sheet (non-fatal if it fails)
+    try {
+      await appendToSheet(buildSheetRow(fields))
+    } catch (sheetErr) {
+      console.error('Sheet write error (non-fatal):', sheetErr)
     }
 
     return res.status(200).json({ success: true })

@@ -31,9 +31,9 @@ export interface SheetData {
 }
 
 // Columns match the Google Form response sheet layout:
-// A: Timestamp (auto)  B: Date  C: Programme  D: Session Type
-// E: Total Participants  F: Under 18  G: 18–30  H: 30–60  I: Over 60
-// J: Gender Male  K: Gender Female  L: Gender Other/Not stated
+// A: Timestamp  B: Date  C: Programme  D: Session Type
+// E: Total Participants  F: Under 18  G: 18–30  H: 30–55  I: Over 55
+// J: Male  K: Female  L: Other  M: Notes  N: First session  O: Returning
 function parseSheetRows(values: string[][]): SheetRow[] {
   if (!values || values.length < 2) return []
   const [, ...rows] = values
@@ -92,8 +92,8 @@ export function aggregateData(rows: SheetRow[]): SheetData {
   const byAge = [
     { name: 'Under 18', participants: ageTotals.under18 },
     { name: '18–30', participants: ageTotals.age18to30 },
-    { name: '30–60', participants: ageTotals.mid },
-    { name: 'Over 60', participants: ageTotals.over60 },
+    { name: '30–55', participants: ageTotals.mid },
+    { name: 'Over 55', participants: ageTotals.over60 },
   ]
 
   const MONTH_LABELS: Record<string, string> = {
