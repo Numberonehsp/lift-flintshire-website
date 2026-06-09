@@ -8,9 +8,9 @@ type FormState = 'idle' | 'submitting' | 'success' | 'error'
 
 const FORM_NAME = 'register-girls-gym-session'
 
-async function submitNetlifyForm(data: Record<string, string>) {
+async function submitForm(data: Record<string, string>) {
   const body = new URLSearchParams({ 'form-name': FORM_NAME, ...data }).toString()
-  const res = await fetch('/', {
+  const res = await fetch('/api/submit-form', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
@@ -51,7 +51,7 @@ function RegistrationFormContent() {
     setFormState('submitting')
     const fd = new FormData(e.currentTarget)
     try {
-      await submitNetlifyForm(Object.fromEntries(fd.entries()) as Record<string, string>)
+      await submitForm(Object.fromEntries(fd.entries()) as Record<string, string>)
       setFormState('success')
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch {

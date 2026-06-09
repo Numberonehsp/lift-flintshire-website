@@ -14,9 +14,9 @@ interface Props {
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 
-async function submitNetlifyForm(formName: string, data: Record<string, string>) {
+async function submitForm(formName: string, data: Record<string, string>) {
   const body = new URLSearchParams({ 'form-name': formName, ...data }).toString()
-  const res = await fetch('/', {
+  const res = await fetch('/api/submit-form', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
@@ -186,7 +186,7 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
     setFormState('submitting')
     const fd = new FormData(e.currentTarget)
     try {
-      await submitNetlifyForm(formName, Object.fromEntries(fd.entries()) as Record<string, string>)
+      await submitForm(formName, Object.fromEntries(fd.entries()) as Record<string, string>)
       setFormState('success')
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch {
