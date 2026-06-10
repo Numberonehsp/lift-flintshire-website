@@ -41,29 +41,45 @@ const IMPACT_AREA_MAP: Record<string, string> = {
   'School Outreach':            'Community',
 }
 
-// Columns match the updated Google Form response sheet layout:
-// A: Timestamp  B: Date  C: Programme  D: Session Type
-// E: Total Participants  F: Total NEW participants
-// G: Under 18  H: 18–30  I: 30–55  J: Over 55
-// K: Male  L: Female  M: Other  N: Notes
+// Parses by matching header names so column order doesn't matter.
+// Fixed columns (A–E) are read by position; variable columns are found by header text.
 function parseSheetRows(values: string[][]): SheetRow[] {
   if (!values || values.length < 2) return []
-  const [, ...rows] = values
+  const [headers, ...rows] = values
+
+  // Helper: find the index of the first header whose lowercase text includes the substring
+  const col = (substring: string) => headers.findIndex(h => h.toLowerCase().includes(substring.toLowerCase()))
+
+  const iDate      = 1
+  const iProg      = 2
+  const iType      = 3
+  const iTotal     = 4
+  const iNew       = col('new participant')
+  const iUnder18   = col('under 18')
+  const i18to30    = col('18-30')
+  const i30to55    = col('30-55')
+  const iOver55    = col('over 55')
+  const iMale      = col('male')
+  const iFemale    = col('female')
+  const iOther     = col('other')
+
+  const n = (row: string[], i: number) => (i >= 0 ? parseInt(row[i]) || 0 : 0)
+
   return rows
     .filter(row => row.length > 1)
     .map(row => ({
-      date: row[1] || '',
-      programme: row[2] || '',
-      sessionType: row[3] || '',
-      totalParticipants: parseInt(row[4]) || 0,
-      newParticipants: parseInt(row[5]) || 0,
-      ageUnder18: parseInt(row[6]) || 0,
-      age18to30: parseInt(row[7]) || 0,
-      age30to60: parseInt(row[8]) || 0,
-      ageOver60: parseInt(row[9]) || 0,
-      genderMale: parseInt(row[10]) || 0,
-      genderFemale: parseInt(row[11]) || 0,
-      genderOther: parseInt(row[12]) || 0,
+      date:              row[iDate]  || '',
+      programme:         row[iProg]  || '',
+      sessionType:       row[iType]  || '',
+      totalParticipants: n(row, iTotal),
+      newParticipants:   n(row, iNew),
+      ageUnder18:        n(row, iUnder18),
+      age18to30:         n(row, i18to30),
+      age30to60:         n(row, i30to55),
+      ageOver60:         n(row, iOver55),
+      genderMale:        n(row, iMale),
+      genderFemale:      n(row, iFemale),
+      genderOther:       n(row, iOther),
     }))
 }
 
