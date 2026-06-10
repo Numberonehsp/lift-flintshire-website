@@ -192,7 +192,7 @@ function ProgrammeReach({ byProgramme, allProgrammes }: { byProgramme: { name: s
     <div className="mb-20">
       <SectionHeading
         title="Programme Reach"
-        subtitle="Total participants supported across each programme since we began recording."
+        subtitle="Total participant attendances across each programme since we began recording."
       />
       <div className="space-y-4">
         {sorted.map(p => {
