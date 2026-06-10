@@ -7,22 +7,22 @@ export interface HeroStat {
   label: string
 }
 
-// These defaults show when the Google Sheet Summary tab is not yet set up.
-// Update them by adding a 'Summary' tab to your Google Sheet (value | label columns).
 const defaultHeroStats: HeroStat[] = []
 
 export interface MonthPoint {
   month: string
   total: number
-  [programme: string]: number | string
+  [key: string]: number | string
 }
 
 export interface SheetData {
   totalParticipants: number
+  totalNew: number
   totalSessions: number
   activeThisMonth: number
   byProgramme: { name: string; participants: number }[]
   byMonth: MonthPoint[]
+  byAreaMonth: MonthPoint[]
   allProgrammes: string[]
   byGender: { name: string; value: number }[]
   byAge: { name: string; participants: number }[]
@@ -30,10 +30,22 @@ export interface SheetData {
   heroStats: HeroStat[]
 }
 
-// Columns match the Google Form response sheet layout:
+// Maps each programme to one of the three main impact areas
+const IMPACT_AREA_MAP: Record<string, string> = {
+  'Flintshire Run Club':        'Running',
+  'Couch to 5km':               'Running',
+  'Women\'s Track Running':     'Running',
+  'Flintshire Weightlifting Club': 'Weightlifting',
+  'Stay Strong':                'Community',
+  'Andy\'s Man Club':           'Community',
+  'School Outreach':            'Community',
+}
+
+// Columns match the updated Google Form response sheet layout:
 // A: Timestamp  B: Date  C: Programme  D: Session Type
-// E: Total Participants  F: Under 18  G: 18–30  H: 30–55  I: Over 55
-// J: Male  K: Female  L: Other  M: Notes  N: First session  O: Returning
+// E: Total Participants  F: Total NEW participants
+// G: Under 18  H: 18–30  I: 30–55  J: Over 55
+// K: Male  L: Female  M: Other  N: Notes
 function parseSheetRows(values: string[][]): SheetRow[] {
   if (!values || values.length < 2) return []
   const [, ...rows] = values
@@ -44,13 +56,14 @@ function parseSheetRows(values: string[][]): SheetRow[] {
       programme: row[2] || '',
       sessionType: row[3] || '',
       totalParticipants: parseInt(row[4]) || 0,
-      ageUnder18: parseInt(row[5]) || 0,
-      age18to30: parseInt(row[6]) || 0,
-      age30to60: parseInt(row[7]) || 0,
-      ageOver60: parseInt(row[8]) || 0,
-      genderMale: parseInt(row[9]) || 0,
-      genderFemale: parseInt(row[10]) || 0,
-      genderOther: parseInt(row[11]) || 0,
+      newParticipants: parseInt(row[5]) || 0,
+      ageUnder18: parseInt(row[6]) || 0,
+      age18to30: parseInt(row[7]) || 0,
+      age30to60: parseInt(row[8]) || 0,
+      ageOver60: parseInt(row[9]) || 0,
+      genderMale: parseInt(row[10]) || 0,
+      genderFemale: parseInt(row[11]) || 0,
+      genderOther: parseInt(row[12]) || 0,
     }))
 }
 
@@ -59,9 +72,10 @@ export function aggregateData(rows: SheetRow[]): SheetData {
   const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 
   const totalParticipants = rows.reduce((sum, r) => sum + r.totalParticipants, 0)
+  const totalNew = rows.reduce((sum, r) => sum + r.newParticipants, 0)
   const totalSessions = rows.length
   const activeThisMonth = rows
-    .filter(r => r.date.startsWith(thisMonth))
+    .filter(r => toYearMonth(r.date) === thisMonth)
     .reduce((sum, r) => sum + r.totalParticipants, 0)
 
   const programmeMap: Record<string, number> = {}
@@ -85,15 +99,15 @@ export function aggregateData(rows: SheetRow[]): SheetData {
       under18: acc.under18 + r.ageUnder18,
       age18to30: acc.age18to30 + r.age18to30,
       mid: acc.mid + r.age30to60,
-      over60: acc.over60 + r.ageOver60,
+      over55: acc.over55 + r.ageOver60,
     }),
-    { under18: 0, age18to30: 0, mid: 0, over60: 0 }
+    { under18: 0, age18to30: 0, mid: 0, over55: 0 }
   )
   const byAge = [
     { name: 'Under 18', participants: ageTotals.under18 },
     { name: '18–30', participants: ageTotals.age18to30 },
     { name: '30–55', participants: ageTotals.mid },
-    { name: 'Over 55', participants: ageTotals.over60 },
+    { name: 'Over 55', participants: ageTotals.over55 },
   ]
 
   const MONTH_LABELS: Record<string, string> = {
@@ -102,9 +116,8 @@ export function aggregateData(rows: SheetRow[]): SheetData {
   }
 
   // Normalise a date string to YYYY-MM regardless of input format.
-  // Handles: YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY, D/M/YYYY, M/D/YYYY (with or without leading zeros).
-  // Disambiguation: if the first segment is > 12 it must be the day → DD/MM; if the second is > 12
-  // it must be the day → MM/DD; otherwise defaults to DD/MM (UK convention).
+  // Handles: YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY (with or without leading zeros).
+  // Disambiguation: if first segment > 12 it must be the day (DD/MM); else defaults to DD/MM (UK).
   function toYearMonth(raw: string): string {
     if (!raw) return ''
     if (/^\d{4}-\d{2}/.test(raw)) return raw.slice(0, 7)
@@ -112,12 +125,13 @@ export function aggregateData(rows: SheetRow[]): SheetData {
     if (parts.length === 3) {
       const [a, b, y] = parts
       const fullYear = y.length <= 2 ? `20${y.padStart(2, '0')}` : y
-      const month = parseInt(a) > 12 ? b : a   // if a>12 it's a day → b is month (DD/MM); else a is month
+      const month = parseInt(a) > 12 ? b : a
       return `${fullYear}-${month.padStart(2, '0')}`
     }
     return raw.slice(0, 7)
   }
 
+  // Monthly breakdown by programme
   const monthlyMap: Record<string, Record<string, number>> = {}
   rows.forEach(r => {
     const key = toYearMonth(r.date)
@@ -134,14 +148,34 @@ export function aggregateData(rows: SheetRow[]): SheetData {
       return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, total: _total || 0, ...programmes }
     })
 
+  // Monthly breakdown by impact area (Running / Weightlifting / Community)
+  const areaMonthlyMap: Record<string, Record<string, number>> = {}
+  rows.forEach(r => {
+    const key = toYearMonth(r.date)
+    if (!key) return
+    const area = IMPACT_AREA_MAP[r.programme] ?? 'Other'
+    if (!areaMonthlyMap[key]) areaMonthlyMap[key] = {}
+    areaMonthlyMap[key][area] = (areaMonthlyMap[key][area] || 0) + r.totalParticipants
+    areaMonthlyMap[key]['_total'] = (areaMonthlyMap[key]['_total'] || 0) + r.totalParticipants
+  })
+  const byAreaMonth: MonthPoint[] = Object.entries(areaMonthlyMap)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, d]) => {
+      const [year, month] = key.split('-')
+      const { _total, ...areas } = d
+      return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, total: _total || 0, ...areas }
+    })
+
   const allProgrammes = Array.from(new Set(rows.map(r => r.programme))).sort()
 
   return {
     totalParticipants,
+    totalNew,
     totalSessions,
     activeThisMonth,
     byProgramme,
     byMonth,
+    byAreaMonth,
     allProgrammes,
     byGender,
     byAge,
@@ -175,9 +209,6 @@ export function useGoogleSheets() {
     }
 
     const base = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values`
-
-    // Reads from the "Form Responses 1" tab that Google Forms creates automatically.
-    // If you rename that tab, update the name here to match.
     const sessionTab = encodeURIComponent('Form Responses 1')
     Promise.all([
       fetch(`${base}/${sessionTab}?key=${apiKey}`).then(r => { if (!r.ok) throw new Error(); return r.json() }),
@@ -197,4 +228,18 @@ export function useGoogleSheets() {
   }, [])
 
   return { data, loading, error }
+}
+
+// toYearMonth exported for use in tests / other modules
+export function toYearMonth(raw: string): string {
+  if (!raw) return ''
+  if (/^\d{4}-\d{2}/.test(raw)) return raw.slice(0, 7)
+  const parts = raw.split('/')
+  if (parts.length === 3) {
+    const [a, b, y] = parts
+    const fullYear = y.length <= 2 ? `20${y.padStart(2, '0')}` : y
+    const month = parseInt(a) > 12 ? b : a
+    return `${fullYear}-${month.padStart(2, '0')}`
+  }
+  return raw.slice(0, 7)
 }
