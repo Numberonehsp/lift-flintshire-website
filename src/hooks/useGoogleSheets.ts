@@ -66,7 +66,7 @@ function parseSheetRows(values: string[][]): SheetRow[] {
   const n = (row: string[], i: number) => (i >= 0 ? parseInt(row[i]) || 0 : 0)
 
   return rows
-    .filter(row => row.length > 1)
+    .filter(row => row.length > 1 && row[iProg]?.trim())
     .map(row => ({
       date:              row[iDate]  || '',
       programme:         row[iProg]  || '',
