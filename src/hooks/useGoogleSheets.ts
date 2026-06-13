@@ -225,7 +225,7 @@ export function useGoogleSheets() {
     }
 
     const base = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values`
-    const sessionTab = encodeURIComponent('Form Responses 1')
+    const sessionTab = encodeURIComponent('Form Responses 4')
     Promise.all([
       fetch(`${base}/${sessionTab}?key=${apiKey}`).then(r => { if (!r.ok) throw new Error(); return r.json() }),
       fetch(`${base}/Summary?key=${apiKey}`).then(r => r.json()).catch(() => ({ values: [] })),
