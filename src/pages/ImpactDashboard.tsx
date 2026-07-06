@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { useGoogleSheets } from '../hooks/useGoogleSheets'
 import { useCountUp } from '../hooks/useCountUp'
@@ -315,12 +315,11 @@ export default function ImpactDashboard() {
 
   return (
     <>
-      <Helmet>
-        <title>Our Impact — Lift Flintshire CIC</title>
-        <meta name="description" content="Live impact data from Lift Flintshire CIC — total participants, sessions delivered, new vs returning, age and gender breakdowns across all programmes." />
-        <meta property="og:title" content="Our Impact — Lift Flintshire CIC" />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <Seo
+        title="Our Impact — Lift Flintshire CIC"
+        description="Live impact data from Lift Flintshire CIC — total participants, sessions delivered, new vs returning, age and gender breakdowns across all programmes."
+        path="/impact"
+      />
 
       {/* Hero */}
       <SectionWrapper variant="dark">

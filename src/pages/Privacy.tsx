@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 
 const headingClass = 'font-display font-bold text-h3 text-ink mt-10 mb-3'
@@ -9,13 +9,12 @@ const listClass = 'font-body text-sm text-ink-light leading-relaxed mb-3 space-y
 export default function Privacy() {
   return (
     <>
-      <Helmet>
-        <title>Privacy Policy — Lift Flintshire CIC</title>
-        <meta name="description" content="Privacy Policy for Lift Flintshire CIC — how we collect, use, and protect your personal data in line with UK GDPR." />
-        <meta property="og:title" content="Privacy Policy — Lift Flintshire CIC" />
-        <meta property="og:type" content="website" />
-        <meta name="robots" content="noindex" />
-      </Helmet>
+      <Seo
+        title="Privacy Policy — Lift Flintshire CIC"
+        description="Privacy Policy for Lift Flintshire CIC — how we collect, use, and protect your personal data in line with UK GDPR."
+        path="/privacy"
+        noindex
+      />
 
       <SectionWrapper variant="dark">
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Transparency</p>

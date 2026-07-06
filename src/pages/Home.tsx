@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { Link } from 'react-router-dom'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { WaveDivider } from '../components/layout/WaveDivider'
@@ -38,13 +38,12 @@ export default function Home() {
 
   return (
     <>
-      <Helmet>
-        <title>Lift Flintshire CIC — Community Strength, Fitness &amp; Wellbeing</title>
-        <meta name="description" content="Lift Flintshire CIC delivers inclusive strength, fitness, and wellbeing programmes across Flintshire, North Wales. Open to everyone, regardless of age or ability." />
-        <meta property="og:title" content="Lift Flintshire CIC — Community Strength, Fitness & Wellbeing" />
-        <meta property="og:description" content="Building stronger communities, one session at a time. Stay Strong, Flintshire Run Club, and Flintshire Weightlifting Club." />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <Seo
+        title="Lift Flintshire CIC — Community Strength, Fitness & Wellbeing"
+        description="Lift Flintshire CIC delivers inclusive strength, fitness, and wellbeing programmes across Flintshire, North Wales. Open to everyone, regardless of age or ability."
+        path="/"
+        ogDescription="Building stronger communities, one session at a time. Stay Strong, Flintshire Run Club, and Flintshire Weightlifting Club."
+      />
 
       {/* Hero — atmospheric photo background */}
       <section className="relative bg-ink overflow-hidden">

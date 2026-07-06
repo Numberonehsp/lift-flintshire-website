@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Button } from '../components/ui/Button'
 
@@ -282,15 +282,13 @@ function QuestionnaireForm() {
 export default function Questionnaire() {
   return (
     <>
-      <Helmet>
-        <title>Feedback — Lift Flintshire CIC</title>
-        <meta
-          name="description"
-          content="Share your feedback on a Lift Flintshire CIC programme session. Your responses help us keep improving."
-        />
-        <meta property="og:title" content="Session Feedback — Lift Flintshire CIC" />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <Seo
+        title="Feedback — Lift Flintshire CIC"
+        description="Share your feedback on a Lift Flintshire CIC programme session. Your responses help us keep improving."
+        path="/questionnaire"
+        ogTitle="Session Feedback — Lift Flintshire CIC"
+        noindex
+      />
 
       <SectionWrapper variant="dark">
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">

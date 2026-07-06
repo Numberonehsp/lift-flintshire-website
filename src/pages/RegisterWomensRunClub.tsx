@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { RegistrationForm } from '../components/forms/RegistrationForm'
 
@@ -46,15 +46,12 @@ function NextSessionInfo() {
 export default function RegisterWomensRunClub() {
   return (
     <>
-      <Helmet>
-        <title>Register — Women's Run Club · Lift Flintshire CIC</title>
-        <meta
-          name="description"
-          content="Register for the free Lift Flintshire Women's Run Club. A monthly social group run in Flintshire for women and non-binary people of all abilities."
-        />
-        <meta property="og:title" content="Register for Women's Run Club — Lift Flintshire CIC" />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <Seo
+        title="Register — Women's Run Club · Lift Flintshire CIC"
+        description="Register for the free Lift Flintshire Women's Run Club. A monthly social group run in Flintshire for women and non-binary people of all abilities."
+        path="/register/womens-run-club"
+        ogTitle="Register for Women's Run Club — Lift Flintshire CIC"
+      />
 
       <SectionWrapper variant="dark">
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">

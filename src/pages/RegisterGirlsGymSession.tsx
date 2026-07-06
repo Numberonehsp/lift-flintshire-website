@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent, ChangeEvent } from 'react'
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Button } from '../components/ui/Button'
 
@@ -503,15 +503,12 @@ function RegistrationFormContent() {
 export default function RegisterGirlsGymSession() {
   return (
     <>
-      <Helmet>
-        <title>Register — Girls Gym Session · Lift Flintshire CIC</title>
-        <meta
-          name="description"
-          content="Register your daughter for a free gym session with Lift Flintshire CIC. Open to high school girls of all abilities. Parental consent required."
-        />
-        <meta property="og:title" content="Register for Girls Gym Session — Lift Flintshire CIC" />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <Seo
+        title="Register — Girls Gym Session · Lift Flintshire CIC"
+        description="Register your daughter for a free gym session with Lift Flintshire CIC. Open to high school girls of all abilities. Parental consent required."
+        path="/register/girls-gym-session"
+        ogTitle="Register for Girls Gym Session — Lift Flintshire CIC"
+      />
 
       <SectionWrapper variant="dark">
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">

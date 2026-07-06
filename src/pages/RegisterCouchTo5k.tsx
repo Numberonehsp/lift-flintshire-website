@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { RegistrationForm } from '../components/forms/RegistrationForm'
 
@@ -27,15 +27,12 @@ function SessionInfo() {
 export default function RegisterCouchTo5k() {
   return (
     <>
-      <Helmet>
-        <title>Register — Couch to 5K · Lift Flintshire CIC</title>
-        <meta
-          name="description"
-          content="Register for the free Lift Flintshire Couch to 5K programme. An 8-week beginner running programme in Flintshire, North Wales."
-        />
-        <meta property="og:title" content="Register for Couch to 5K — Lift Flintshire CIC" />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <Seo
+        title="Register — Couch to 5K · Lift Flintshire CIC"
+        description="Register for the free Lift Flintshire Couch to 5K programme. An 8-week beginner running programme in Flintshire, North Wales."
+        path="/register/couch-to-5k"
+        ogTitle="Register for Couch to 5K — Lift Flintshire CIC"
+      />
 
       <SectionWrapper variant="dark">
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">

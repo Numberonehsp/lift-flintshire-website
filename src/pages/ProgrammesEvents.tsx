@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
@@ -120,12 +120,11 @@ export default function ProgrammesEvents() {
 
   return (
     <>
-      <Helmet>
-        <title>Programmes — Lift Flintshire CIC</title>
-        <meta name="description" content="Explore our programmes — Stay Strong for the over-60s, Flintshire Run Club, Girls Gym Sessions, Couch to 5K, and Flintshire Weightlifting Club. Open to everyone." />
-        <meta property="og:title" content="Programmes — Lift Flintshire CIC" />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <Seo
+        title="Programmes — Lift Flintshire CIC"
+        description="Explore our programmes — Stay Strong for the over-60s, Flintshire Run Club, Girls Gym Sessions, Couch to 5K, and Flintshire Weightlifting Club. Open to everyone."
+        path="/programmes-events"
+      />
 
       {/* Page hero */}
       <SectionWrapper variant="dark">

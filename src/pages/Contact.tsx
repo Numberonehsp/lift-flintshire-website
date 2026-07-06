@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Button } from '../components/ui/Button'
 
@@ -77,7 +77,7 @@ function ContactForm() {
       </Button>
       {state === 'error' && (
         <p className="font-body text-xs text-red-600 text-center">
-          Something went wrong. Please try again or email us directly at hello@liftflintshire.org
+          Something went wrong. Please try again or email us directly at hello@liftflintshire.co.uk
         </p>
       )}
     </form>
@@ -88,12 +88,11 @@ function ContactForm() {
 export default function Contact() {
   return (
     <>
-      <Helmet>
-        <title>Contact — Lift Flintshire CIC</title>
-        <meta name="description" content="Get in touch with Lift Flintshire CIC. Questions, volunteering, partnerships — we'd love to hear from you. We respond within two working days." />
-        <meta property="og:title" content="Contact — Lift Flintshire CIC" />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <Seo
+        title="Contact — Lift Flintshire CIC"
+        description="Get in touch with Lift Flintshire CIC. Questions, volunteering, partnerships — we'd love to hear from you. We respond within two working days."
+        path="/contact"
+      />
 
       <SectionWrapper variant="dark">
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Get involved</p>

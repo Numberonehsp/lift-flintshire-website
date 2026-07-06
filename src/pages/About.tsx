@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Badge } from '../components/ui/Badge'
 
@@ -53,12 +53,11 @@ const values = [
 export default function About() {
   return (
     <>
-      <Helmet>
-        <title>About Us — Lift Flintshire CIC</title>
-        <meta name="description" content="Learn about Lift Flintshire CIC — our story, values, and the team behind our community strength, fitness, and wellbeing programmes in North Wales." />
-        <meta property="og:title" content="About Us — Lift Flintshire CIC" />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <Seo
+        title="About Us — Lift Flintshire CIC"
+        description="Learn about Lift Flintshire CIC — our story, values, and the team behind our community strength, fitness, and wellbeing programmes in North Wales."
+        path="/about"
+      />
 
       {/* Hero */}
       <SectionWrapper variant="dark">

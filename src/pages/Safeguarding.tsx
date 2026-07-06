@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async'
+import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 
 const h2Class = 'font-display font-bold text-h3 text-ink mt-10 mb-3'
@@ -17,13 +17,12 @@ function AlertBox({ children }: { children: React.ReactNode }) {
 export default function Safeguarding() {
   return (
     <>
-      <Helmet>
-        <title>Safeguarding Policy — Lift Flintshire CIC</title>
-        <meta name="description" content="Safeguarding policy for Lift Flintshire CIC — our commitment to protecting adults at risk and children in all our programmes." />
-        <meta property="og:title" content="Safeguarding Policy — Lift Flintshire CIC" />
-        <meta property="og:type" content="website" />
-        <meta name="robots" content="noindex" />
-      </Helmet>
+      <Seo
+        title="Safeguarding Policy — Lift Flintshire CIC"
+        description="Safeguarding policy for Lift Flintshire CIC — our commitment to protecting adults at risk and children in all our programmes."
+        path="/safeguarding"
+        noindex
+      />
 
       <SectionWrapper variant="dark">
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Our commitment</p>
