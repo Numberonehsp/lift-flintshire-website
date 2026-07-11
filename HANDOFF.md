@@ -1,7 +1,7 @@
 # Lift Flintshire CIC — Project Handoff
 
 ## Project
-Website for Lift Flintshire CIC, a not-for-profit community fitness organisation in Flintshire, North Wales. Live at **liftflintshire.co.uk**, deployed on Netlify, auto-deploys from GitHub (`Numberonehsp/lift-flintshire-website`).
+Website for Lift Flintshire CIC, a not-for-profit community fitness organisation in Flintshire, North Wales. Live at **liftflintshire.co.uk**, deployed on **Vercel** (confirmed via response headers 2026-07-11 — `server: Vercel` on apex and www), auto-deploys from GitHub (`Numberonehsp/lift-flintshire-website`). `netlify.toml` is a leftover from the earlier Netlify deployment and is unused; `vercel.json` holds the SPA rewrite (everything except `/api/*` → `index.html`).
 
 ---
 
@@ -9,7 +9,7 @@ Website for Lift Flintshire CIC, a not-for-profit community fitness organisation
 - Vite + React 18 + TypeScript (strict, `verbatimModuleSyntax` — always use `import type` for type-only imports)
 - Tailwind CSS v3 with custom tokens: `teal` #376A6B, `ink` #111111, `bg` #FAFAF8
 - React Router v6 + ScrollToTop on route change
-- Netlify Forms (`data-netlify="true"` + hidden `form-name`) — 6 forms total
+- Forms submit to `/api/submit-form` (Vercel serverless function: Resend email + Google Sheets append). The `data-netlify` attributes still in the JSX are dead leftovers from the Netlify era. **Known issue:** `src/pages/Contact.tsx` still POSTs to `/` (old Netlify Forms style) and is silently broken on Vercel — needs repointing at `/api/submit-form`.
 - Google Sheets API v4 (public fetch via `VITE_GOOGLE_SHEET_ID` + `VITE_GOOGLE_API_KEY`)
 - Recharts for Impact Dashboard
 - react-helmet-async for SEO
