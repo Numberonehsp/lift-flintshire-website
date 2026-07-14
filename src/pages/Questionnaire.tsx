@@ -71,7 +71,7 @@ function StarRating({ name, label, required }: StarRatingProps) {
           <span className="font-body text-xs text-ink-light ml-2">{labels[hovered || selected]}</span>
         )}
       </div>
-      {/* Hidden input for Netlify */}
+      {/* Hidden input carries the rating value into FormData on submit */}
       <input type="hidden" name={name} value={selected} required={required} />
     </div>
   )

@@ -6,9 +6,9 @@ import { Button } from '../components/ui/Button'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 
-async function submitNetlifyForm(formName: string, data: Record<string, string>) {
+async function submitForm(formName: string, data: Record<string, string>) {
   const body = new URLSearchParams({ 'form-name': formName, ...data }).toString()
-  const res = await fetch('/', {
+  const res = await fetch('/api/submit-form', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
@@ -27,7 +27,7 @@ function ContactForm() {
     setState('submitting')
     const fd = new FormData(e.currentTarget)
     try {
-      await submitNetlifyForm('contact', Object.fromEntries(fd.entries()) as Record<string, string>)
+      await submitForm('contact', Object.fromEntries(fd.entries()) as Record<string, string>)
       setState('success')
     } catch {
       setState('error')
@@ -44,8 +44,7 @@ function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} data-netlify="true" name="contact" className="space-y-4">
-      <input type="hidden" name="form-name" value="contact" />
+    <form onSubmit={handleSubmit} name="contact" className="space-y-4">
       <div>
         <label htmlFor="contact-name" className={labelClass}>Full name</label>
         <input id="contact-name" type="text" name="name" required placeholder="Jane Smith" className={inputClass} />
