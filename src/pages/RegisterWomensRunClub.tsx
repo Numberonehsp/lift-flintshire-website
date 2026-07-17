@@ -7,34 +7,43 @@ const FORM_NAME = 'register-womens-run-club'
 
 const INTRO =
   "Register below for our Women's Run Club sessions. " +
-  "We meet on the first Saturday of every month for a welcoming, social group run — all abilities welcome, walkers included. " +
+  "We will try to run the first Saturday of every month but keep an eye out for changes — all abilities welcome, walkers included. " +
   "Please complete all sections including the health declaration and waiver before your first session."
 
+// Update this date whenever a new session is scheduled — sessions don't run on a fixed weekly/monthly pattern.
+const NEXT_SESSION_DATE = new Date(2026, 7, 15) // 15 August 2026
+
 function NextSessionInfo() {
-  function getNextFirstSaturday(): string {
-    const now = new Date()
-    const d = new Date(now.getFullYear(), now.getMonth(), 1)
-    const dayOfWeek = d.getDay()
-    const daysUntilSaturday = (6 - dayOfWeek + 7) % 7
-    d.setDate(1 + daysUntilSaturday)
-    if (d <= now) {
-      d.setMonth(d.getMonth() + 1)
-      d.setDate(1)
-      const nextDay = d.getDay()
-      const nextDaysUntil = (6 - nextDay + 7) % 7
-      d.setDate(1 + nextDaysUntil)
-    }
-    return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  const now = new Date()
+  const sessionHasPassed = now > new Date(
+    NEXT_SESSION_DATE.getFullYear(), NEXT_SESSION_DATE.getMonth(), NEXT_SESSION_DATE.getDate(), 23, 59, 59
+  )
+
+  if (sessionHasPassed) {
+    return (
+      <div className="bg-teal-pale rounded-card p-4 border border-teal/20">
+        <p className="font-body font-semibold text-sm text-teal mb-1">Next session</p>
+        <p className="font-body text-sm text-ink-light">
+          Next date to be announced soon — email us at{' '}
+          <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
+            hello@liftflintshire.co.uk
+          </a>{' '}
+          for info.
+        </p>
+      </div>
+    )
   }
+
+  const dateLabel = NEXT_SESSION_DATE.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
   return (
     <div className="bg-teal-pale rounded-card p-4 border border-teal/20">
       <p className="font-body font-semibold text-sm text-teal mb-1">Next session</p>
       <p className="font-body text-sm text-ink-light mb-3">
-        <strong className="text-ink">{getNextFirstSaturday()}</strong>
+        <strong className="text-ink">{dateLabel}</strong>
       </p>
       <ul className="font-body text-sm text-ink-light space-y-1">
-        <li><strong className="text-ink">Time:</strong> 9:00–10:00am</li>
+        <li><strong className="text-ink">Time:</strong> 10:00–11:00am</li>
         <li><strong className="text-ink">Location:</strong> Deeside Athletics Track</li>
         <li><strong className="text-ink">Cost:</strong> Free</li>
         <li><strong className="text-ink">Who:</strong> Women and non-binary people of all abilities</li>
@@ -55,13 +64,13 @@ export default function RegisterWomensRunClub() {
 
       <SectionWrapper variant="dark">
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">
-          Free · First Saturday of every month
+          Free · We will try to run the first Saturday of every month but keep an eye out for changes
         </p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">
           Women's Run Club — Register
         </h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          A safe, welcoming space to run, walk, and connect. Open to women and non-binary people of all abilities — every first Saturday of the month.
+          A safe, welcoming space to run, walk, and connect. Open to women and non-binary people of all abilities — we will try to run the first Saturday of every month but keep an eye out for changes.
         </p>
       </SectionWrapper>
 
