@@ -86,7 +86,52 @@ export default function Home() {
         </p>
       </SectionWrapper>
 
-      <WaveDivider fromColor="#376A6B" toColor="#F0EFEA" />
+      <WaveDivider fromColor="#376A6B" toColor="#FAFAF8" />
+
+      {/* Aims and objectives */}
+      <SectionWrapper variant="light">
+        <div className="max-w-3xl mx-auto text-center mb-12">
+          <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Our aim</p>
+          <h2 className="font-display font-extrabold text-h2 text-ink mb-6">
+            A stronger, healthier Flintshire — open to everyone
+          </h2>
+          <p className="font-body text-lg text-ink-light leading-relaxed">
+            Our aim is simple: to improve the health, strength, and wellbeing of people across Flintshire by making fitness genuinely accessible — regardless of age, ability, income, or experience. We do this through four objectives.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-surface rounded-card border border-border p-6 shadow-sm">
+            <p className="font-display font-black text-h3 text-teal mb-2">01</p>
+            <h3 className="font-display font-bold text-h3 text-ink mb-2">Reach underserved groups</h3>
+            <p className="font-body text-sm text-ink-light leading-relaxed">
+              Deliver programmes for people who are too often left out of fitness spaces — older adults through Stay Strong, complete beginners through Couch to 5K, and women and girls through our Women's Run Club and Girls Gym Sessions.
+            </p>
+          </div>
+          <div className="bg-surface rounded-card border border-border p-6 shadow-sm">
+            <p className="font-display font-black text-h3 text-teal mb-2">02</p>
+            <h3 className="font-display font-bold text-h3 text-ink mb-2">Remove the barriers to joining in</h3>
+            <p className="font-body text-sm text-ink-light leading-relaxed">
+              Keep cost, location, and confidence from standing in anyone's way. Every programme starts free, sessions run at accessible community venues across the county, and every coach is trained to welcome complete beginners.
+            </p>
+          </div>
+          <div className="bg-surface rounded-card border border-border p-6 shadow-sm">
+            <p className="font-display font-black text-h3 text-teal mb-2">03</p>
+            <h3 className="font-display font-bold text-h3 text-ink mb-2">Build community, not just fitness</h3>
+            <p className="font-body text-sm text-ink-light leading-relaxed">
+              Create spaces where people connect as well as move — social running groups, group strength sessions, and clubs where no one is left behind, whatever pace or level they're starting from.
+            </p>
+          </div>
+          <div className="bg-surface rounded-card border border-border p-6 shadow-sm">
+            <p className="font-display font-black text-h3 text-teal mb-2">04</p>
+            <h3 className="font-display font-bold text-h3 text-ink mb-2">Reinvest and prove our impact</h3>
+            <p className="font-body text-sm text-ink-light leading-relaxed">
+              As a Community Interest Company, every penny we raise goes back into running more sessions and reaching more people. We track and publish our impact data openly, because we believe in accountability.
+            </p>
+          </div>
+        </div>
+      </SectionWrapper>
+
+      <WaveDivider fromColor="#FAFAF8" toColor="#F0EFEA" />
 
       {/* Programmes preview */}
       <SectionWrapper variant="muted">
