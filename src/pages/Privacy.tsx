@@ -56,7 +56,7 @@ export default function Privacy() {
           <h3 className={subheadingClass}>Contact enquiries</h3>
           <p className={bodyClass}>When you use our contact form, we collect your name, email address, phone number (optional), and message. We use this to respond to your enquiry. The legal basis is our <strong>legitimate interests</strong> in responding to communications.</p>
 
-          <h3 className={subheadingClass}>Programme registration (Couch to 5K, Women's Run Club, and Girls Gym Session)</h3>
+          <h3 className={subheadingClass}>Programme registration (Couch to 5K, Women's Run Club, Girls Gym Session, and Youth Strength &amp; Conditioning)</h3>
           <p className={bodyClass}>When you register for a programme, we collect:</p>
           <ul className={listClass}>
             <li>Name, date of birth, email address, and phone number</li>
@@ -65,7 +65,7 @@ export default function Privacy() {
             <li>Consents given — including GDPR consent, photo/video consent, and your signed participation waiver</li>
           </ul>
           <p className={bodyClass}>
-            For Girls Gym Session registrations, which are completed by a parent or guardian on behalf of a young person, we additionally collect the young person's school year and how they heard about us, along with the parent or guardian's name, relationship to the young person, and contact details.
+            For Girls Gym Session and Youth Strength &amp; Conditioning registrations, which are completed by a parent or guardian on behalf of a young person, we additionally collect the young person's school year, gender, and how they heard about us, along with the parent or guardian's name, relationship to the young person, and contact details.
           </p>
           <p className={bodyClass}>
             Health and medical information is <strong>special category data</strong> under UK GDPR. We collect it solely to enable our coaches to support your safe participation. The legal basis for processing this data is your <strong>explicit consent</strong> (or, for young people, the consent of their parent or guardian), given when the registration form is completed.

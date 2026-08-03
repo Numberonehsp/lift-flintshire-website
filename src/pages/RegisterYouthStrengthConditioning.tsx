@@ -116,7 +116,6 @@ function RegistrationFormContent() {
   return (
     <form
       onSubmit={handleSubmit}
-      data-netlify="true"
       name={FORM_NAME}
       className="space-y-4 max-w-2xl"
     >
