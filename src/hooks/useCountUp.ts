@@ -6,10 +6,7 @@ export function useCountUp(target: number, duration = 1800) {
   const started = useRef(false)
 
   useEffect(() => {
-    if (target === 0) {
-      setValue(0)
-      return
-    }
+    if (target === 0) return
 
     const el = ref.current
     if (!el) return
@@ -38,5 +35,7 @@ export function useCountUp(target: number, duration = 1800) {
     return () => observer.disconnect()
   }, [target, duration])
 
-  return { value, ref }
+  // Derived rather than reset via the effect — a zero target always displays zero,
+  // so there's no need for an extra render pass to clear a stale count.
+  return { value: target === 0 ? 0 : value, ref }
 }

@@ -209,26 +209,27 @@ function parseSummarySheet(values: string[][]): HeroStat[] {
   return parsed.length > 0 ? parsed : defaultHeroStats
 }
 
+// Credentials are inlined by Vite at build time, so whether we're running against
+// the real sheet or the bundled sample data is known before the first render.
+const SHEET_ID = import.meta.env.VITE_GOOGLE_SHEET_ID
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY
+const HAS_SHEET_CONFIG = Boolean(SHEET_ID && API_KEY)
+
 export function useGoogleSheets() {
-  const [data, setData] = useState<SheetData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState<SheetData | null>(() =>
+    HAS_SHEET_CONFIG ? null : aggregateData(mockRows)
+  )
+  const [loading, setLoading] = useState(HAS_SHEET_CONFIG)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const sheetId = import.meta.env.VITE_GOOGLE_SHEET_ID
-    const apiKey = import.meta.env.VITE_GOOGLE_API_KEY
+    if (!HAS_SHEET_CONFIG) return
 
-    if (!sheetId || !apiKey) {
-      setData(aggregateData(mockRows))
-      setLoading(false)
-      return
-    }
-
-    const base = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values`
+    const base = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values`
     const sessionTab = encodeURIComponent('Form Responses 4')
     Promise.all([
-      fetch(`${base}/${sessionTab}?key=${apiKey}`).then(r => { if (!r.ok) throw new Error(); return r.json() }),
-      fetch(`${base}/Summary?key=${apiKey}`).then(r => r.json()).catch(() => ({ values: [] })),
+      fetch(`${base}/${sessionTab}?key=${API_KEY}`).then(r => { if (!r.ok) throw new Error(); return r.json() }),
+      fetch(`${base}/Summary?key=${API_KEY}`).then(r => r.json()).catch(() => ({ values: [] })),
     ])
       .then(([impactJson, summaryJson]: [{ values: string[][] }, { values: string[][] }]) => {
         const rows = parseSheetRows(impactJson.values)

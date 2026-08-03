@@ -65,27 +65,27 @@ function parseSessionsSheet(values: string[][]): Record<string, SessionDetail[]>
   return map
 }
 
+// Credentials are inlined by Vite at build time, so whether there's a sheet to
+// fetch from is known before the first render — without one we stay on static data.
+const SHEET_ID = import.meta.env.VITE_GOOGLE_SHEET_ID
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY
+const HAS_SHEET_CONFIG = Boolean(SHEET_ID && API_KEY)
+
 export function useContentSheets(): ContentSheetsData {
   const [events, setEvents] = useState<Event[]>(staticEvents)
   const [sessionsByProgramme, setSessionsByProgramme] = useState<Record<string, SessionDetail[]>>({})
   const [registrations, setRegistrations] = useState<RegistrationSummary[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(HAS_SHEET_CONFIG)
 
   useEffect(() => {
-    const sheetId = import.meta.env.VITE_GOOGLE_SHEET_ID
-    const apiKey = import.meta.env.VITE_GOOGLE_API_KEY
+    if (!HAS_SHEET_CONFIG) return
 
-    if (!sheetId || !apiKey) {
-      setLoading(false)
-      return
-    }
-
-    const base = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values`
+    const base = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values`
 
     Promise.all([
-      fetch(`${base}/Events?key=${apiKey}`).then(r => r.json()),
-      fetch(`${base}/Programme_Sessions?key=${apiKey}`).then(r => r.json()),
-      fetch(`${base}/Registrations?key=${apiKey}`).then(r => r.json()).catch(() => ({ values: [] })),
+      fetch(`${base}/Events?key=${API_KEY}`).then(r => r.json()),
+      fetch(`${base}/Programme_Sessions?key=${API_KEY}`).then(r => r.json()),
+      fetch(`${base}/Registrations?key=${API_KEY}`).then(r => r.json()).catch(() => ({ values: [] })),
     ])
       .then(([eventsJson, sessionsJson, registrationsJson]) => {
         setEvents(parseEventsSheet(eventsJson.values))
