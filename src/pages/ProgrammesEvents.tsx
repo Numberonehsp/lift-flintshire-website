@@ -37,6 +37,83 @@ const programmeImages: Record<string, string[]> = {
 
 const REGISTER_DIRECTLY = ['couch-to-5k', 'womens-run-club', 'youth-strength-conditioning']
 
+// Condenses the full cost string ("4 weeks Free, then £16 per month") into something
+// that fits a snapshot card — the exact terms are shown in the programme's own section.
+function shortCost(cost: string): string {
+  const c = cost.trim()
+  if (/^free$/i.test(c)) return 'Free'
+  if (/free/i.test(c)) return 'Free to start'
+  const price = c.match(/£\d+/)
+  return price ? `From ${price[0]}` : c
+}
+
+// Quick-jump cards shown at the top of the page so visitors can scan every programme
+// and go straight to the one they want instead of scrolling through all of them.
+function ProgrammeSnapshot({ programmes }: { programmes: Programme[] }) {
+  return (
+    <nav aria-label="Programme quick links" className="mt-12 md:mt-14">
+      <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">
+        Jump to a programme
+      </p>
+      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {programmes.map(p => {
+          const cost = p.sessions[0]?.cost
+          const isFree = cost ? /free/i.test(cost) : false
+          return (
+            <li key={p.id}>
+              <a
+                href={`#${p.id}`}
+                className="group flex h-full flex-col justify-between gap-5 rounded-card border border-white/10 bg-white/[0.04] p-4 transition-colors duration-150 hover:border-teal-light hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-light"
+              >
+                <div>
+                  <p className="font-body text-[10px] uppercase tracking-[0.08em] text-teal-light mb-1.5">
+                    {p.badge}
+                  </p>
+                  {/* Not a heading — this is a nav card, and each programme already has an h2 below */}
+                  <p className="font-display font-bold text-xl text-white leading-tight">
+                    {p.title}
+                  </p>
+                </div>
+
+                <div className="flex items-end justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {cost && (
+                      <span
+                        className={`font-body text-[11px] rounded-full px-2 py-0.5 ${
+                          isFree ? 'bg-teal/25 text-teal-light' : 'bg-white/10 text-white/70'
+                        }`}
+                      >
+                        {shortCost(cost)}
+                      </span>
+                    )}
+                    {REGISTER_DIRECTLY.includes(p.id) && (
+                      <span className="font-body text-[11px] rounded-full px-2 py-0.5 bg-white/10 text-white/70">
+                        Register online
+                      </span>
+                    )}
+                  </div>
+                  <svg
+                    className="flex-shrink-0 text-white/40 transition-all duration-150 group-hover:text-teal-light group-hover:translate-y-0.5"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 5v14M19 12l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+              </a>
+            </li>
+          )
+        })}
+      </ul>
+    </nav>
+  )
+}
+
 function ProgrammeSection({ programme, imageLeft = false }: { programme: Programme; imageLeft?: boolean }) {
   const images = programmeImages[programme.id]
 
@@ -98,8 +175,9 @@ function ProgrammeSection({ programme, imageLeft = false }: { programme: Program
 
   const mutedIds = ['run-club', 'weightlifting', 'girls-gym-session']
 
+  // scroll-mt keeps the heading clear of the fixed header when jumped to from the snapshot nav
   return (
-    <section id={programme.id}>
+    <section id={programme.id} className="scroll-mt-24">
       <SectionWrapper variant={mutedIds.includes(programme.id) ? 'muted' : 'light'}>
         <div className={`flex flex-col ${imageLeft ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-10 lg:gap-16 items-start`}>
           {content}
@@ -133,6 +211,8 @@ export default function ProgrammesEvents() {
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
           From strength training for the over-60s to free gym sessions for young women — we have a programme for everyone. All sessions are led by qualified coaches and are fully inclusive.
         </p>
+
+        <ProgrammeSnapshot programmes={programmesWithSessions} />
       </SectionWrapper>
 
       {programmesWithSessions.map((p, i) => (

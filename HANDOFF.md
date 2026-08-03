@@ -129,7 +129,7 @@ All three new forms are declared as static HTML in `index.html` (required for Ne
 - [ ] Populate Google Sheet tabs: Summary, Events, Programme_Sessions, Registrations
 - [ ] Add real GymMaster booking links to Events sheet
 - [ ] Photos for Stay Strong, Weightlifting, C25K, and Women's Run Club (currently showing placeholder)
-- [ ] Set up C25K session schedule — update `sessions` in `programmes.ts` with real day/time/location
+- [x] Set up C25K session schedule — update `sessions` in `programmes.ts` with real day/time/location
 - [ ] Configure Netlify email notifications for the 3 new forms (Netlify dashboard → Forms → register-couch-to-5k → Notifications)
 - [ ] (Optional) Set up Zapier to auto-populate Registrations Google Sheet from Netlify form submissions
 - [ ] Send `/questionnaire` link to participants after each session as a follow-up email
@@ -137,3 +137,17 @@ All three new forms are declared as static HTML in `index.html` (required for Ne
 - [ ] About page — real team names, roles, photos (currently placeholders)
 - [ ] Register site with Google Search Console
 - [ ] Regenerate Google API key (was briefly exposed in a Terminal screenshot earlier in the project)
+
+---
+
+## Session Notes — 2026-08-03
+- Added `src/data/nextSessionDates.ts` as the single source of truth for the Women's Run Club next-session date and the Couch to 5K next-cohort-start date. `programmes.ts`, `RegisterWomensRunClub.tsx`, and `RegisterCouchTo5k.tsx` all read from it now — previously the Women's Run Club date was duplicated (and could drift) between `programmes.ts` and the register page.
+- Fixed Stay Strong price: £15 → £16 per month.
+- Added a new programme, **Youth Strength & Conditioning** (Thursdays 11:00–12:00, Number One HSP, Years 7–13, free) — `src/pages/RegisterYouthStrengthConditioning.tsx`, route `/register/youth-strength-conditioning`, entry in `programmes.ts`, sitemap entry. Duplicated from the Girls Gym Session template (parental consent/waiver flow) since participants are minors; the shared `api/submit-form.ts` handler needed no changes since it's keyed by field name, not form name.
+- User confirmed they'll continue with hardcoded date constants (not the Google Sheet `Programme_Sessions` tab) for these one-off "next date" fields, since that sheet mechanism is better suited to genuinely fixed weekly schedules — see comment in `nextSessionDates.ts`.
+- **`npm run lint` now passes clean** (was 68 errors). Two causes: (1) ESLint was crawling `.claude/worktrees/` and hitting ambiguous tsconfig roots — now in `globalIgnores`; (2) three `react-hooks/set-state-in-effect` violations in `useCountUp`/`useGoogleSheets`/`useContentSheets`, all the same pattern of an effect setting state synchronously on an early-return path. Fixed by deriving during render / lazy `useState` initialisers instead, which also removes a wasted render pass each. Behaviour verified unchanged by A/B testing against the pre-change hooks.
+- Note: the worktree at `.claude/worktrees/magical-pascal-edcfef` is **not** stale — it holds commit `bb98f20` fixing the Contact-form-POSTs-to-`/` bug listed above, never merged to `main`. Left untouched.
+- Gotcha for future browser verification: the Impact dashboard's stat tiles use `useCountUp`, which only animates via `IntersectionObserver`. Headless preview panes can report a 0×0 viewport, so the tiles read `0` there even when the data is correct — not a bug. Confirm the underlying value via React props rather than the rendered text.
+- Added a **"Jump to a programme" snapshot nav** at the top of `/programmes-events` (`ProgrammeSnapshot` in `ProgrammesEvents.tsx`), rendered inside the existing dark hero so it needs no extra section band. One card per programme showing audience badge, title, a condensed cost chip, and a "Register online" tag where direct registration exists. Cards are plain `<a href="#id">` fragment links — each programme `<section>` now carries `scroll-mt-24` so headings clear the fixed header on jump. Adding a programme to `programmes.ts` automatically adds a card; no separate list to maintain.
+- `shortCost()` condenses the verbose cost strings for those chips ("4 weeks Free, then £16 per month" → "Free to start", "£9 per session, or £25 per month" → "From £9"). If cost wording changes substantially, sanity-check that helper.
+- Contact page's "Register for a programme" links were stale — only listed 2 of the 3 directly-registerable programmes. Added Youth Strength & Conditioning.
