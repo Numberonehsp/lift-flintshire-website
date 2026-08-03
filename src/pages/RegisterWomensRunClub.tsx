@@ -1,6 +1,7 @@
 import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { RegistrationForm } from '../components/forms/RegistrationForm'
+import { WOMENS_RUN_CLUB_NEXT_SESSION, formatSessionDate, sessionHasPassed } from '../data/nextSessionDates'
 
 const PROGRAMME_LABEL = "Women's Run Club"
 const FORM_NAME = 'register-womens-run-club'
@@ -10,16 +11,8 @@ const INTRO =
   "We will try to run the first Saturday of every month but keep an eye out for changes — all abilities welcome, walkers included. " +
   "Please complete all sections including the health declaration and waiver before your first session."
 
-// Update this date whenever a new session is scheduled — sessions don't run on a fixed weekly/monthly pattern.
-const NEXT_SESSION_DATE = new Date(2026, 7, 15) // 15 August 2026
-
 function NextSessionInfo() {
-  const now = new Date()
-  const sessionHasPassed = now > new Date(
-    NEXT_SESSION_DATE.getFullYear(), NEXT_SESSION_DATE.getMonth(), NEXT_SESSION_DATE.getDate(), 23, 59, 59
-  )
-
-  if (sessionHasPassed) {
+  if (sessionHasPassed(WOMENS_RUN_CLUB_NEXT_SESSION)) {
     return (
       <div className="bg-teal-pale rounded-card p-4 border border-teal/20">
         <p className="font-body font-semibold text-sm text-teal mb-1">Next session</p>
@@ -34,7 +27,7 @@ function NextSessionInfo() {
     )
   }
 
-  const dateLabel = NEXT_SESSION_DATE.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  const dateLabel = formatSessionDate(WOMENS_RUN_CLUB_NEXT_SESSION)
 
   return (
     <div className="bg-teal-pale rounded-card p-4 border border-teal/20">

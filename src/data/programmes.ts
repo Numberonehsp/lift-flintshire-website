@@ -1,3 +1,5 @@
+import { WOMENS_RUN_CLUB_NEXT_SESSION, COUCH_TO_5K_NEXT_COHORT_START, formatSessionDate } from './nextSessionDates'
+
 export interface SessionDetail {
   day: string
   time: string
@@ -29,7 +31,7 @@ export const programmes: Programme[] = [
     whatToExpect:
       "Each session follows a structured run/walk interval plan that gradually increases over 8 weeks. You'll be supported by a coach throughout and run as part of a small group. Sessions include a warm-up walk, intervals, and a cool-down stretch.",
     sessions: [
-      { day: 'Thursday', time: '18:00', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free' },
+      { day: `Next cohort starts ${formatSessionDate(COUCH_TO_5K_NEXT_COHORT_START)}`, time: '18:00', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free' },
     ],
   },
   {
@@ -44,7 +46,7 @@ export const programmes: Programme[] = [
     whatToExpect:
       "Sessions run for approximately one hour, starting with a group walk-up and ending with a cool-down and coffee together. Most sessions will be based at Deeside Athletics Track but we may venture a bit further out as the community grows.",
     sessions: [
-      { day: 'First Saturday of each month', time: '10:00–11:00am', location: 'Deeside Athletics Track', cost: 'Free' },
+      { day: formatSessionDate(WOMENS_RUN_CLUB_NEXT_SESSION), time: '10:00–11:00am', location: 'Deeside Athletics Track', cost: 'Free' },
     ],
   },
   {
@@ -74,7 +76,7 @@ export const programmes: Programme[] = [
     whatToExpect:
       'Each 45-minute session combines seated and standing resistance exercises using bands and light weights, balance work, and time to connect with others in the group. Sessions are led by qualified strength coaches and are fully inclusive.',
     sessions: [
-      { day: 'Wednesday', time: '11:00–11:45am', location: 'Number One HSP, CH5 2TF', cost: '4 weeks Free, then £15 per month' },
+      { day: 'Wednesday', time: '11:00–11:45am', location: 'Number One HSP, CH5 2TF', cost: '4 weeks Free, then £16 per month' },
     ],
   },
   {

@@ -1,6 +1,7 @@
 import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { RegistrationForm } from '../components/forms/RegistrationForm'
+import { COUCH_TO_5K_NEXT_COHORT_START, formatSessionDate, sessionHasPassed } from '../data/nextSessionDates'
 
 const PROGRAMME_LABEL = 'Couch to 5K'
 const FORM_NAME = 'register-couch-to-5k'
@@ -10,10 +11,28 @@ const INTRO =
   'The programme runs over 8 weeks and is open to complete beginners — no running experience needed. ' +
   'Please complete all sections including the health declaration and waiver before your first session.'
 
-function SessionInfo() {
+function NextCohortInfo() {
+  if (sessionHasPassed(COUCH_TO_5K_NEXT_COHORT_START)) {
+    return (
+      <div className="bg-teal-pale rounded-card p-4 border border-teal/20">
+        <p className="font-body font-semibold text-sm text-teal mb-1">Next cohort</p>
+        <p className="font-body text-sm text-ink-light">
+          Next start date to be announced soon — email us at{' '}
+          <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
+            hello@liftflintshire.co.uk
+          </a>{' '}
+          for info.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-teal-pale rounded-card p-4 border border-teal/20">
-      <p className="font-body font-semibold text-sm text-teal mb-1">Programme details</p>
+      <p className="font-body font-semibold text-sm text-teal mb-1">Next cohort starts</p>
+      <p className="font-body text-sm text-ink-light mb-3">
+        <strong className="text-ink">{formatSessionDate(COUCH_TO_5K_NEXT_COHORT_START)}</strong>
+      </p>
       <ul className="font-body text-sm text-ink-light space-y-1">
         <li><strong className="text-ink">Duration:</strong> 8 weeks</li>
         <li><strong className="text-ink">Sessions:</strong> 3 per week (1 guided group run and 2 optional group or homework runs)</li>
@@ -61,7 +80,7 @@ export default function RegisterCouchTo5k() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <SessionInfo />
+            <NextCohortInfo />
 
             <div className="bg-surface rounded-card border border-border p-5">
               <p className="font-body font-semibold text-sm text-ink mb-2">What happens next?</p>
