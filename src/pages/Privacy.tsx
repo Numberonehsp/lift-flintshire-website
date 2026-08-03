@@ -31,7 +31,7 @@ export default function Privacy() {
             This Privacy Policy explains how <strong>Lift Flintshire Community Interest Company</strong> ("Lift Flintshire CIC", "we", "us", "our") collects and uses your personal data when you visit our website or use our services. It applies to all personal data we process and reflects our obligations under the <strong>UK General Data Protection Regulation (UK GDPR)</strong> and the <strong>Data Protection Act 2018</strong>.
           </p>
           <p className={bodyClass}>
-            Last updated: <strong>May 2026</strong>
+            Last updated: <strong>July 2026</strong>
           </p>
 
           {/* Who we are */}
@@ -47,7 +47,7 @@ export default function Privacy() {
             </a>
           </p>
           <p className={bodyClass}>
-            We are registered with the Information Commissioner's Office (ICO) as a data controller. Our ICO registration number will be published here once registration is complete.
+            Lift Flintshire CIC is exempt from paying the ICO data protection fee under the <strong>not-for-profit exemption</strong>, as we only process personal data necessary to establish and maintain membership or participation in our programmes. This exemption does not affect your rights under UK GDPR as set out in this policy.
           </p>
 
           {/* What data we collect */}
@@ -56,7 +56,7 @@ export default function Privacy() {
           <h3 className={subheadingClass}>Contact enquiries</h3>
           <p className={bodyClass}>When you use our contact form, we collect your name, email address, phone number (optional), and message. We use this to respond to your enquiry. The legal basis is our <strong>legitimate interests</strong> in responding to communications.</p>
 
-          <h3 className={subheadingClass}>Programme registration (Couch to 5K and Women's Run Club)</h3>
+          <h3 className={subheadingClass}>Programme registration (Couch to 5K, Women's Run Club, and Girls Gym Session)</h3>
           <p className={bodyClass}>When you register for a programme, we collect:</p>
           <ul className={listClass}>
             <li>Name, date of birth, email address, and phone number</li>
@@ -65,7 +65,10 @@ export default function Privacy() {
             <li>Consents given — including GDPR consent, photo/video consent, and your signed participation waiver</li>
           </ul>
           <p className={bodyClass}>
-            Health and medical information is <strong>special category data</strong> under UK GDPR. We collect it solely to enable our coaches to support your safe participation. The legal basis for processing this data is your <strong>explicit consent</strong>, given when you complete the registration form.
+            For Girls Gym Session registrations, which are completed by a parent or guardian on behalf of a young person, we additionally collect the young person's school year and how they heard about us, along with the parent or guardian's name, relationship to the young person, and contact details.
+          </p>
+          <p className={bodyClass}>
+            Health and medical information is <strong>special category data</strong> under UK GDPR. We collect it solely to enable our coaches to support your safe participation. The legal basis for processing this data is your <strong>explicit consent</strong> (or, for young people, the consent of their parent or guardian), given when the registration form is completed.
           </p>
 
           <h3 className={subheadingClass}>Session feedback (questionnaire)</h3>
@@ -75,8 +78,9 @@ export default function Privacy() {
           <h2 className={headingClass}>3. How and where we store your data</h2>
           <p className={bodyClass}>We use the following services to store and process your data:</p>
           <ul className={listClass}>
-            <li><strong>Netlify Forms</strong> — form submissions are initially stored on Netlify's servers (USA). Netlify Inc. participates in the EU–US Data Privacy Framework and provides appropriate safeguards for international transfers.</li>
-            <li><strong>Google Sheets</strong> — participant records are transferred to a private Google Sheet accessible only to authorised Lift Flintshire CIC staff. Google LLC participates in the EU–US Data Privacy Framework.</li>
+            <li><strong>Vercel</strong> — our website and form submission service are hosted on Vercel's infrastructure (USA). Vercel Inc. participates in the EU–US Data Privacy Framework and provides appropriate safeguards for international transfers.</li>
+            <li><strong>Resend</strong> — form submissions are emailed to us via Resend, an email delivery service (USA). Resend relies on Standard Contractual Clauses to provide appropriate safeguards for international transfers.</li>
+            <li><strong>Google Sheets</strong> — participant registration records are also saved to a private Google Sheet accessible only to authorised Lift Flintshire CIC staff. Google LLC participates in the EU–US Data Privacy Framework. Contact enquiries are not saved to this sheet.</li>
           </ul>
           <p className={bodyClass}>
             All data is stored securely and access is restricted to authorised personnel only. We do not use unsecured email to transmit sensitive participant data.
@@ -96,7 +100,7 @@ export default function Privacy() {
             We do not sell, rent, or share your personal data with third parties for marketing purposes. We may share data in the following limited circumstances:
           </p>
           <ul className={listClass}>
-            <li>With our technology providers (Netlify, Google) as described above, for the purposes of operating our website and storing records</li>
+            <li>With our technology providers (Vercel, Resend, Google) as described above, for the purposes of operating our website and storing records</li>
             <li>Where required by law, for example in response to a court order or regulatory obligation</li>
             <li>In an emergency, with emergency services if we need to share your emergency contact or medical information</li>
           </ul>

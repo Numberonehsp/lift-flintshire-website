@@ -199,7 +199,7 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
   }
 
   return (
-    <form onSubmit={handleSubmit} data-netlify="true" name={formName}>
+    <form onSubmit={handleSubmit} name={formName}>
       <input type="hidden" name="form-name" value={formName} />
       <input type="hidden" name="programme" value={programme} />
 

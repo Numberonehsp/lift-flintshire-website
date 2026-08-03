@@ -35,6 +35,9 @@ const FORM_LABELS: Record<string, string> = {
   gender:                           'Gender',
   'emergency-name':                 'Emergency contact name',
   'emergency-phone':                'Emergency contact phone',
+  name:                             'Name',
+  subject:                          'Subject',
+  message:                          'Message',
   'has-medical-conditions':         'Medical conditions?',
   'medical-conditions-details':     'Medical details',
   'waiver-initials':                'Initials',
@@ -224,7 +227,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       from: 'Lift Flintshire Website <forms@liftflintshire.co.uk>',
       to: ['hello@liftflintshire.co.uk'],
       replyTo: fields['guardian-email'] ?? fields['email'],
-      subject: `New registration: ${formName.replace(/-/g, ' ')}`,
+      subject: formName === 'contact'
+        ? `New contact message${fields['subject'] ? `: ${fields['subject']}` : ''}`
+        : `New registration: ${formName.replace(/-/g, ' ')}`,
       html: buildHtml(fields),
     })
 
@@ -233,16 +238,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: 'Email failed' })
     }
 
-    // 2 — Save to Google Sheet (non-fatal if it fails)
-    try {
-      const isQuestionnaire = formName === 'programme-questionnaire'
-      if (isQuestionnaire) {
-        await appendToSheet(buildFeedbackRow(fields), 'Feedback', FEEDBACK_SHEET_COLUMNS)
-      } else {
-        await appendToSheet(buildSheetRow(fields), 'Registrations', SHEET_COLUMNS)
+    // 2 — Save to Google Sheet (non-fatal if it fails); contact messages are email-only
+    if (formName !== 'contact') {
+      try {
+        const isQuestionnaire = formName === 'programme-questionnaire'
+        if (isQuestionnaire) {
+          await appendToSheet(buildFeedbackRow(fields), 'Feedback', FEEDBACK_SHEET_COLUMNS)
+        } else {
+          await appendToSheet(buildSheetRow(fields), 'Registrations', SHEET_COLUMNS)
+        }
+      } catch (sheetErr) {
+        console.error('Sheet write error (non-fatal):', sheetErr)
       }
-    } catch (sheetErr) {
-      console.error('Sheet write error (non-fatal):', sheetErr)
     }
 
     return res.status(200).json({ success: true })
