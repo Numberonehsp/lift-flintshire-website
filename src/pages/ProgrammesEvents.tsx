@@ -35,7 +35,7 @@ const programmeImages: Record<string, string[]> = {
   'girls-gym-session': ['/images/oly-ohs.jpg'],
 }
 
-const REGISTER_DIRECTLY = ['couch-to-5k', 'womens-run-club']
+const REGISTER_DIRECTLY = ['couch-to-5k', 'womens-run-club', 'youth-strength-conditioning']
 
 function ProgrammeSection({ programme, imageLeft = false }: { programme: Programme; imageLeft?: boolean }) {
   const images = programmeImages[programme.id]

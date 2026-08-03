@@ -125,11 +125,12 @@ export default function Contact() {
             <div className="bg-surface rounded-card border border-border p-6">
               <p className="font-body font-semibold text-sm text-ink mb-2">Register for a programme</p>
               <p className="font-body text-sm text-ink-light leading-relaxed mb-3">
-                Ready to join? You can register directly for our Couch to 5K and Women's Run Club programmes.
+                Ready to join? You can register directly for our Couch to 5K, Women's Run Club, and Youth Strength &amp; Conditioning programmes.
               </p>
               <div className="flex flex-col gap-2">
                 <a href="/register/couch-to-5k" className="font-body text-sm text-teal hover:underline font-medium">Register for Couch to 5K →</a>
                 <a href="/register/womens-run-club" className="font-body text-sm text-teal hover:underline font-medium">Register for Women's Run Club →</a>
+                <a href="/register/youth-strength-conditioning" className="font-body text-sm text-teal hover:underline font-medium">Register for Youth Strength &amp; Conditioning →</a>
               </div>
             </div>
           </div>

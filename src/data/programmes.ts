@@ -8,7 +8,7 @@ export interface SessionDetail {
 }
 
 export interface Programme {
-  id: 'stay-strong' | 'run-club' | 'weightlifting' | 'couch-to-5k' | 'womens-run-club' | 'girls-gym-session'
+  id: 'stay-strong' | 'run-club' | 'weightlifting' | 'couch-to-5k' | 'womens-run-club' | 'girls-gym-session' | 'youth-strength-conditioning'
   title: string
   tagline: string
   badge: string
@@ -62,6 +62,21 @@ export const programmes: Programme[] = [
       'A fun, structured gym session where our coaches explain how to use equipment safely and confidently. Groups are small, sessions are social, and the atmosphere is never competitive. We want every young woman who attends to leave feeling capable and welcomed.',
     sessions: [
       { day: 'By arrangement', time: 'TBC', location: 'Number One HSP, CH5 2TF', cost: 'Free' },
+    ],
+  },
+  {
+    id: 'youth-strength-conditioning',
+    title: 'Youth Strength & Conditioning',
+    tagline: 'Building strength, movement skills, and confidence in young people',
+    badge: 'Years 7–13 · Free',
+    description:
+      'Our Youth Strength & Conditioning sessions introduce young people to safe, structured strength training and movement skills in a fun, coach-led environment. No experience needed — every session is adapted to age and ability.',
+    targetAudience:
+      'Open to young people in Years 7–13 (ages 11–18). No previous gym experience required — our qualified coaches adapt every session to suit the group.',
+    whatToExpect:
+      'Sessions combine fundamental movement skills, bodyweight and light resistance training, and games — building strength and confidence without pressure or competition. Groups are small and social.',
+    sessions: [
+      { day: 'Thursday', time: '11:00–12:00', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free' },
     ],
   },
   {
