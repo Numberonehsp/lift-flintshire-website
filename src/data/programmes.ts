@@ -22,16 +22,16 @@ export const programmes: Programme[] = [
   {
     id: 'couch-to-5k',
     title: 'Couch to 5K',
-    tagline: 'From first steps to 5 kilometres in 8 weeks',
+    tagline: 'From first steps to 5 kilometres in 9 weeks',
     badge: 'All Ages · Beginners Welcome',
     description:
       'Our free Couch to 5K programme takes complete beginners from no running experience to comfortably completing a 5K in just nine weeks. Guided by qualified running coaches, sessions are friendly, social, and never competitive.',
     targetAudience:
       'Designed for adults who have never run before, or who are returning to running after a long break. If you can walk for 30 minutes, you can start Couch to 5K. All ages welcome — no fitness test required.',
     whatToExpect:
-      "Each session follows a structured run/walk interval plan that gradually increases over 8 weeks. You'll be supported by a coach throughout and run as part of a small group. Sessions include a warm-up walk, intervals, and a cool-down stretch.",
+      "Each session follows a structured run/walk interval plan that gradually increases over 9 weeks. You'll be supported by a coach throughout and run as part of a small group. Sessions include a warm-up walk, intervals, and a cool-down stretch.",
     sessions: [
-      { day: `Next cohort starts ${formatSessionDate(COUCH_TO_5K_NEXT_COHORT_START)}`, time: '18:00', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free' },
+      { day: `Next cohort starts ${formatSessionDate(COUCH_TO_5K_NEXT_COHORT_START)} · coached session every Wednesday`, time: '17:30', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free' },
     ],
   },
   {

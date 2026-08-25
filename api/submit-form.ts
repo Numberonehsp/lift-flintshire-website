@@ -1,6 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Resend } from 'resend'
 import { google } from 'googleapis'
+import {
+  WOMENS_RUN_CLUB_NEXT_SESSION,
+  COUCH_TO_5K_NEXT_COHORT_START,
+  formatSessionDate,
+  sessionHasPassed,
+} from '../src/data/nextSessionDates'
 
 const FORM_LABELS: Record<string, string> = {
   'form-name':                      'Form',
@@ -104,6 +110,73 @@ const SHEET_COLUMNS = [
   'Initials',
   'Referral Source',
 ]
+
+// ── Registrant confirmation emails ──────────────────────────────────────────
+// Keyed by the `programme` field submitted from each registration form.
+// Each entry builds its own subject/body so different programmes can carry
+// different next-session details, tone, or instructions.
+const EMAIL_WRAPPER = (bodyHtml: string) => `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+      <div style="background:#376A6B;color:white;padding:20px 24px;border-radius:8px 8px 0 0">
+        <h2 style="margin:0;font-size:20px">Lift Flintshire CIC</h2>
+      </div>
+      <div style="border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px;padding:24px;color:#222;line-height:1.5">
+        ${bodyHtml}
+      </div>
+      <p style="font-size:11px;color:#999;margin-top:12px">Lift Flintshire CIC · liftflintshire.co.uk</p>
+    </div>`
+
+type ConfirmationEmail = { subject: string; html: string }
+
+const CONFIRMATION_TEMPLATES: Record<string, (fields: Record<string, string>) => ConfirmationEmail> = {
+  // Template A — Couch to 5K
+  'couch-to-5k': fields => {
+    const name = fields['first-name'] || 'there'
+    const startInfo = sessionHasPassed(COUCH_TO_5K_NEXT_COHORT_START)
+      ? '<p>Our next cohort date is being finalised — we\'ll email you as soon as it\'s confirmed.</p>'
+      : `<p><strong>Next cohort starts:</strong> ${formatSessionDate(COUCH_TO_5K_NEXT_COHORT_START)}</p>
+         <p><strong>Coached session:</strong> Every Wednesday, 17:30<br/>
+         <strong>Duration:</strong> 9 weeks<br/>
+         <strong>Location:</strong> Number One HSP, CH5 2TF, Flintshire</p>`
+    return {
+      subject: "You're registered for Couch to 5K — Lift Flintshire",
+      html: EMAIL_WRAPPER(`
+        <p>Hi ${name},</p>
+        <p>Thanks for registering for our free <strong>Couch to 5K</strong> programme — we're delighted to have you on board.</p>
+        ${startInfo}
+        <p>Bring trainers and comfortable clothing. We'll be in touch within 2 working days to confirm your place.</p>
+        <p>Questions? Just reply to this email or contact us at hello@liftflintshire.co.uk.</p>
+        <p>See you soon,<br/>The Lift Flintshire Team</p>
+      `),
+    }
+  },
+  // Template B — Women's Track Running (Women & Girls)
+  'womens-run-club': fields => {
+    const name = fields['first-name'] || 'there'
+    const sessionInfo = sessionHasPassed(WOMENS_RUN_CLUB_NEXT_SESSION)
+      ? '<p>Our next session date is being finalised — we\'ll email you as soon as it\'s confirmed.</p>'
+      : `<p><strong>Next session:</strong> ${formatSessionDate(WOMENS_RUN_CLUB_NEXT_SESSION)}</p>
+         <p><strong>Time:</strong> 10:00–11:00am<br/>
+         <strong>Location:</strong> Deeside Athletics Track</p>`
+    return {
+      subject: "You're registered for Women's Track Running — Lift Flintshire",
+      html: EMAIL_WRAPPER(`
+        <p>Hi ${name},</p>
+        <p>Thanks for registering for our <strong>Women's Track Running</strong> sessions — a welcoming, social space for women and girls of all abilities.</p>
+        ${sessionInfo}
+        <p>Walkers are always welcome. We'll be in touch within 2 working days to confirm your place.</p>
+        <p>Questions? Just reply to this email or contact us at hello@liftflintshire.co.uk.</p>
+        <p>See you soon,<br/>The Lift Flintshire Team</p>
+      `),
+    }
+  },
+}
+
+function buildConfirmationEmail(fields: Record<string, string>): ConfirmationEmail | null {
+  const programme = fields['programme']
+  const template = programme && CONFIRMATION_TEMPLATES[programme]
+  return template ? template(fields) : null
+}
 
 function buildHtml(fields: Record<string, string>): string {
   const formName = fields['form-name'] ?? 'Registration'
@@ -249,6 +322,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       } catch (sheetErr) {
         console.error('Sheet write error (non-fatal):', sheetErr)
+      }
+    }
+
+    // 3 — Send a programme-specific confirmation email to the registrant (non-fatal if it fails)
+    const recipient = fields['guardian-email'] ?? fields['email']
+    const confirmation = buildConfirmationEmail(fields)
+    if (recipient && confirmation) {
+      try {
+        const { error: confirmError } = await resend.emails.send({
+          from: 'Lift Flintshire CIC <forms@liftflintshire.co.uk>',
+          to: [recipient],
+          subject: confirmation.subject,
+          html: confirmation.html,
+        })
+        if (confirmError) console.error('Confirmation email error (non-fatal):', confirmError)
+      } catch (confirmErr) {
+        console.error('Confirmation email error (non-fatal):', confirmErr)
       }
     }
 

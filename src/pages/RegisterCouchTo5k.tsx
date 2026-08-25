@@ -8,7 +8,7 @@ const FORM_NAME = 'register-couch-to-5k'
 
 const INTRO =
   'Register below to secure your place on our free Couch to 5K programme. ' +
-  'The programme runs over 8 weeks and is open to complete beginners — no running experience needed. ' +
+  'The programme runs over 9 weeks, with a coached session every Wednesday at 17:30, and is open to complete beginners — no running experience needed. ' +
   'Please complete all sections including the health declaration and waiver before your first session.'
 
 function NextCohortInfo() {
@@ -34,7 +34,8 @@ function NextCohortInfo() {
         <strong className="text-ink">{formatSessionDate(COUCH_TO_5K_NEXT_COHORT_START)}</strong>
       </p>
       <ul className="font-body text-sm text-ink-light space-y-1">
-        <li><strong className="text-ink">Duration:</strong> 8 weeks</li>
+        <li><strong className="text-ink">Duration:</strong> 9 weeks</li>
+        <li><strong className="text-ink">Coached session:</strong> Every Wednesday, 17:30</li>
         <li><strong className="text-ink">Sessions:</strong> 3 per week (1 guided group run and 2 optional group or homework runs)</li>
         <li><strong className="text-ink">Cost:</strong> Free</li>
         <li><strong className="text-ink">What to bring:</strong> Trainers and comfortable clothing</li>
@@ -48,7 +49,7 @@ export default function RegisterCouchTo5k() {
     <>
       <Seo
         title="Register — Couch to 5K · Lift Flintshire CIC"
-        description="Register for the free Lift Flintshire Couch to 5K programme. An 8-week beginner running programme in Flintshire, North Wales."
+        description="Register for the free Lift Flintshire Couch to 5K programme. A 9-week beginner running programme in Flintshire, North Wales."
         path="/register/couch-to-5k"
         ogTitle="Register for Couch to 5K — Lift Flintshire CIC"
       />
@@ -61,7 +62,7 @@ export default function RegisterCouchTo5k() {
           Couch to 5K — Register
         </h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          Eight weeks from your sofa to your first 5K. Join our free, coach-led programme and run your first 5K in Flintshire.
+          Nine weeks from your sofa to your first 5K. Join our free, coach-led programme and run your first 5K in Flintshire.
         </p>
       </SectionWrapper>
 

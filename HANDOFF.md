@@ -155,3 +155,10 @@ All three new forms are declared as static HTML in `index.html` (required for Ne
 - Follow-ups closed alongside the merge: added Youth Strength & Conditioning to the privacy policy's programme list and parent/guardian data paragraph (it collects children's special-category health data, so it must be listed), and removed the dead `data-netlify` attribute the Youth form inherited from the Girls Gym template. No Netlify references remain anywhere in `src/` or `index.html`.
 - **Unverified by me:** the privacy policy now asserts Lift Flintshire CIC is exempt from the ICO data protection fee under the not-for-profit exemption. Ed confirmed this. Worth re-checking if processing ever broadens beyond membership/participation admin — the exemption is narrow and the site processes special-category health data for under-18s.
 - `netlify.toml` is still in the repo but is now the only Netlify remnant; safe to delete whenever.
+
+---
+
+## Session Notes — 2026-08-25
+- Fixed a Couch to 5K copy inconsistency: `programmes.ts` and `RegisterCouchTo5k.tsx` mixed "8 weeks" and "nine weeks" and gave the session time as 18:00 with no day. Standardised everywhere to **9 weeks, coached session every Wednesday at 17:30**, next cohort starting 9 September 2026 (already correct in `nextSessionDates.ts` — that date genuinely is a Wednesday).
+- Added programme-specific **registrant confirmation emails** in `api/submit-form.ts`: `CONFIRMATION_TEMPLATES` is keyed by the `programme` form field, currently covering `couch-to-5k` (Template A) and `womens-run-club` (Template B). Each pulls its next-session info live from `nextSessionDates.ts` so it can't drift from the website copy. Sent via the same Resend client as the admin notification, to `guardian-email` ?? `email`, from `forms@liftflintshire.co.uk` (the address Resend already has verified — do not switch to `hello@` without adding a Resend sender/domain verification for it). Failure to send is non-fatal, same pattern as the Sheets write.
+- To add a confirmation email for another programme, add a new entry to `CONFIRMATION_TEMPLATES` keyed by that programme's `id` — no other wiring needed.
