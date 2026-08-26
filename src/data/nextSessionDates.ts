@@ -2,6 +2,10 @@
 // fixed weekly pattern the Programme_Sessions Google Sheet tab can express.
 // Update the date here — it flows through to both the Programmes & Events
 // card and the relevant registration page.
+//
+// api/submit-form.ts keeps its own duplicate of these two dates (Vercel
+// functions can't reliably import across the api/ boundary) — update both
+// places when either date changes.
 
 export const WOMENS_RUN_CLUB_NEXT_SESSION = new Date(2026, 7, 15) // 15 August 2026
 export const COUCH_TO_5K_NEXT_COHORT_START = new Date(2026, 8, 9) // 9 September 2026

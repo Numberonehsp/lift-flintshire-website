@@ -1,12 +1,24 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Resend } from 'resend'
 import { google } from 'googleapis'
-import {
-  WOMENS_RUN_CLUB_NEXT_SESSION,
-  COUCH_TO_5K_NEXT_COHORT_START,
-  formatSessionDate,
-  sessionHasPassed,
-} from '../src/data/nextSessionDates'
+
+// Duplicated from src/data/nextSessionDates.ts rather than imported: Vercel
+// builds each file under api/ as an isolated function, and an import that
+// reaches outside api/ is not reliably bundled — it crashed the deployed
+// function (FUNCTION_INVOCATION_FAILED) for every form on the site, not just
+// registrations, when this was `import ... from '../src/data/nextSessionDates'`.
+// Keep these two dates in sync with src/data/nextSessionDates.ts by hand.
+const WOMENS_RUN_CLUB_NEXT_SESSION = new Date(2026, 7, 15) // 15 August 2026
+const COUCH_TO_5K_NEXT_COHORT_START = new Date(2026, 8, 9) // 9 September 2026
+
+function formatSessionDate(date: Date): string {
+  return date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+function sessionHasPassed(date: Date): boolean {
+  const now = new Date()
+  return now > new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59)
+}
 
 const FORM_LABELS: Record<string, string> = {
   'form-name':                      'Form',
