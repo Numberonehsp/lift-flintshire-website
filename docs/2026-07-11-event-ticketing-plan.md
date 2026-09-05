@@ -1,10 +1,22 @@
 # Event Registration & Ticketing on LiftFlintshire.co.uk — Plan
 
-**Date:** 2026-07-11 · **Status:** Approved (Approach A) — decisions confirmed by Ed 2026-07-11
+**Date:** 2026-07-11 · **Revised:** 2026-09-05 after architecture review
+· **Status:** Approved (Approach A), revised
+
+> **2026-09-05 revision.** A review before implementation found three defects in the
+> original design. See "Revision notes" at the end of this document. Summary: shared
+> root-level `lib/` replaced with `api/_lib/` (the original pattern caused a production
+> outage on 26 Aug); the separate booking-fee line item removed as an unlawful UK card
+> surcharge and folded into the ticket price; and personal/health data moved out of Stripe
+> metadata into a pending-row flow in the private sheet.
 
 **Confirmed decisions:**
 1. New Stripe account will be set up for the CIC (pay-on-the-day rejected).
-2. Stripe fees added on top of the ticket price at checkout, not absorbed.
+2. ~~Stripe fees added on top of the ticket price at checkout, not absorbed.~~
+   **Revised 2026-09-05:** fees are *included in the advertised ticket price* — a separate
+   card/booking fee is banned under the Consumer Rights (Payment Surcharges) Regulations
+   2012 (as amended 2018) when card is the only payment method. Same money, one price.
+   To net £100, advertise £101.73 — `(price + 0.20) ÷ 0.985`.
 3. Reference pricing from last event: 10 early-bird tickets at £80 (sold out), then 19
    standard at £100 — so **tiered ticket types with per-tier capacity that auto-roll from
    early bird to standard** are a core requirement, not a nice-to-have.
@@ -87,11 +99,14 @@ an optional later phase.
   e.g. `run-2026 | early-bird | Early Bird Entry | 80 | 10 | 1` and
   `run-2026 | standard | Standard Entry | 100 | 999 | 2`. A tier is shown as available
   only when its own capacity isn't reached AND every lower `sort_order` tier is sold out
-  or past — this reproduces the early-bird → standard rollover from the last event. The
-  Stripe fee (~1.5% + 20p, rounded up) is added as a separate "booking fee" line item at
-  checkout so the advertised price stays clean.
-- **Event_Entries** (new tab, written by webhook):
-  `timestamp | event_id | entry_ref | ticket_type | first_name | last_name | email | phone | dob | gender | emergency_name | emergency_phone | medical | club/notes | waiver_agreed | photo_consent | gdpr_consent | amount_paid | stripe_session_id | checked_in`
+  or past — this reproduces the early-bird → standard rollover from the last event.
+  `price_gbp` is the **final price the buyer pays**, already inclusive of Stripe's fee (see
+  revised decision 2). One price, one line item, no surcharge.
+- **Event_Entries** (new tab, in the separate private spreadsheet). Column order is
+  deliberate: the columns needed to count sold tickets come first, so the public
+  availability endpoint can read `A:D` and never touch personal or health data.
+  `timestamp | event_id | tier_id | status | entry_ref | tier_label | amount_paid | stripe_session_id | paid_at | checked_in | first_name | last_name | email | phone | dob | gender | emergency_name | emergency_phone | medical | waiver_agreed | photo_consent | gdpr_consent`
+  `status` is `pending` (checkout started) or `paid` (payment confirmed).
 - The Impact Dashboard and reports read straight from `Event_Entries` — that *is* the
   participant report. Sheet → File → Download CSV replaces TicketsCandy exports.
 
@@ -108,13 +123,18 @@ an optional later phase.
 
 ### 3. Serverless functions (same pattern as `api/submit-form.ts`)
 
-- `api/create-entry.ts` — validates the form, checks remaining capacity by counting
-  `Event_Entries` rows for the event, creates a Stripe Checkout session (entry details in
-  `metadata`), returns the redirect URL. Free events skip Stripe and write the entry
-  directly.
-- `api/stripe-webhook.ts` — on `checkout.session.completed`: generate entry ref (e.g.
-  `LF26-0042`), append to `Event_Entries`, send participant confirmation email (Resend,
-  reuse the existing HTML email style), send admin notification.
+Shared server-side code lives in `api/_lib/` (underscore prefix = not routed as an
+endpoint). **Nothing under `api/` may import from `src/`** — that pattern crashed every
+form on the site on 26 Aug 2026 (commit `e8572dc`, `FUNCTION_INVOCATION_FAILED`).
+
+- `api/create-entry.ts` — validates the form, counts taken places, confirms the requested
+  tier is the currently-available one, generates an entry ref, creates a Stripe Checkout
+  session (metadata carries **only** `entryRef`/`eventId`/`tierId` — no personal data),
+  then writes a `pending` row holding the participant details, and returns the redirect URL.
+- `api/stripe-webhook.ts` — on `checkout.session.completed`: look up the row by entry ref,
+  flip `pending` → `paid` (already-`paid` rows return 200 unchanged, so Stripe's retries are
+  idempotent), record amount and paid-at, then send the participant confirmation email
+  (Resend, reusing the existing HTML email style) and an admin notification.
 - `api/send-event-email.ts` (phase 2) — admin-triggered "email all entrants" for the
   pre-event info/reminder email (race pack details, parking, start time), reading
   addresses from `Event_Entries`. Protected by a shared secret. This replaces
@@ -137,12 +157,34 @@ marks `checked_in`. Fallback: name search on the same page.
 
 ### 6. Error handling & edge cases
 
-- Capacity: re-check inside the webhook; if oversold by a race condition, flag the row and
-  email admin (refund manually via Stripe dashboard). At run-club scale this is acceptable.
-- Abandoned checkouts: no row is written until payment succeeds, so no ghost entries.
-- Refund policy text on the event page; refunds handled manually in Stripe.
-- Sheet unavailable: webhook retries (Stripe retries failed webhooks automatically); email
-  still sent, admin alerted.
+- **Capacity** is a soft check, deliberately. A place counts as taken when its row is
+  `paid`, or `pending` and less than 30 minutes old (Stripe sessions are set to expire in
+  30 minutes, so a stale pending row releases its hold). Two people can still take the last
+  early-bird place within the same instant; the cost is one extra £80 entry, refundable in
+  the Stripe dashboard. Hard atomic capacity is not worth a database at this scale.
+- **Abandoned checkouts** leave a `pending` row that expires after 30 minutes and is
+  ignored by every count and report. They're useful signal, not junk.
+- **Sheet unavailable during checkout:** `create-entry` fails closed — the user sees an
+  error and no payment is taken.
+- **Sheet unavailable at webhook time:** the function returns 500 and Stripe retries
+  automatically (for up to 3 days), so a confirmed payment is never lost. The row already
+  exists from `create-entry`, so the participant's details survive regardless.
+- **Idempotency:** Stripe retries webhooks. A row already marked `paid` short-circuits to
+  200 without re-sending emails.
+- Refund policy text on the event page; refunds handled manually in Stripe. Events on a
+  fixed date are exempt from the 14-day distance-selling cooling-off period, so a
+  no-refund (or transfer-only) policy is lawful — it just has to be stated up front.
+
+### 6a. Data protection
+
+Entrant rows include medical/health information, which is special-category data under UK
+GDPR Article 9. Two rules follow, both reflected in the design:
+
+- It lives **only** in the private spreadsheet, shared with the service account alone —
+  never in the public content sheet, and never in Stripe metadata (Stripe only ever sees an
+  entry reference).
+- The public `event-availability` endpoint reads columns `A:D` only, so health data is not
+  loaded into a publicly-reachable function at all.
 
 ### 7. Build phases
 
@@ -158,5 +200,39 @@ marks `checked_in`. Fallback: name search on the same page.
    `STRIPE_WEBHOOK_SECRET`.
 2. Webhook endpoint registered in the Stripe dashboard →
    `https://liftflintshire.co.uk/api/stripe-webhook`.
-3. Refund/transfer policy wording for the event page (needed for card-payment consumer
-   rights clarity).
+3. Refund/transfer policy wording for the event page.
+4. Confirm the private entries spreadsheet is shared **only** with the service account
+   (`client_email` from `GOOGLE_SERVICE_ACCOUNT_KEY`), and add `TICKETING_SHEET_ID` to
+   Vercel.
+5. Verify the existing server-side `GOOGLE_SHEET_ID` is *not* the public
+   `VITE_GOOGLE_SHEET_ID`. If it is, the current `Registrations` tab — which already holds
+   medical details for the programme sign-ups — is publicly readable and needs moving
+   before anything else ships.
+
+## Revision notes — 2026-09-05
+
+Reviewed before implementation, two months after the design was written. Three defects
+found and corrected above:
+
+1. **Shared root `lib/` → `api/_lib/`.** The original design had one `lib/` directory
+   imported by both the Vite client and the Vercel functions. On 26 Aug 2026 that exact
+   pattern (an `api/` file importing from `src/`) crashed the serverless function and broke
+   *every form on the site*; commit `e8572dc` fixed it by duplicating the code inside
+   `api/`. Server code now lives in `api/_lib/`, the client keeps its own copy under
+   `src/lib/`, and a unit test asserts the two mirrored files stay byte-identical. A
+   deployment spike verifies `api/_lib/` bundles before anything is built on it.
+2. **Booking fee → included in the price.** A separate fee equal to the card cost, when
+   card is the only payment method, is a prohibited surcharge under the Consumer Rights
+   (Payment Surcharges) Regulations 2012 as amended in 2018 — ticket booking is a named
+   example in the guidance. The original formula was also arithmetically wrong, since
+   Stripe charges its percentage on the total *including* the added fee.
+3. **Personal data out of Stripe, entry refs made collision-safe.** The original design put
+   medical details in Stripe metadata and derived entry references from the sheet's row
+   count — racy under concurrent webhooks and corrupted by any deleted row. Replaced with
+   the pending-row flow: details go straight to the private sheet, Stripe holds only a
+   randomly-generated reference.
+
+Considered and rejected: moving to Supabase/Postgres. It would give true atomic capacity
+and proper constraints, but 29 entries at the last event doesn't justify new
+infrastructure, and Sheets keeps the data directly readable and exportable by the people
+running the event. Revisit if an event ever approaches several hundred entries.
