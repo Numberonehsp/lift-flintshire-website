@@ -9,7 +9,7 @@ Website for Lift Flintshire CIC, a not-for-profit community fitness organisation
 - Vite + React 18 + TypeScript (strict, `verbatimModuleSyntax` — always use `import type` for type-only imports)
 - Tailwind CSS v3 with custom tokens: `teal` #376A6B, `ink` #111111, `bg` #FAFAF8
 - React Router v6 + ScrollToTop on route change
-- Forms submit to `/api/submit-form` (Vercel serverless function: Resend email + Google Sheets append). The `data-netlify` attributes still in the JSX are dead leftovers from the Netlify era. **Known issue:** `src/pages/Contact.tsx` still POSTs to `/` (old Netlify Forms style) and is silently broken on Vercel — needs repointing at `/api/submit-form`.
+- Forms submit to `/api/submit-form` (Vercel serverless function: Resend email + Google Sheets append). The `data-netlify` attributes still in the JSX are dead leftovers from the Netlify era. `Contact.tsx` was briefly broken after the Vercel move (still POSTing to `/`, old Netlify Forms style) — fixed in `bb98f20`.
 - Google Sheets API v4 (public fetch via `VITE_GOOGLE_SHEET_ID` + `VITE_GOOGLE_API_KEY`)
 - Recharts for Impact Dashboard
 - react-helmet-async for SEO
@@ -116,10 +116,18 @@ it directly, regardless of whether the site's own UI shows it.
 ---
 
 ## Deployment
-- **Netlify**: `npm run build` → `dist/`, SPA redirect `/* → /index.html 200` in `netlify.toml`
-- **Env vars**: `VITE_GOOGLE_SHEET_ID` and `VITE_GOOGLE_API_KEY` set in both `.env.local` and Netlify dashboard
-- **DNS** (Fasthosts): A record `@` → `75.2.60.5`, CNAME `www` → `incandescent-tartufo-734037.netlify.app`
-- **Push**: `git push` to `Numberonehsp/lift-flintshire-website` triggers auto-deploy
+- **Vercel** (confirmed 2026-07-11 via response headers; corrected from a stale Netlify
+  description that lingered here after the move). `npm run build` → `dist/`, SPA rewrite
+  in `vercel.json` (`/((?!api/).*) → /index.html`). `netlify.toml` is unused.
+- **Env vars**: `VITE_GOOGLE_SHEET_ID`, `VITE_GOOGLE_API_KEY` set in both `.env.local` and
+  the Vercel dashboard (Production + Preview). Server-only vars (`GOOGLE_SERVICE_ACCOUNT_KEY`,
+  `PRIVATE_SHEET_ID`, `RESEND_API_KEY`, and the ticketing Stripe/`GOOGLE_*_PUBLIC` vars) are
+  Vercel-dashboard only — never put these in a `VITE_`-prefixed var or they ship to the browser.
+- **DNS** (checked 2026-09-06, Fasthosts): apex `@` → `216.198.79.1` (Vercel anycast IP);
+  `www` → Vercel-assigned CNAME. If DNS ever needs re-pointing, get the current target from
+  the Vercel dashboard's Domains page rather than reusing an old IP/CNAME here — it can
+  change.
+- **Push**: `git push` to `Numberonehsp/lift-flintshire-website` triggers auto-deploy on Vercel.
 
 ---
 
