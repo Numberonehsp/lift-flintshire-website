@@ -21,6 +21,10 @@ const config: Config = {
         },
         cream: '#D4CDB2',
         border: '#E2E0D8',
+        // Boundary colour for form controls: 3:1 against a white field (WCAG 1.4.11).
+        field: '#8F8B7B',
+        // Error / destructive text: 5.9:1 on white.
+        danger: '#B23B2E',
       },
       fontFamily: {
         display: ['"Barlow Condensed"', 'sans-serif'],

@@ -56,18 +56,19 @@ function ProgrammeCard({ title, description, badge, href, imageSrc, imagePositio
         </div>
       )}
 
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/40 to-transparent transition-opacity duration-300 group-hover:opacity-90" />
+      {/* Legibility scrim: kept dark enough that title and body text clear WCAG AA
+          over any underlying photo, not just the dark ones. */}
+      <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/70 to-ink/20 transition-opacity duration-300 group-hover:opacity-95" />
 
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
         {badge && (
-          <span className="inline-block font-body font-semibold text-[10px] uppercase tracking-[0.1em] text-teal-light bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 mb-3">
+          <span className="inline-block font-body font-semibold text-[10px] uppercase tracking-[0.1em] text-white bg-white/15 backdrop-blur-sm rounded-full px-3 py-1 mb-3">
             {badge}
           </span>
         )}
         <h3 className="font-display font-bold text-h3 text-white leading-tight mb-1">{title}</h3>
-        <p className="font-body text-sm text-white/75 leading-relaxed mb-3 line-clamp-2">{description}</p>
+        <p className="font-body text-sm text-white/90 leading-relaxed mb-3 line-clamp-2">{description}</p>
         <span className="font-body text-sm font-semibold text-teal-light group-hover:text-white transition-colors duration-200">
           Find out more →
         </span>

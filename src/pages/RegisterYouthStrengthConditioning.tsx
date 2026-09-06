@@ -77,7 +77,7 @@ function RegistrationFormContent() {
             {[
               "We'll confirm the registration by email within 2 working days.",
               "We'll share the exact date, time, and location of the session.",
-              "Turn up in comfortable clothes and trainers — we'll handle the rest.",
+              "Turn up in comfortable clothes and trainers, we'll handle the rest.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal text-white font-display font-bold text-xs flex items-center justify-center mt-0.5">
@@ -503,21 +503,21 @@ export default function RegisterYouthStrengthConditioning() {
   return (
     <>
       <Seo
-        title="Register — Youth Strength & Conditioning · Lift Flintshire CIC"
+        title="Register · Youth Strength & Conditioning · Lift Flintshire CIC"
         description="Register your child for Lift Flintshire's free Youth Strength & Conditioning sessions. Open to young people in Years 7–13. Parental consent required."
         path="/register/youth-strength-conditioning"
-        ogTitle="Register for Youth Strength & Conditioning — Lift Flintshire CIC"
+        ogTitle="Register for Youth Strength & Conditioning · Lift Flintshire CIC"
       />
 
       <SectionWrapper variant="dark">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">
           Free · Years 7–13
         </p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">
-          Youth Strength &amp; Conditioning — Register
+          Register for Youth Strength &amp; Conditioning
         </h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          Free, coach-led strength and movement sessions for young people — no experience needed. Led by qualified coaches in a welcoming, supportive environment.
+          Free, coach-led strength and movement sessions for young people, no experience needed. Led by qualified coaches in a welcoming, supportive environment.
         </p>
       </SectionWrapper>
 
@@ -548,7 +548,7 @@ export default function RegisterYouthStrengthConditioning() {
             <div className="bg-surface rounded-card border border-border p-5">
               <p className="font-body font-semibold text-sm text-ink mb-2">What to expect</p>
               <p className="font-body text-sm text-ink-light leading-relaxed">
-                A structured, coach-led session covering fundamental movement skills and strength training, adapted to age and ability. No previous experience needed — sessions are relaxed, social, and designed to build confidence as well as fitness.
+                A structured, coach-led session covering fundamental movement skills and strength training, adapted to age and ability. No previous experience needed, sessions are relaxed, social, and designed to build confidence as well as fitness.
               </p>
             </div>
 
@@ -557,7 +557,7 @@ export default function RegisterYouthStrengthConditioning() {
               <ol className="font-body text-sm text-ink-light space-y-2 list-decimal list-inside">
                 <li>We'll confirm the registration by email within 2 working days.</li>
                 <li>We'll share the exact date, time, and location of the session.</li>
-                <li>Turn up in comfortable clothes and trainers — we'll handle the rest.</li>
+                <li>Turn up in comfortable clothes and trainers, we'll handle the rest.</li>
               </ol>
             </div>
 

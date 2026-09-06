@@ -88,16 +88,16 @@ export default function Contact() {
   return (
     <>
       <Seo
-        title="Contact — Lift Flintshire CIC"
-        description="Get in touch with Lift Flintshire CIC. Questions, volunteering, partnerships — we'd love to hear from you. We respond within two working days."
+        title="Contact · Lift Flintshire CIC"
+        description="Get in touch with Lift Flintshire CIC. Questions, volunteering, partnerships, we'd love to hear from you. We respond within two working days."
         path="/contact"
       />
 
       <SectionWrapper variant="dark">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Get involved</p>
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">Get involved</p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">Get in Touch</h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          Whether you have a question, want to volunteer, or are interested in partnering with us — we'd love to hear from you.
+          Whether you have a question, want to volunteer, or are interested in partnering with us, we'd love to hear from you.
         </p>
       </SectionWrapper>
 

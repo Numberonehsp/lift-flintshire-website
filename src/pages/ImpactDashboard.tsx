@@ -4,16 +4,47 @@ import { useGoogleSheets } from '../hooks/useGoogleSheets'
 import { useCountUp } from '../hooks/useCountUp'
 import type { MonthPoint } from '../hooks/useGoogleSheets'
 
-const PROGRAMME_COLOURS = ['#376A6B', '#E8713C', '#5A9798', '#B8860B', '#A8CBCC', '#6B5B95']
+// Distinct hues so adjacent series stay separable for low-vision and colour-blind
+// readers (no two near-identical teals). Colour is always paired with a text label.
+const PROGRAMME_COLOURS = ['#376A6B', '#E8713C', '#B8860B', '#8A6BB0', '#4A6FA5', '#B5556D']
 
 const AREA_COLOURS: Record<string, string> = {
-  Running:      '#E8713C',
+  Running:       '#E8713C',
   Weightlifting: '#376A6B',
-  Community:    '#5A9798',
-  Other:        '#B8860B',
+  Community:     '#8A6BB0',
+  Other:         '#B8860B',
 }
 
 const IMPACT_AREAS = ['Running', 'Weightlifting', 'Community']
+
+// Screen-reader-only equivalent of a chart: the same numbers as a real table.
+function ChartDataTable({
+  caption,
+  columns,
+  rows,
+}: {
+  caption: string
+  columns: string[]
+  rows: (string | number)[][]
+}) {
+  return (
+    <table className="sr-only">
+      <caption>{caption}</caption>
+      <thead>
+        <tr>{columns.map(c => <th key={c} scope="col">{c}</th>)}</tr>
+      </thead>
+      <tbody>
+        {rows.map((r, i) => (
+          <tr key={i}>
+            {r.map((cell, j) => (
+              j === 0 ? <th key={j} scope="row">{cell}</th> : <td key={j}>{cell}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
 
 // ── Shared helpers ─────────────────────────────────────────────────────────────
 
@@ -71,17 +102,28 @@ function StackedBarChart({
   keys,
   colours,
   label,
+  caption,
 }: {
   rows: MonthPoint[]
   keys: string[]
   colours: (key: string, i: number) => string
   label: string
+  caption: string
 }) {
   const maxTotal = Math.max(...rows.map(m => m.total), 1)
 
   return (
     <>
-      <div className="space-y-3">
+      <ChartDataTable
+        caption={caption}
+        columns={['Month', ...keys, 'Total']}
+        rows={rows.map(m => [
+          m.month,
+          ...keys.map(k => (typeof m[k] === 'number' ? (m[k] as number) : 0)),
+          m.total,
+        ])}
+      />
+      <div className="space-y-3" aria-hidden="true">
         {rows.map(m => (
           <div key={m.month} className="flex items-center gap-3">
             <div className="w-14 flex-shrink-0 font-body text-xs font-semibold text-ink-light text-right">
@@ -98,7 +140,6 @@ function StackedBarChart({
                     style={{
                       width: `${pct}%`,
                       backgroundColor: colours(key, i),
-                      transition: 'width 1s cubic-bezier(0.16, 1, 0.3, 1)',
                     }}
                   />
                 ) : null
@@ -110,14 +151,14 @@ function StackedBarChart({
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-3 mt-2">
+      <div className="flex items-center gap-3 mt-2" aria-hidden="true">
         <div className="w-14" />
         <div className="flex-1 flex justify-between font-body text-[10px] text-ink-light">
           <span>0</span><span>{Math.round(maxTotal / 2)}</span><span>{maxTotal}</span>
         </div>
         <div className="w-10" />
       </div>
-      <div className="flex items-center gap-3 mt-0.5">
+      <div className="flex items-center gap-3 mt-0.5" aria-hidden="true">
         <div className="w-14" />
         <div className="flex-1 text-center font-body text-[10px] text-ink-light">{label}</div>
         <div className="w-10" />
@@ -133,7 +174,7 @@ function MonthlyTimeline({ byMonth, allProgrammes }: { byMonth: MonthPoint[]; al
     <div className="mb-20">
       <SectionHeading
         title="Monthly Growth"
-        subtitle="Total participants each month, coloured by programme — showing which sessions drive growth over time."
+        subtitle="Total participants each month, coloured by programme, showing which sessions drive growth over time."
       />
       <div className="flex flex-wrap gap-x-5 gap-y-2 mb-6">
         {allProgrammes.map((prog, i) => (
@@ -148,6 +189,7 @@ function MonthlyTimeline({ byMonth, allProgrammes }: { byMonth: MonthPoint[]; al
         keys={allProgrammes}
         colours={(_, i) => PROGRAMME_COLOURS[i % PROGRAMME_COLOURS.length]}
         label="Participants per month"
+        caption="Monthly Growth: total participants each month broken down by programme."
       />
     </div>
   )
@@ -162,7 +204,7 @@ function ImpactAreasChart({ byAreaMonth }: { byAreaMonth: MonthPoint[] }) {
     <div className="mb-20">
       <SectionHeading
         title="Impact Areas Over Time"
-        subtitle="How our three pillars — Running, Weightlifting and Community — contribute each month, showing how they work alongside each other."
+        subtitle="How our three pillars (Running, Weightlifting and Community) contribute each month, showing how they work alongside each other."
       />
       <div className="flex flex-wrap gap-x-5 gap-y-2 mb-6">
         {IMPACT_AREAS.map(area => (
@@ -177,6 +219,7 @@ function ImpactAreasChart({ byAreaMonth }: { byAreaMonth: MonthPoint[] }) {
         keys={areas}
         colours={(key) => AREA_COLOURS[key] ?? '#999'}
         label="Participants per month"
+        caption="Impact Areas Over Time: monthly participants split across Running, Weightlifting and Community."
       />
     </div>
   )
@@ -194,7 +237,12 @@ function ProgrammeReach({ byProgramme, allProgrammes }: { byProgramme: { name: s
         title="Programme Reach"
         subtitle="Total participant attendances across each programme since we began recording."
       />
-      <div className="space-y-4">
+      <ChartDataTable
+        caption="Programme Reach: total participant attendances per programme."
+        columns={['Programme', 'Participants']}
+        rows={sorted.map(p => [p.name, p.participants])}
+      />
+      <div className="space-y-4" aria-hidden="true">
         {sorted.map(p => {
           const idx = allProgrammes.indexOf(p.name)
           const colour = PROGRAMME_COLOURS[idx >= 0 ? idx % PROGRAMME_COLOURS.length : 0]
@@ -203,7 +251,10 @@ function ProgrammeReach({ byProgramme, allProgrammes }: { byProgramme: { name: s
             <div key={p.name} className="flex items-center gap-3">
               <div className="w-44 flex-shrink-0 font-body text-sm text-ink text-right leading-tight">{p.name}</div>
               <div className="flex-1 h-8 bg-surface-muted rounded overflow-hidden">
-                <div className="h-full rounded" style={{ width: `${pct}%`, backgroundColor: colour, transition: 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }} />
+                <div
+                  className="h-full w-full origin-left rounded"
+                  style={{ transform: `scaleX(${pct / 100})`, backgroundColor: colour, transition: 'transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                />
               </div>
               <div className="w-12 flex-shrink-0 font-display font-bold text-base text-right" style={{ color: colour }}>
                 {p.participants}
@@ -212,14 +263,14 @@ function ProgrammeReach({ byProgramme, allProgrammes }: { byProgramme: { name: s
           )
         })}
       </div>
-      <div className="flex items-center gap-3 mt-2">
+      <div className="flex items-center gap-3 mt-2" aria-hidden="true">
         <div className="w-44" />
         <div className="flex-1 flex justify-between font-body text-[10px] text-ink-light">
           <span>0</span><span>{Math.round(max / 2)}</span><span>{max}</span>
         </div>
         <div className="w-12" />
       </div>
-      <div className="flex items-center gap-3 mt-0.5">
+      <div className="flex items-center gap-3 mt-0.5" aria-hidden="true">
         <div className="w-44" />
         <div className="flex-1 text-center font-body text-[10px] text-ink-light">Total participants</div>
         <div className="w-12" />
@@ -239,8 +290,8 @@ function DemographicsSection({
 }) {
   const totalGender = byGender.reduce((s, g) => s + g.value, 0)
   const totalAge = byAge.reduce((s, a) => s + a.participants, 0)
-  const genderColours = ['#376A6B', '#E8713C', '#5A9798']
-  const ageColours = ['#376A6B', '#E8713C', '#5A9798', '#B8860B']
+  const genderColours = ['#376A6B', '#E8713C', '#8A6BB0']
+  const ageColours = ['#376A6B', '#E8713C', '#8A6BB0', '#B8860B']
 
   return (
     <div className="mb-20 grid md:grid-cols-2 gap-10">
@@ -259,10 +310,10 @@ function DemographicsSection({
                   <span>{g.name}</span>
                   <span className="font-semibold" style={{ color: genderColours[i] }}>{pct}%</span>
                 </div>
-                <div className="h-4 bg-surface-muted rounded-full overflow-hidden">
+                <div className="h-4 bg-surface-muted rounded-full overflow-hidden" aria-hidden="true">
                   <div
-                    className="h-full rounded-full"
-                    style={{ width: `${pct}%`, backgroundColor: genderColours[i], transition: 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                    className="h-full w-full origin-left rounded-full"
+                    style={{ transform: `scaleX(${pct / 100})`, backgroundColor: genderColours[i], transition: 'transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
                   />
                 </div>
               </div>
@@ -286,10 +337,10 @@ function DemographicsSection({
                   <span>{a.name}</span>
                   <span className="font-semibold" style={{ color: ageColours[i] }}>{pct}%</span>
                 </div>
-                <div className="h-4 bg-surface-muted rounded-full overflow-hidden">
+                <div className="h-4 bg-surface-muted rounded-full overflow-hidden" aria-hidden="true">
                   <div
-                    className="h-full rounded-full"
-                    style={{ width: `${pct}%`, backgroundColor: ageColours[i], transition: 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                    className="h-full w-full origin-left rounded-full"
+                    style={{ transform: `scaleX(${pct / 100})`, backgroundColor: ageColours[i], transition: 'transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
                   />
                 </div>
               </div>
@@ -316,19 +367,19 @@ export default function ImpactDashboard() {
   return (
     <>
       <Seo
-        title="Our Impact — Lift Flintshire CIC"
-        description="Live impact data from Lift Flintshire CIC — total participants, sessions delivered, new vs returning, age and gender breakdowns across all programmes."
+        title="Our Impact · Lift Flintshire CIC"
+        description="Live impact data from Lift Flintshire CIC, total participants, sessions delivered, new vs returning, age and gender breakdowns across all programmes."
         path="/impact"
       />
 
       {/* Hero */}
       <SectionWrapper variant="dark">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">
           Transparency &amp; accountability
         </p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">Our Impact</h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          We believe in being open about the difference we're making. Here's a live view of our programme data — updated directly from our session records.
+          We believe in being open about the difference we're making. Here's a live view of our programme data, updated directly from our session records.
         </p>
       </SectionWrapper>
 
@@ -342,7 +393,7 @@ export default function ImpactDashboard() {
             {/* ── Stat tiles ─────────────────────────────────────── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20">
 
-              {/* Total participants — large */}
+              {/* Total participants, large */}
               <div className="col-span-2 rounded-card p-6 flex flex-col justify-between min-h-[160px]" style={{ backgroundColor: '#376A6B' }}>
                 <p className="font-body text-sm font-semibold text-white/80">People supported</p>
                 <div>
@@ -388,13 +439,13 @@ export default function ImpactDashboard() {
               </div>
 
               {/* % female */}
-              <div className="rounded-card p-6 flex flex-col justify-between min-h-[140px]" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E0D8' }}>
+              <div className="rounded-card border border-border bg-surface p-6 flex flex-col justify-between min-h-[140px]">
                 <p className="font-body text-sm font-semibold text-ink-light">Female participants</p>
                 <StatNum value={pctFemale} suffix="%" colour="#376A6B" />
               </div>
 
               {/* Active programmes */}
-              <div className="rounded-card p-6 flex flex-col justify-between min-h-[140px]" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E0D8' }}>
+              <div className="rounded-card border border-border bg-surface p-6 flex flex-col justify-between min-h-[140px]">
                 <p className="font-body text-sm font-semibold text-ink-light">Active programmes</p>
                 <div>
                   <StatNum value={numProgrammes} colour="#376A6B" />
@@ -424,7 +475,7 @@ export default function ImpactDashboard() {
               Data sourced from Lift Flintshire CIC session records via Google Sheets.
               Last updated: {data.lastUpdated}.
               {!import.meta.env.VITE_GOOGLE_SHEET_ID &&
-                ' (Currently showing sample data — connect a Google Sheet to show live figures.)'}
+                ' (Currently showing sample data, connect a Google Sheet to show live figures.)'}
             </p>
           </>
         )}

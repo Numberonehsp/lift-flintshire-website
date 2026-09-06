@@ -77,7 +77,7 @@ function RegistrationFormContent() {
             {[
               "We'll confirm the registration by email within 2 working days.",
               "We'll share the exact date, time, and location of the session.",
-              "Turn up in comfortable clothes and trainers — we'll handle the rest.",
+              "Turn up in comfortable clothes and trainers, we'll handle the rest.",
             ].map((step, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal text-white font-display font-bold text-xs flex items-center justify-center mt-0.5">
@@ -503,21 +503,21 @@ export default function RegisterGirlsGymSession() {
   return (
     <>
       <Seo
-        title="Register — Girls Gym Session · Lift Flintshire CIC"
+        title="Register · Girls Gym Session · Lift Flintshire CIC"
         description="Register your daughter for a free gym session with Lift Flintshire CIC. Open to high school girls of all abilities. Parental consent required."
         path="/register/girls-gym-session"
-        ogTitle="Register for Girls Gym Session — Lift Flintshire CIC"
+        ogTitle="Register for Girls Gym Session · Lift Flintshire CIC"
       />
 
       <SectionWrapper variant="dark">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">
           Free · High school girls
         </p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">
-          Girls Gym Session — Register
+          Register for Girls Gym Session
         </h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          A free, fun gym session for high school girls — no experience needed. Led by qualified coaches in a welcoming, supportive environment.
+          A free, fun gym session for high school girls, no experience needed. Led by qualified coaches in a welcoming, supportive environment.
         </p>
       </SectionWrapper>
 
@@ -546,7 +546,7 @@ export default function RegisterGirlsGymSession() {
             <div className="bg-surface rounded-card border border-border p-5">
               <p className="font-body font-semibold text-sm text-ink mb-2">What to expect</p>
               <p className="font-body text-sm text-ink-light leading-relaxed">
-                A beginner-friendly gym session coached by our qualified team. No previous experience needed — sessions are relaxed, social, and designed to build confidence as well as fitness.
+                A beginner-friendly gym session coached by our qualified team. No previous experience needed, sessions are relaxed, social, and designed to build confidence as well as fitness.
               </p>
             </div>
 
@@ -555,7 +555,7 @@ export default function RegisterGirlsGymSession() {
               <ol className="font-body text-sm text-ink-light space-y-2 list-decimal list-inside">
                 <li>We'll confirm the registration by email within 2 working days.</li>
                 <li>We'll share the exact date, time, and location of the session.</li>
-                <li>Turn up in comfortable clothes and trainers — we'll handle the rest.</li>
+                <li>Turn up in comfortable clothes and trainers, we'll handle the rest.</li>
               </ol>
             </div>
 

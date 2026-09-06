@@ -196,3 +196,40 @@ All three new forms are declared as static HTML in `index.html` (required for Ne
 - Fixed a Couch to 5K copy inconsistency: `programmes.ts` and `RegisterCouchTo5k.tsx` mixed "8 weeks" and "nine weeks" and gave the session time as 18:00 with no day. Standardised everywhere to **9 weeks, coached session every Wednesday at 17:30**, next cohort starting 9 September 2026 (already correct in `nextSessionDates.ts` — that date genuinely is a Wednesday).
 - Added programme-specific **registrant confirmation emails** in `api/submit-form.ts`: `CONFIRMATION_TEMPLATES` is keyed by the `programme` form field, currently covering `couch-to-5k` (Template A) and `womens-run-club` (Template B). Each pulls its next-session info live from `nextSessionDates.ts` so it can't drift from the website copy. Sent via the same Resend client as the admin notification, to `guardian-email` ?? `email`, from `forms@liftflintshire.co.uk` (the address Resend already has verified — do not switch to `hello@` without adding a Resend sender/domain verification for it). Failure to send is non-fatal, same pattern as the Sheets write.
 - To add a confirmation email for another programme, add a new entry to `CONFIRMATION_TEMPLATES` keyed by that programme's `id` — no other wiring needed.
+
+---
+
+## Session Notes — 2026-09-06 (impeccable audit remediation)
+
+Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `npm run lint`, `npm run build`, `npm test` all pass. Verified in a local dev server (browser pane).
+
+**Colour / contrast (P1)**
+- Added two tokens in `tailwind.config.ts`: `field` (`#8F8B7B`, 3.4:1 on white — WCAG 1.4.11 boundary for form inputs) and `danger` (`#B23B2E`, 5.9:1 — error text).
+- Dark-section kicker/eyebrow text was `text-teal` (`#376A6B`, 3.09:1 on `#111` — failed AA). Swapped to `text-teal-light` (`#5A9798`, 5.68:1) on every `SectionWrapper variant="dark"` hero across all pages, the Home hero `<h1>` "Communities" span, Header logo fallback + mobile-menu active link, Footer logo fallback + Instagram hover. Light-background `text-teal` left as-is (passes).
+- `StatCard` (Home hero only) label `text-ink-light` → `text-white/75`; value → `text-teal-light`.
+- `Footer` fine print `text-white/40` → `text-white/60`.
+- `Card` programme-card scrim strengthened (`from-ink/95 via-ink/70 to-ink/20`), description `text-white/75` → `/90`, badge text → solid white.
+- `ImpactDashboard` chart palettes de-duplicated (two near-identical teals removed): programme/area/gender/age series now use distinct hues (`#8A6BB0` plum replaces the second teal). Inline `#E2E0D8` tile borders → `border border-border bg-surface`.
+
+**Accessibility (P2)**
+- `RegistrationForm`: the two health radio groups are now `<fieldset>`/`<legend>`; unset-required-radio failures show an inline `role="alert"` message (was silent); step changes announce via a visually-hidden `role="status" aria-live="polite"` region that also receives focus; submit-error `<p>` got `role="alert"`; the `<pre>` waiver is now an intro `<p>` + `<ol>`; input borders use `border-field`; radio hit area enlarged (`py-1.5` labels, 18px controls).
+- Skip link: `App.tsx` renders `<a href="#main" class="skip-link">`; `.skip-link` rule in `global.css` (off-screen until `:focus`); `<main id="main" tabIndex={-1}>`.
+- `Header` mobile menu: `aria-controls`, `aria-hidden` when closed, links `tabIndex={-1}` when closed (were focusable while the overlay was visually hidden), Escape-to-close, focus moves to first link on open and back to the toggle on close.
+- `ImpactDashboard` charts: each has a visually-hidden `<table>` equivalent (`ChartDataTable`) and the visual bars are `aria-hidden`.
+
+**Motion (P2)**
+- `global.css`: `@media (prefers-reduced-motion: reduce)` block (kills transitions/animations, `scroll-behavior: auto`).
+- `useCountUp`: reads `prefers-reduced-motion` via a lazy `useState` initialiser and renders the final number immediately when set (no effect setState — keeps lint clean).
+- Chart bars animated `width` (layout property) → `transform: scaleX()` on a full-width track; stacked-bar segments no longer transition.
+
+**Copy (P3, typeset)**
+- Removed em dashes from all user-facing copy (heroes, intros, `programmes.ts`, sidebars, chart subtitles, form success text). Register page `<h1>`s reworded to "Register for X". `<title>` / `ogTitle` brand separators `—` → `·`. Not touched: code comments; a couple of dense legal bullet lists in `Privacy.tsx` / `Safeguarding.tsx` where the dashes are parenthetical definitions (left deliberately — revisit if doing a legal-copy pass).
+
+**Cleanup (P3)**
+- `<html lang="en">` → `en-GB`.
+- Removed unused `recharts` from `package.json` (imported nowhere; charts are hand-rolled). `package-lock.json` not regenerated — run `npm install` to reconcile.
+- Removed the duplicated colour block from `global.css :root` (kept only `--color-ink` / `--color-bg`, which the bare `html{}` rule needs); palette single-sources from `tailwind.config.ts` now.
+
+**Not done / deferred**
+- Per-route `<meta name="description">` still only updates at runtime (Helmet); crawlers get the static `index.html` description. Needs prerender/SSR — out of scope.
+- Header nav has an `Events` item; `/events` route exists on this branch (`Events.tsx` etc. still untracked).

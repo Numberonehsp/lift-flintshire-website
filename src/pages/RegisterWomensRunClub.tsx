@@ -8,7 +8,7 @@ const FORM_NAME = 'register-womens-run-club'
 
 const INTRO =
   "Register below for our Women's Run Club sessions. " +
-  "We will try to run the first Saturday of every month but keep an eye out for changes — all abilities welcome, walkers included. " +
+  "We will try to run the first Saturday of every month but keep an eye out for changes, all abilities welcome, walkers included. " +
   "Please complete all sections including the health declaration and waiver before your first session."
 
 function NextSessionInfo() {
@@ -17,7 +17,7 @@ function NextSessionInfo() {
       <div className="bg-teal-pale rounded-card p-4 border border-teal/20">
         <p className="font-body font-semibold text-sm text-teal mb-1">Next session</p>
         <p className="font-body text-sm text-ink-light">
-          Next date to be announced soon — email us at{' '}
+          Next date to be announced soon, email us at{' '}
           <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
             hello@liftflintshire.co.uk
           </a>{' '}
@@ -49,21 +49,21 @@ export default function RegisterWomensRunClub() {
   return (
     <>
       <Seo
-        title="Register — Women's Run Club · Lift Flintshire CIC"
+        title="Register · Women's Run Club · Lift Flintshire CIC"
         description="Register for the free Lift Flintshire Women's Run Club. A monthly social group run in Flintshire for women and non-binary people of all abilities."
         path="/register/womens-run-club"
-        ogTitle="Register for Women's Run Club — Lift Flintshire CIC"
+        ogTitle="Register for Women's Run Club · Lift Flintshire CIC"
       />
 
       <SectionWrapper variant="dark">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">
           Free · We will try to run the first Saturday of every month but keep an eye out for changes
         </p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">
-          Women's Run Club — Register
+          Register for Women's Run Club
         </h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          A safe, welcoming space to run, walk, and connect. Open to women and non-binary people of all abilities — we will try to run the first Saturday of every month but keep an eye out for changes.
+          A safe, welcoming space to run, walk, and connect. Open to women and non-binary people of all abilities, we will try to run the first Saturday of every month but keep an eye out for changes.
         </p>
       </SectionWrapper>
 
@@ -87,7 +87,7 @@ export default function RegisterWomensRunClub() {
             <div className="bg-surface rounded-card border border-border p-5">
               <p className="font-body font-semibold text-sm text-ink mb-2">A note on our sessions</p>
               <p className="font-body text-sm text-ink-light leading-relaxed">
-                Our Women's Run Club is designed to be a safe and supportive space. Sessions are led by a qualified female coach. No one gets left behind — we always finish as a group.
+                Our Women's Run Club is designed to be a safe and supportive space. Sessions are led by a qualified female coach. No one gets left behind, we always finish as a group.
               </p>
             </div>
 
@@ -96,7 +96,7 @@ export default function RegisterWomensRunClub() {
               <ol className="font-body text-sm text-ink-light space-y-2 list-decimal list-inside">
                 <li>We'll confirm your registration by email within 2 working days.</li>
                 <li>You'll get a reminder before the next session with the exact meeting point.</li>
-                <li>Turn up in comfortable clothes and trainers — we'll handle the rest.</li>
+                <li>Turn up in comfortable clothes and trainers, we'll handle the rest.</li>
               </ol>
             </div>
 

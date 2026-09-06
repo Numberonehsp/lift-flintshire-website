@@ -2,19 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Palette lives in tailwind.config.ts (single source of truth). Only the two
+   values the bare html element needs before Tailwind classes apply are kept here. */
 :root {
   --font-display: 'Barlow Condensed', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --color-ink: #111111;
-  --color-ink-light: #444444;
   --color-bg: #FAFAF8;
-  --color-surface: #FFFFFF;
-  --color-surface-muted: #F0EFEA;
-  --color-teal: #376A6B;
-  --color-teal-light: #5A9798;
-  --color-teal-pale: #E0EDEE;
-  --color-cream: #D4CDB2;
-  --color-border: #E2E0D8;
 }
 
 html {
@@ -40,4 +34,37 @@ p {
 body {
   margin: 0;
   overflow-x: hidden;
+}
+
+/* Skip link: off-screen until it receives keyboard focus. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 60;
+}
+.skip-link:focus {
+  left: 0.75rem;
+  top: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 7px;
+  background-color: #FFFFFF;
+  color: #111111;
+  font-weight: 600;
+  font-size: 0.875rem;
+  box-shadow: 0 10px 15px -3px rgba(17, 17, 17, 0.25);
+  outline: 2px solid #376A6B;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

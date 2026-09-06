@@ -1,12 +1,22 @@
 import { useState, useEffect, useRef } from 'react'
 
+function prefersReducedMotion() {
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+}
+
 export function useCountUp(target: number, duration = 1800) {
   const [value, setValue] = useState(0)
   const ref = useRef<HTMLDivElement>(null)
   const started = useRef(false)
+  // Read once on mount; a lazy initializer keeps this out of an effect.
+  const [reducedMotion] = useState(prefersReducedMotion)
 
   useEffect(() => {
-    if (target === 0) return
+    if (target === 0 || reducedMotion) return
 
     const el = ref.current
     if (!el) return
@@ -33,9 +43,11 @@ export function useCountUp(target: number, duration = 1800) {
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [target, duration])
+  }, [target, duration, reducedMotion])
 
-  // Derived rather than reset via the effect — a zero target always displays zero,
-  // so there's no need for an extra render pass to clear a stale count.
-  return { value: target === 0 ? 0 : value, ref }
+  // Derived rather than reset via the effect. A zero target always displays
+  // zero, and when the user asks for reduced motion we show the final number
+  // straight away with no animation.
+  const displayValue = target === 0 ? 0 : reducedMotion ? target : value
+  return { value: displayValue, ref }
 }
