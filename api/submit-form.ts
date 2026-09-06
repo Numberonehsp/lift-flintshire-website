@@ -250,9 +250,14 @@ function buildSheetRow(fields: Record<string, string>): string[] {
   ]
 }
 
+// Registrations and Feedback hold personal data (names, DOBs, medical details, guardian
+// contacts) — they live in PRIVATE_SHEET_ID, a spreadsheet shared only with the service
+// account, never in the public content sheet VITE_GOOGLE_SHEET_ID reads from. That sheet
+// has to allow "anyone with the link" for the public API key to work at all, so anything
+// written there is effectively public — see the incident this fixed, 2026-09-06.
 async function appendToSheet(row: string[], tab: string, headers: string[]) {
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY
-  const sheetId = process.env.GOOGLE_SHEET_ID
+  const sheetId = process.env.PRIVATE_SHEET_ID
   if (!keyJson || !sheetId) {
     console.warn('Google Sheets env vars not set — skipping sheet write')
     return

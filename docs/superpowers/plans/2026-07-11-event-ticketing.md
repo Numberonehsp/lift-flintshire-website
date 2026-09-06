@@ -4,7 +4,7 @@
 
 **Goal:** Self-hosted event ticketing on liftflintshire.co.uk — tiered ticket types with early-bird rollover, Stripe Checkout payment, entrant details in a private Google Sheet, confirmation emails via Resend.
 
-**Architecture:** Static Vite/React SPA on Vercel plus three serverless functions in `api/`. The public content sheet gains a `Ticket_Types` tab (prices and capacities only — safe to be world-readable). Entrant personal and health data goes to a **separate private spreadsheet** (`TICKETING_SHEET_ID`), reachable only by the service account. `create-entry` writes a `pending` row and starts Stripe Checkout; the webhook flips it to `paid`. Stripe never receives personal data — only an entry reference.
+**Architecture:** Static Vite/React SPA on Vercel plus three serverless functions in `api/`. The public content sheet gains a `Ticket_Types` tab (prices and capacities only — safe to be world-readable). Entrant personal and health data goes to a **separate private spreadsheet** (`PRIVATE_SHEET_ID`), reachable only by the service account. `create-entry` writes a `pending` row and starts Stripe Checkout; the webhook flips it to `paid`. Stripe never receives personal data — only an entry reference.
 
 **Tech Stack:** React 19 + react-router v7, Tailwind v3, TypeScript strict (`verbatimModuleSyntax` — type-only imports MUST use `import type`), `stripe`, `googleapis`, `resend`, `vitest` (new).
 
@@ -44,8 +44,16 @@
 ## Manual setup (do before Task 4)
 
 1. **Public content sheet** (`VITE_GOOGLE_SHEET_ID` = `1y9dde38zP9rinh1pBU7ki3sHVZXf7eOrJ-oEidp67i0`) — `Ticket_Types` tab, header row: `event_id | tier_id | label | price_gbp | capacity | sort_order`. Already created by Ed.
-2. **Private spreadsheet** "LF Ticketing — Entries", shared as Editor with the service account's `client_email` (found inside the `GOOGLE_SERVICE_ACCOUNT_KEY` JSON). Tab named `Event_Entries`; the header row is written automatically on first use.
-3. **Vercel env vars:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `TICKETING_SHEET_ID`, `SITE_URL=https://liftflintshire.co.uk`, plus non-prefixed `GOOGLE_SHEET_ID_PUBLIC` and `GOOGLE_API_KEY` mirroring the two `VITE_` values (server code cannot rely on `VITE_`-prefixed vars being present at runtime).
+2. **Private spreadsheet** "LF Ticketing — Entries" — already created and shared as Editor
+   with the service account's `client_email`. **Consolidated 2026-09-06:** this is now the
+   *one* private spreadsheet for all personal data, not ticketing-only — `PRIVATE_SHEET_ID`
+   also holds the `Registrations` and `Feedback` tabs moved there when the public-sheet
+   exposure was fixed (see `HANDOFF.md`). Add an `Event_Entries` tab; its header row is
+   written automatically on first use.
+3. **Vercel env vars:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PRIVATE_SHEET_ID`
+   (already set), `SITE_URL=https://liftflintshire.co.uk`, plus non-prefixed
+   `GOOGLE_SHEET_ID_PUBLIC` and `GOOGLE_API_KEY` mirroring the two `VITE_` values (server
+   code cannot rely on `VITE_`-prefixed vars being present at runtime).
 4. Register the webhook in the Stripe dashboard → `https://liftflintshire.co.uk/api/stripe-webhook`.
 
 ## Column order for `Event_Entries` (A–V)
@@ -347,7 +355,7 @@ function sheets() {
   return google.sheets({ version: 'v4', auth })
 }
 
-const sheetId = () => process.env.TICKETING_SHEET_ID!
+const sheetId = () => process.env.PRIVATE_SHEET_ID!
 
 async function ensureHeaderRow(): Promise<void> {
   const api = sheets()

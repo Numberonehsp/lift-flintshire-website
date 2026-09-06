@@ -3,16 +3,9 @@ import { events as staticEvents } from '../data/events'
 import type { Event } from '../data/events'
 import type { SessionDetail } from '../data/programmes'
 
-export interface RegistrationSummary {
-  programme: string
-  label: string
-  total: number
-}
-
 interface ContentSheetsData {
   events: Event[]
   sessionsByProgramme: Record<string, SessionDetail[]>
-  registrations: RegistrationSummary[]
   loading: boolean
 }
 
@@ -35,22 +28,6 @@ function parseEventsSheet(values: string[][]): Event[] {
   return parsed.length > 0 ? parsed : staticEvents
 }
 
-function parseRegistrationsSheet(values: string[][]): RegistrationSummary[] {
-  if (!values || values.length < 2) return []
-  const [, ...rows] = values
-  const counts: Record<string, { label: string; total: number }> = {}
-  rows
-    .filter(row => row[0])
-    .forEach(row => {
-      const id = row[0]
-      const label = row[1] || id
-      const count = parseInt(row[2]) || 1
-      if (!counts[id]) counts[id] = { label, total: 0 }
-      counts[id].total += count
-    })
-  return Object.entries(counts).map(([programme, { label, total }]) => ({ programme, label, total }))
-}
-
 function parseSessionsSheet(values: string[][]): Record<string, SessionDetail[]> {
   if (!values || values.length < 2) return {}
   const [, ...rows] = values
@@ -71,10 +48,14 @@ const SHEET_ID = import.meta.env.VITE_GOOGLE_SHEET_ID
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY
 const HAS_SHEET_CONFIG = Boolean(SHEET_ID && API_KEY)
 
+// This hook only ever reads Events and Programme_Sessions from the PUBLIC content
+// sheet. Personal data (Registrations, Feedback, and event entries) lives in a
+// separate private spreadsheet that only the server-side service account can reach —
+// never fetch a tab containing personal data from here, since VITE_ env vars and
+// anything fetched with them are visible in the shipped JS bundle to any visitor.
 export function useContentSheets(): ContentSheetsData {
   const [events, setEvents] = useState<Event[]>(staticEvents)
   const [sessionsByProgramme, setSessionsByProgramme] = useState<Record<string, SessionDetail[]>>({})
-  const [registrations, setRegistrations] = useState<RegistrationSummary[]>([])
   const [loading, setLoading] = useState(HAS_SHEET_CONFIG)
 
   useEffect(() => {
@@ -85,16 +66,14 @@ export function useContentSheets(): ContentSheetsData {
     Promise.all([
       fetch(`${base}/Events?key=${API_KEY}`).then(r => r.json()),
       fetch(`${base}/Programme_Sessions?key=${API_KEY}`).then(r => r.json()),
-      fetch(`${base}/Registrations?key=${API_KEY}`).then(r => r.json()).catch(() => ({ values: [] })),
     ])
-      .then(([eventsJson, sessionsJson, registrationsJson]) => {
+      .then(([eventsJson, sessionsJson]) => {
         setEvents(parseEventsSheet(eventsJson.values))
         setSessionsByProgramme(parseSessionsSheet(sessionsJson.values))
-        setRegistrations(parseRegistrationsSheet(registrationsJson.values))
       })
       .catch(() => { /* fall back to static data */ })
       .finally(() => setLoading(false))
   }, [])
 
-  return { events, sessionsByProgramme, registrations, loading }
+  return { events, sessionsByProgramme, loading }
 }

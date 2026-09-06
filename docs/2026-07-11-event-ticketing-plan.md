@@ -202,7 +202,7 @@ GDPR Article 9. Two rules follow, both reflected in the design:
    `https://liftflintshire.co.uk/api/stripe-webhook`.
 3. Refund/transfer policy wording for the event page.
 4. Confirm the private entries spreadsheet is shared **only** with the service account
-   (`client_email` from `GOOGLE_SERVICE_ACCOUNT_KEY`), and add `TICKETING_SHEET_ID` to
+   (`client_email` from `GOOGLE_SERVICE_ACCOUNT_KEY`), and add `PRIVATE_SHEET_ID` to
    Vercel.
 5. Verify the existing server-side `GOOGLE_SHEET_ID` is *not* the public
    `VITE_GOOGLE_SHEET_ID`. If it is, the current `Registrations` tab — which already holds
