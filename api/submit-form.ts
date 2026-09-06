@@ -56,8 +56,6 @@ const FORM_LABELS: Record<string, string> = {
   name:                             'Name',
   subject:                          'Subject',
   message:                          'Message',
-  'has-medical-conditions':         'Medical conditions?',
-  'medical-conditions-details':     'Medical details',
   'waiver-initials':                'Initials',
 }
 
