@@ -12,17 +12,30 @@ async function rawBody(req: VercelRequest): Promise<Buffer> {
   return Buffer.concat(chunks)
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function confirmationHtml(firstName: string, eventTitle: string, tierLabel: string, ref: string, amount: string): string {
+  const name = escapeHtml(firstName)
+  const title = escapeHtml(eventTitle)
+  const tier = escapeHtml(tierLabel)
+  const reference = escapeHtml(ref)
   return `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#376A6B;color:white;padding:20px 24px;border-radius:8px 8px 0 0">
-        <h2 style="margin:0;font-size:20px">You're in — ${eventTitle}</h2>
-        <p style="margin:4px 0 0;opacity:.85;font-size:14px">Entry reference: <strong>${ref}</strong></p>
+        <h2 style="margin:0;font-size:20px">You're in — ${title}</h2>
+        <p style="margin:4px 0 0;opacity:.85;font-size:14px">Entry reference: <strong>${reference}</strong></p>
       </div>
       <div style="border:1px solid #e0e0e0;border-top:none;padding:20px 24px;border-radius:0 0 8px 8px">
-        <p>Hi ${firstName},</p>
-        <p>Your entry is confirmed — <strong>${tierLabel}</strong>, £${amount} paid.</p>
-        <p>Keep your entry reference <strong>${ref}</strong> handy for event day. We'll email
+        <p>Hi ${name},</p>
+        <p>Your entry is confirmed — <strong>${tier}</strong>, £${amount} paid.</p>
+        <p>Keep your entry reference <strong>${reference}</strong> handy for event day. We'll email
         final instructions (start time, parking, what to bring) closer to the date.</p>
         <p>Any questions, just reply to this email.</p>
         <p>— Lift Flintshire CIC</p>
@@ -86,7 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       from: 'Lift Flintshire Website <forms@liftflintshire.co.uk>',
       to: ['hello@liftflintshire.co.uk'],
       subject: `New paid entry: ${title} — ${entry.firstName} (${entry.entryRef})`,
-      html: `<p>${entry.firstName} (${entry.email}) entered ${title} — ${entry.tierLabel}, £${amount}. Reference ${entry.entryRef}.</p>`,
+      html: `<p>${escapeHtml(entry.firstName)} (${escapeHtml(entry.email)}) entered ${escapeHtml(title)} — ${escapeHtml(entry.tierLabel)}, £${amount}. Reference ${escapeHtml(entry.entryRef)}.</p>`,
     })
   } catch (emailErr) {
     // The entry is saved and paid; a failed email must not trigger a Stripe retry loop.
