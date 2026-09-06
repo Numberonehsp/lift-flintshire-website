@@ -12,6 +12,9 @@ export const ENTRY_COLUMNS = [
   'First Name', 'Last Name', 'Email', 'Phone', 'Date of Birth', 'Gender',
   'Emergency Contact', 'Emergency Phone', 'Medical Details',
   'Waiver Agreed', 'Photo Consent', 'GDPR Consent',
+  'Team Name', 'Club/Gym', 'Captain Liability Accepted',
+  'Runner 1 Name', 'Runner 1 Email', 'Runner 2 Name', 'Runner 2 Email',
+  'Runner 3 Name', 'Runner 3 Email', 'Runner 4 Name', 'Runner 4 Email',
 ]
 
 /** A pending row holds its place for this long, matching the Stripe session expiry. */
@@ -75,6 +78,10 @@ export interface PendingEntry {
   waiverAgreed: string
   photoConsent: string
   gdprConsent: string
+  teamName: string
+  clubOrGym: string
+  captainLiabilityAgreed: string
+  runners: { name: string; email: string }[]
 }
 
 export async function appendPendingEntry(e: PendingEntry): Promise<void> {
@@ -89,6 +96,8 @@ export async function appendPendingEntry(e: PendingEntry): Promise<void> {
         e.firstName, e.lastName, e.email, e.phone, e.dob, e.gender,
         e.emergencyName, e.emergencyPhone, e.medical,
         e.waiverAgreed, e.photoConsent, e.gdprConsent,
+        e.teamName, e.clubOrGym, e.captainLiabilityAgreed,
+        ...e.runners.flatMap(r => [r.name, r.email]),
       ]],
     },
   })

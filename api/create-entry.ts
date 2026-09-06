@@ -9,6 +9,14 @@ const REQUIRED = [
   'date-of-birth', 'emergency-name', 'emergency-phone', 'waiver-agreed', 'gdpr-consent',
 ] as const
 
+const TEAM_TIER_ID = 'team'
+
+const TEAM_REQUIRED = [
+  'team-name', 'captain-liability-agreed',
+  'runner1-name', 'runner1-email', 'runner2-name', 'runner2-email',
+  'runner3-name', 'runner3-email', 'runner4-name', 'runner4-email',
+] as const
+
 // Unambiguous alphabet: no I, O, 0, 1.
 const REF_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
@@ -41,6 +49,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const f = req.body as Record<string, string>
   for (const key of REQUIRED) {
     if (!f[key]) return res.status(400).json({ error: `Missing field: ${key}` })
+  }
+  if (f.tierId === TEAM_TIER_ID) {
+    for (const key of TEAM_REQUIRED) {
+      if (!f[key]) return res.status(400).json({ error: `Missing field: ${key}` })
+    }
   }
 
   try {
@@ -102,6 +115,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       waiverAgreed: f['waiver-agreed'],
       photoConsent: f['photo-consent'] ?? '',
       gdprConsent: f['gdpr-consent'],
+      teamName: f['team-name'] ?? '',
+      clubOrGym: f['club-or-gym'] ?? '',
+      captainLiabilityAgreed: f['captain-liability-agreed'] ?? '',
+      runners: [1, 2, 3, 4].map(n => ({
+        name: f[`runner${n}-name`] ?? '',
+        email: f[`runner${n}-email`] ?? '',
+      })),
     })
 
     return res.status(200).json({ url: session.url })

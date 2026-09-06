@@ -20,6 +20,9 @@ const WAIVER_TEXT = `Physical activity involves inherent risks. By submitting th
 
 type SubmitState = 'idle' | 'submitting' | 'error' | 'conflict'
 
+// Must match TEAM_TIER_ID in api/create-entry.ts.
+const TEAM_TIER_ID = 'team'
+
 export default function EventEntry() {
   const { id } = useParams<{ id: string }>()
   const { events, loading: eventsLoading } = useContentSheets()
@@ -103,6 +106,7 @@ export default function EventEntry() {
   }
 
   const priceLabel = (availableTier.pricePence / 100).toFixed(2)
+  const isTeam = availableTier.tierId === TEAM_TIER_ID
 
   return (
     <>
@@ -133,8 +137,54 @@ export default function EventEntry() {
             <p className="font-display font-black text-teal text-2xl">£{priceLabel}</p>
           </div>
 
+          {isTeam && (
+            <>
+              <h2 className="font-display font-bold text-h3 text-ink mb-4 pb-2 border-b border-border">
+                Team details
+              </h2>
+
+              <div className="mb-4">
+                <label htmlFor="team-name" className={labelClass}>Team name</label>
+                <input id="team-name" type="text" name="team-name" required className={inputClass} />
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="club-or-gym" className={labelClass}>
+                  Representing a run club or gym? (optional)
+                </label>
+                <input
+                  id="club-or-gym"
+                  type="text"
+                  name="club-or-gym"
+                  placeholder="Leave blank if not applicable"
+                  className={inputClass}
+                />
+                <p className="font-body text-xs text-ink-light mt-1">
+                  We'll give you a shout on social media if you tell us.
+                </p>
+              </div>
+
+              <p className="font-body text-sm text-ink-light mb-4">
+                Enter all 4 runners in the team, including yourself.
+              </p>
+
+              {[1, 2, 3, 4].map(n => (
+                <div key={n} className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label htmlFor={`runner${n}-name`} className={labelClass}>Runner {n} name</label>
+                    <input id={`runner${n}-name`} type="text" name={`runner${n}-name`} required className={inputClass} />
+                  </div>
+                  <div>
+                    <label htmlFor={`runner${n}-email`} className={labelClass}>Runner {n} email</label>
+                    <input id={`runner${n}-email`} type="email" name={`runner${n}-email`} required className={inputClass} />
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
           <h2 className="font-display font-bold text-h3 text-ink mb-4 pb-2 border-b border-border">
-            Your details
+            {isTeam ? 'Your details (team captain)' : 'Your details'}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -248,6 +298,29 @@ export default function EventEntry() {
               </label>
             </div>
           </div>
+
+          {isTeam && (
+            <div className="bg-surface-muted rounded-card p-4 border border-border mb-4">
+              <p className="font-body font-semibold text-xs text-ink uppercase tracking-wide mb-2">
+                Team captain responsibility
+              </p>
+              <div className="flex items-start gap-3">
+                <input
+                  id="captain-liability-agreed"
+                  type="checkbox"
+                  name="captain-liability-agreed"
+                  value="yes"
+                  required
+                  className="mt-0.5 h-4 w-4 accent-teal flex-shrink-0 cursor-pointer"
+                />
+                <label htmlFor="captain-liability-agreed" className="font-body text-sm text-ink leading-relaxed cursor-pointer">
+                  As team captain, I accept responsibility for the safety and conduct of my team, and confirm
+                  I have each teammate's permission to share their name and email for this registration.{' '}
+                  <span className="text-teal font-medium">(Required)</span>
+                </label>
+              </div>
+            </div>
+          )}
 
           <div className="bg-surface-muted rounded-card p-4 border border-border mb-4">
             <p className="font-body font-semibold text-xs text-ink uppercase tracking-wide mb-2">

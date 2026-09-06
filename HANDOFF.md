@@ -160,6 +160,23 @@ client-side values (server code can't rely on `VITE_`-prefixed vars at runtime).
 4. Early-bird/standard rows entered in `Ticket_Types` with real capacities; event `status`
    set to open.
 
+**Stripe has three separate environments — cost real debugging time to learn this:**
+a *sandbox* (its own dashboard section, its own keys, its own webhook endpoints), the
+account's regular *test mode*, and *live mode*. A webhook endpoint created in one is
+invisible to the others — `GET /v1/webhook_endpoints` from test mode will show nothing
+for a sandbox-created endpoint, and a sandbox signing secret will never verify a test-mode
+event. Always create the webhook endpoint in the *same* environment as the API key you're
+using, and check which one you're in (dashboard header shows "Sandbox" or a mode toggle)
+before debugging "webhook never fires."
+
+**Preview deployments may not build.** This project's `main` branch is wired as the
+Vercel Production branch, so every push/redeploy to `main` reads **Production**-scoped
+env vars, not Preview — a var added only under Preview silently reads as missing in every
+`main` deployment. Pushing a new branch is supposed to trigger a separate Preview
+deployment, but didn't during this build (never appeared in the Deployments list even
+after several minutes) — worth checking Vercel project Git settings if preview builds are
+needed again, rather than assuming they'll just appear.
+
 **Phase 2 (not built)**: QR code in the confirmation email + a PIN-protected marshal
 check-in page; an "email all entrants" broadcast function for pre-event instructions;
 scheduled reminders; promo codes; waitlist.
