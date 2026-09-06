@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 
 const navItems = [
   { label: 'Home', to: '/' },
   { label: 'Programmes & Events', to: '/programmes-events' },
+  { label: 'Events', to: '/events' },
   { label: 'Impact', to: '/impact' },
   { label: 'About', to: '/about' },
   { label: 'Contact', to: '/contact' },
@@ -12,6 +13,8 @@ const navItems = [
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const firstLinkRef = useRef<HTMLAnchorElement>(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -22,6 +25,21 @@ export function Header() {
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
+  }, [isOpen])
+
+  // Close on Escape, and manage focus in/out of the overlay.
+  useEffect(() => {
+    if (!isOpen) return
+    const toggle = toggleRef.current
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    firstLinkRef.current?.focus()
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      toggle?.focus()
+    }
   }, [isOpen])
 
   return (
@@ -55,7 +73,7 @@ export function Header() {
               className="font-display font-black text-white text-lg leading-none tracking-tight"
               style={{ display: 'none' }}
             >
-              LIFT <span className="text-teal">FLINTSHIRE</span>
+              LIFT <span className="text-teal-light">FLINTSHIRE</span>
             </span>
           </Link>
 
@@ -77,12 +95,14 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Hamburger — morphs into × */}
+          {/* Hamburger morphs into a cross */}
           <button
+            ref={toggleRef}
             onClick={() => setIsOpen(prev => !prev)}
             className="md:hidden text-white min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label={isOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isOpen}
+            aria-controls="mobile-menu"
           >
             <div className="relative w-5 h-[14px]">
               <span
@@ -107,11 +127,13 @@ export function Header() {
 
       {/* Full-screen mobile overlay */}
       <div
+        id="mobile-menu"
         className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ease-in-out ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         style={{ backgroundColor: 'rgba(17,17,17,0.97)', backdropFilter: 'blur(12px)' }}
         onClick={() => setIsOpen(false)}
+        aria-hidden={!isOpen}
       >
         <nav
           className="flex flex-col items-center justify-center h-full gap-1"
@@ -121,16 +143,18 @@ export function Header() {
           {navItems.map((item, i) => (
             <NavLink
               key={item.to}
+              ref={i === 0 ? firstLinkRef : undefined}
               to={item.to}
               end={item.to === '/'}
               onClick={() => setIsOpen(false)}
+              tabIndex={isOpen ? undefined : -1}
               style={{
                 transitionDelay: isOpen ? `${i * 55 + 40}ms` : '0ms',
                 fontSize: 'clamp(26px, 7vw, 40px)',
               }}
               className={({ isActive }) =>
                 `font-display font-black uppercase py-3 transition-all duration-300 ease-out ${
-                  isActive ? 'text-teal' : 'text-white hover:text-teal'
+                  isActive ? 'text-teal-light' : 'text-white hover:text-teal-light'
                 } ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`
               }
             >
