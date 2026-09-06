@@ -100,6 +100,72 @@ it directly, regardless of whether the site's own UI shows it.
 
 ---
 
+## Event Ticketing
+
+Self-hosted replacement for TicketsCandy. Design doc:
+`docs/2026-07-11-event-ticketing-plan.md`. Implementation plan:
+`docs/superpowers/plans/2026-07-11-event-ticketing.md`. Status as of this writing: code
+complete on branch `feature/ticketing-entries-sheet` (Tasks 1–10), not yet merged to
+`main` — blocked on Stripe test/live keys.
+
+**Pricing rule — read this before adding an event.** `Ticket_Types.price_gbp` is the
+**all-in price the buyer pays**, inclusive of Stripe's fee. There is no separate booking
+fee: adding one when card is the only payment method is a prohibited surcharge under the
+Consumer Rights (Payment Surcharges) Regulations 2012 (as amended 2018). To net £100,
+enter `101.73` — `(price + 0.20) ÷ 0.985`.
+
+**`Ticket_Types` tab** (public sheet): `event_id | tier_id | label | price_gbp | capacity | sort_order`.
+One row per tier, e.g.:
+```
+run-2026 | early-bird | Early Bird Entry | 81.42  | 10  | 1
+run-2026 | standard   | Standard Entry   | 101.73 | 999 | 2
+```
+Tiers roll over in `sort_order`: the lowest-order tier under capacity is "available";
+earlier tiers at capacity show "sold out"; later tiers show "available once earlier
+tickets sell out". Logic lives in `src/lib/tickets.ts`.
+
+**`Event_Entries` tab** (private sheet, `PRIVATE_SHEET_ID`): one row per entry attempt,
+`status` `pending` → `paid`. A row is created by `api/create-entry.ts` *before* Stripe
+Checkout opens (holds the tier slot for 30 minutes, matching Stripe's session expiry) and
+flipped to `paid` by `api/stripe-webhook.ts` once payment confirms. Columns are ordered so
+the public `api/event-availability.ts` endpoint can read only `A:D` — personal and health
+data never reaches a publicly-callable function. Column reference:
+`timestamp | event_id | tier_id | status | entry_ref | tier_label | amount_paid | stripe_session_id | paid_at | checked_in | first_name | last_name | email | phone | dob | gender | emergency_name | emergency_phone | medical | waiver_agreed | photo_consent | gdpr_consent`.
+
+**`api/` cannot import from `src/`.** Same rule as the rest of this doc, re-verified for
+this feature by a throwaway spike (`spike/api-lib-bundling`, deleted): shared server logic
+lives in `api/_lib/`, and the tier logic is deliberately duplicated between
+`api/_lib/tickets.ts` and `src/lib/tickets.ts` — `src/lib/tickets.test.ts` has a test that
+fails if the two drift. **Every relative import inside `api/` needs an explicit `.js`
+extension** (`from './tickets.js'`, even though the source is `.ts`) — Node's ESM loader
+requires it at runtime since `package.json` has `"type": "module"`; `api/tsconfig.json`
+(added alongside this feature, `moduleResolution: nodenext`) catches a missing one locally
+now, where previously `api/` had no type-checking coverage at all.
+
+**Reports & refunds**: the `Event_Entries` tab *is* the participant report — File →
+Download → CSV. Refunds are manual: process in the Stripe dashboard, then edit the sheet
+row (there's no automated refund flow in Phase 1).
+
+**Env vars needed** (beyond the existing `RESEND_API_KEY`, `GOOGLE_SERVICE_ACCOUNT_KEY`,
+`PRIVATE_SHEET_ID`): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SITE_URL`, and
+non-`VITE_`-prefixed `GOOGLE_SHEET_ID_PUBLIC` + `GOOGLE_API_KEY` mirroring the two
+client-side values (server code can't rely on `VITE_`-prefixed vars at runtime).
+
+**Go-live checklist**:
+1. Stripe account verified for the CIC; live keys added to Vercel (Production only).
+2. Webhook endpoint registered in the Stripe dashboard, live mode →
+   `https://liftflintshire.co.uk/api/stripe-webhook`.
+3. One real low-value ticket bought end-to-end in live mode, then refunded, before
+   announcing a real event.
+4. Early-bird/standard rows entered in `Ticket_Types` with real capacities; event `status`
+   set to open.
+
+**Phase 2 (not built)**: QR code in the confirmation email + a PIN-protected marshal
+check-in page; an "email all entrants" broadcast function for pre-event instructions;
+scheduled reminders; promo codes; waitlist.
+
+---
+
 ## Architecture Decisions
 - **Static data as fallback**: Code always falls back to `src/data/` files if sheets are empty or env vars missing — site never breaks without the sheet.
 - **Programme text stays static**: Only sessions (day/time/location/cost) and events are sheet-driven. Programme descriptions, taglines, target audience are in `programmes.ts` (requires code edit to change).
