@@ -35,8 +35,22 @@ Website for Lift Flintshire CIC, a not-for-profit community fitness organisation
 
 ---
 
-## Google Sheets CMS
-Four tabs to create in the existing Google Sheet:
+## Google Sheets — two spreadsheets, not one
+
+There are **two separate Google Sheets**, and which one a tab belongs in is a real
+security boundary, not a filing preference:
+
+- **Public content sheet** (`VITE_GOOGLE_SHEET_ID`, read client-side with `VITE_GOOGLE_API_KEY`).
+  Fetched directly from every visitor's browser, so it has to be shared "anyone with the
+  link" for the API key to work at all — **anything in this sheet is effectively public**,
+  whether or not the site's own code happens to display it. Tabs: `Summary` (homepage hero
+  stats), `Events`, `Programme_Sessions`, `Ticket_Types` (event ticketing).
+- **Private data sheet** (`PRIVATE_SHEET_ID`, written server-side only, from `api/`
+  functions using `GOOGLE_SERVICE_ACCOUNT_KEY`). Shared *only* with the service account —
+  never "anyone with the link". Tabs: `Registrations`, `Feedback`, and (once built)
+  `Event_Entries`. This is where any personal or health data belongs.
+
+**Public sheet tabs:**
 
 **Summary** — drives hero stats on homepage
 | Value | Label |
@@ -50,19 +64,39 @@ Four tabs to create in the existing Google Sheet:
 - One row per session day (e.g. Stay Strong Tuesday and Thursday = 2 rows both with `stay-strong`)
 - Valid programme_ids: `stay-strong`, `run-club`, `weightlifting`, `couch-to-5k`, `womens-run-club`
 
-**Registrations** — columns: `programme_id | programme_label | count`
-- Used by the Impact Dashboard to show registration totals per programme
-- Populated manually from Netlify Forms CSV export, or automatically via Zapier (see below)
-- Example row: `couch-to-5k | Couch to 5K | 1` (one row per registration OR one summary row with count)
-- Valid programme_ids: `couch-to-5k`, `womens-run-club`
+**Private sheet tabs**, written by `api/submit-form.ts`:
 
-### Automating Registrations → Google Sheet (optional)
-To auto-populate the Registrations tab when someone submits a form:
-1. Create a free [Zapier](https://zapier.com) account
-2. Trigger: **Netlify › New Form Submission** (select `register-couch-to-5k` or `register-womens-run-club`)
-3. Action: **Google Sheets › Create Spreadsheet Row** → point to the Registrations tab
-4. Map fields: programme_id, name, email, date, etc.
-5. Repeat for the second form
+**Registrations** — one row per form submission (names, DOB, guardian/emergency contacts,
+medical details). Columns are `SHEET_COLUMNS` in `api/submit-form.ts`.
+
+**Feedback** — one row per questionnaire submission. Columns are `FEEDBACK_SHEET_COLUMNS`
+in `api/submit-form.ts`.
+
+### Incident — personal data was exposed in the public sheet (fixed 2026-09-06)
+
+`Registrations` and `Feedback` used to live in the **public** content sheet. Since
+`f896f38` (May 2026) every registration — full names, dates of birth, guardian names and
+phone numbers, medical conditions, for programmes including under-18 participants — was
+written to a tab inside the sheet that has to be publicly link-shared for the site's own
+`Events`/`Programme_Sessions` fetches to work. Compounding it, `useContentSheets.ts` also
+fetched that `Registrations` tab client-side (in full, no column restriction) to feed a
+`registrations` summary that, on inspection, **no page ever rendered** — dead code that
+was itself exposing the data further.
+
+Fixed by:
+1. Moving `Registrations` and `Feedback` to the private spreadsheet
+   (`PRIVATE_SHEET_ID`) — `api/submit-form.ts`'s `appendToSheet` now writes there instead
+   of `VITE_GOOGLE_SHEET_ID`.
+2. Deleting the dead client-side fetch and `parseRegistrationsSheet` from
+   `useContentSheets.ts` entirely, rather than just repointing it.
+3. Manually migrating the historical rows and deleting the `Registrations`/`Feedback` tabs
+   from the public sheet (see below) — moving future writes isn't enough on its own; the
+   old data sitting in the public sheet was still exposed until removed.
+
+**If you ever add a field or a new form that collects anything personal, it must write to
+`PRIVATE_SHEET_ID`, never to `VITE_GOOGLE_SHEET_ID`.** The tell: if a value is fetched
+using `VITE_GOOGLE_API_KEY` from client-side code, assume anyone on the internet can read
+it directly, regardless of whether the site's own UI shows it.
 
 ---
 
