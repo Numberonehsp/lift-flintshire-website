@@ -55,16 +55,16 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30" aria-hidden="true" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-          <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">
+          <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">
             Strength · Fitness · Wellbeing · Flintshire
           </p>
           <h1 className="font-display font-black text-hero text-white uppercase leading-none mb-6">
             Lifting<br />
-            <span className="text-teal">Communities</span><br />
+            <span className="text-teal-light">Communities</span><br />
             Together
           </h1>
           <p className="font-body text-lg text-white/70 leading-relaxed max-w-xl mb-8">
-            Lift Flintshire CIC delivers inclusive strength, fitness, and wellbeing programmes across Flintshire — open to everyone, regardless of age or ability. We believe movement changes lives.
+            Lift Flintshire CIC delivers inclusive strength, fitness, and wellbeing programmes across Flintshire, open to everyone regardless of age or ability. We believe movement changes lives.
           </p>
           <div className="flex flex-wrap gap-4">
             <Button variant="primary" href="/programmes-events" size="lg">View our programmes</Button>
@@ -82,7 +82,7 @@ export default function Home() {
           Building stronger communities,<br className="hidden md:block" /> one session at a time.
         </h2>
         <p className="font-body text-lg text-white/80 max-w-2xl mx-auto">
-          We're a Community Interest Company — which means every penny we raise goes back into delivering more sessions, reaching more people, and making Flintshire a healthier place to live.
+          We're a Community Interest Company, which means every penny we raise goes back into delivering more sessions, reaching more people, and making Flintshire a healthier place to live.
         </p>
       </SectionWrapper>
 
@@ -93,10 +93,10 @@ export default function Home() {
         <div className="max-w-3xl mx-auto text-center mb-12">
           <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Our aim</p>
           <h2 className="font-display font-extrabold text-h2 text-ink mb-6">
-            A stronger, healthier Flintshire — open to everyone
+            A stronger, healthier Flintshire, open to everyone
           </h2>
           <p className="font-body text-lg text-ink-light leading-relaxed">
-            Our aim is simple: to improve the health, strength, and wellbeing of people across Flintshire by making fitness genuinely accessible — regardless of age, ability, income, or experience. We do this through four objectives.
+            Our aim is simple: to improve the health, strength, and wellbeing of people across Flintshire by making fitness genuinely accessible, regardless of age, ability, income, or experience. We do this through four objectives.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -104,7 +104,7 @@ export default function Home() {
             <p className="font-display font-black text-h3 text-teal mb-2">01</p>
             <h3 className="font-display font-bold text-h3 text-ink mb-2">Reach underserved groups</h3>
             <p className="font-body text-sm text-ink-light leading-relaxed">
-              Deliver programmes for people who are too often left out of fitness spaces — older adults through Stay Strong, complete beginners through Couch to 5K, and women and girls through our Women's Run Club and Girls Gym Sessions.
+              Deliver programmes for people who are too often left out of fitness spaces: older adults through Stay Strong, complete beginners through Couch to 5K, and women and girls through our Women's Run Club and Girls Gym Sessions.
             </p>
           </div>
           <div className="bg-surface rounded-card border border-border p-6 shadow-sm">
@@ -118,7 +118,7 @@ export default function Home() {
             <p className="font-display font-black text-h3 text-teal mb-2">03</p>
             <h3 className="font-display font-bold text-h3 text-ink mb-2">Build community, not just fitness</h3>
             <p className="font-body text-sm text-ink-light leading-relaxed">
-              Create spaces where people connect as well as move — social running groups, group strength sessions, and clubs where no one is left behind, whatever pace or level they're starting from.
+              Create spaces where people connect as well as move: social running groups, group strength sessions, and clubs where no one is left behind, whatever pace or level they're starting from.
             </p>
           </div>
           <div className="bg-surface rounded-card border border-border p-6 shadow-sm">
@@ -164,7 +164,7 @@ export default function Home() {
 
       {/* Social strip */}
       <SectionWrapper variant="dark" innerClassName="text-center">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Follow our journey</p>
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">Follow our journey</p>
         <h2 className="font-display font-extrabold text-h2 text-white mb-6">
           Stay connected with<br className="hidden md:block" /> the Lift Flintshire community
         </h2>
@@ -173,7 +173,7 @@ export default function Home() {
             href="https://instagram.com/LiftFlintshire"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 font-body font-semibold text-white/80 hover:text-teal transition-colors min-h-[44px]"
+            className="flex items-center gap-2 font-body font-semibold text-white/80 hover:text-teal-light transition-colors min-h-[44px]"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
               <rect x="2" y="2" width="20" height="20" rx="5" />

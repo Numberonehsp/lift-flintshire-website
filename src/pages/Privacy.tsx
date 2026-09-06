@@ -17,7 +17,7 @@ export default function Privacy() {
       />
 
       <SectionWrapper variant="dark">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Transparency</p>
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">Transparency</p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">Privacy Policy</h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
           How Lift Flintshire CIC collects, uses, and protects your personal data.

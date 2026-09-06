@@ -69,7 +69,7 @@ function ProgrammeSnapshot({ programmes }: { programmes: Programme[] }) {
                   <p className="font-body text-[10px] uppercase tracking-[0.08em] text-teal-light mb-1.5">
                     {p.badge}
                   </p>
-                  {/* Not a heading — this is a nav card, and each programme already has an h2 below */}
+                  {/* Not a heading, this is a nav card, and each programme already has an h2 below */}
                   <p className="font-display font-bold text-xl text-white leading-tight">
                     {p.title}
                   </p>
@@ -136,7 +136,7 @@ function ProgrammeSection({ programme, imageLeft = false }: { programme: Program
             <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
           </svg>
           <p className="font-body text-sm text-ink-light">
-            <strong className="text-ink">Affiliated with British Weightlifting</strong> — our coaches hold British Weightlifting qualifications and our athletes can compete in sanctioned competitions.
+            <strong className="text-ink">Affiliated with British Weightlifting</strong>, our coaches hold British Weightlifting qualifications and our athletes can compete in sanctioned competitions.
           </p>
         </div>
       )}
@@ -144,7 +144,7 @@ function ProgrammeSection({ programme, imageLeft = false }: { programme: Program
       <div className="mt-6 flex flex-wrap gap-3">
         {REGISTER_DIRECTLY.includes(programme.id) ? (
           <Button variant="primary" href={`/register/${programme.id}`}>
-            Register now — it's free
+            Register now, it's free
           </Button>
         ) : programme.id === 'girls-gym-session' ? (
           <Button variant="primary" href="/contact">Contact us to arrange a session for your school</Button>
@@ -168,7 +168,7 @@ function ProgrammeSection({ programme, imageLeft = false }: { programme: Program
           />
         ))
       ) : (
-        <ImagePlaceholder aspectRatio="4/3" label={`${programme.title} — photography coming soon`} />
+        <ImagePlaceholder aspectRatio="4/3" label={`${programme.title}, photography coming soon`} />
       )}
     </div>
   )
@@ -199,17 +199,17 @@ export default function ProgrammesEvents() {
   return (
     <>
       <Seo
-        title="Programmes — Lift Flintshire CIC"
-        description="Explore our programmes — Stay Strong for the over-60s, Flintshire Run Club, Girls Gym Sessions, Couch to 5K, and Flintshire Weightlifting Club. Open to everyone."
+        title="Programmes · Lift Flintshire CIC"
+        description="Explore our programmes, Stay Strong for the over-60s, Flintshire Run Club, Girls Gym Sessions, Couch to 5K, and Flintshire Weightlifting Club. Open to everyone."
         path="/programmes-events"
       />
 
       {/* Page hero */}
       <SectionWrapper variant="dark">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">What we offer</p>
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">What we offer</p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">Our Programmes</h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          From strength training for the over-60s to free gym sessions for young women — we have a programme for everyone. All sessions are led by qualified coaches and are fully inclusive.
+          From strength training for the over-60s to free gym sessions for young women, we have a programme for everyone. All sessions are led by qualified coaches and are fully inclusive.
         </p>
 
         <ProgrammeSnapshot programmes={programmesWithSessions} />

@@ -27,7 +27,7 @@ export const programmes: Programme[] = [
     description:
       'Our free Couch to 5K programme takes complete beginners from no running experience to comfortably completing a 5K in just nine weeks. Guided by qualified running coaches, sessions are friendly, social, and never competitive.',
     targetAudience:
-      'Designed for adults who have never run before, or who are returning to running after a long break. If you can walk for 30 minutes, you can start Couch to 5K. All ages welcome — no fitness test required.',
+      'Designed for adults who have never run before, or who are returning to running after a long break. If you can walk for 30 minutes, you can start Couch to 5K. All ages welcome, no fitness test required.',
     whatToExpect:
       "Each session follows a structured run/walk interval plan that gradually increases over 9 weeks. You'll be supported by a coach throughout and run as part of a small group. Sessions include a warm-up walk, intervals, and a cool-down stretch.",
     sessions: [
@@ -40,7 +40,7 @@ export const programmes: Programme[] = [
     tagline: 'A safe, social space to run every first Saturday of the month',
     badge: 'Women & Girls · All Abilities',
     description:
-      "Our Women's Run Club meets on the first Saturday of every month for a social group run across Flintshire and North Wales. It's a welcoming, low-pressure environment led by a female coach — walkers are always included.",
+      "Our Women's Run Club meets on the first Saturday of every month for a social group run across Flintshire and North Wales. It's a welcoming, low-pressure environment led by a female coach, walkers are always included.",
     targetAudience:
       "Open to women and girls of all abilities. Whether you're a complete beginner or a regular runner, you'll find your pace here. No one gets left behind.",
     whatToExpect:
@@ -55,9 +55,9 @@ export const programmes: Programme[] = [
     tagline: 'A free, confidence-building gym session for young women',
     badge: 'High School Girls · Free',
     description:
-      'Our Girls Gym Sessions give young women their first positive experience of the gym — a welcoming, coach-led session where no previous experience is needed. We focus on fun, confidence, and building a healthy relationship with movement.',
+      'Our Girls Gym Sessions give young women their first positive experience of the gym, a welcoming, coach-led session where no previous experience is needed. We focus on fun, confidence, and building a healthy relationship with movement.',
     targetAudience:
-      'Open to girls in Years 7–13 (ages 11–18). Sessions are led by our qualified coaches and are designed specifically for young women. No gym experience required — this is exactly the kind of session you can bring a friend to.',
+      'Open to girls in Years 7–13 (ages 11–18). Sessions are led by our qualified coaches and are designed specifically for young women. No gym experience required, this is exactly the kind of session you can bring a friend to.',
     whatToExpect:
       'A fun, structured gym session where our coaches explain how to use equipment safely and confidently. Groups are small, sessions are social, and the atmosphere is never competitive. We want every young woman who attends to leave feeling capable and welcomed.',
     sessions: [
@@ -70,11 +70,11 @@ export const programmes: Programme[] = [
     tagline: 'Building strength, movement skills, and confidence in young people',
     badge: 'Years 7–13 · Free',
     description:
-      'Our Youth Strength & Conditioning sessions introduce young people to safe, structured strength training and movement skills in a fun, coach-led environment. No experience needed — every session is adapted to age and ability.',
+      'Our Youth Strength & Conditioning sessions introduce young people to safe, structured strength training and movement skills in a fun, coach-led environment. No experience needed, every session is adapted to age and ability.',
     targetAudience:
-      'Open to young people in Years 7–13 (ages 11–18). No previous gym experience required — our qualified coaches adapt every session to suit the group.',
+      'Open to young people in Years 7–13 (ages 11–18). No previous gym experience required, our qualified coaches adapt every session to suit the group.',
     whatToExpect:
-      'Sessions combine fundamental movement skills, bodyweight and light resistance training, and games — building strength and confidence without pressure or competition. Groups are small and social.',
+      'Sessions combine fundamental movement skills, bodyweight and light resistance training, and games, building strength and confidence without pressure or competition. Groups are small and social.',
     sessions: [
       { day: 'Thursday', time: '11:00–12:00', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free' },
     ],
@@ -87,7 +87,7 @@ export const programmes: Programme[] = [
     description:
       'Stay Strong is our flagship programme for adults aged 55 and over. Using resistance training and functional movement, we help participants build the strength they need to stay active, independent, and confident in everyday life.',
     targetAudience:
-      'Designed for adults aged 55 and over, including those recovering from falls, living with long-term conditions, or who have been inactive for a while. No experience required — our qualified coaches adapt every session to suit you.',
+      'Designed for adults aged 55 and over, including those recovering from falls, living with long-term conditions, or who have been inactive for a while. No experience required, our qualified coaches adapt every session to suit you.',
     whatToExpect:
       'Each 45-minute session combines seated and standing resistance exercises using bands and light weights, balance work, and time to connect with others in the group. Sessions are led by qualified strength coaches and are fully inclusive.',
     sessions: [
@@ -100,7 +100,7 @@ export const programmes: Programme[] = [
     tagline: 'Running for every pace, every person',
     badge: 'All Abilities · Running',
     description:
-      "Flintshire Run Club is a welcoming, inclusive running group open to everyone — whether you've never run before or you're training for your next race. We focus on enjoyment, community, and getting outside together.",
+      "Flintshire Run Club is a welcoming, inclusive running group open to everyone, whether you've never run before or you're training for your next race. We focus on enjoyment, community, and getting outside together.",
     targetAudience:
       "Open to all abilities from complete beginners to experienced runners. We run as a group and no one gets left behind. Walkers are always welcome too.",
     whatToExpect:
@@ -117,7 +117,7 @@ export const programmes: Programme[] = [
     tagline: 'Learn the snatch, clean & jerk, and build real strength',
     badge: 'All Levels · Olympic Lifting',
     description:
-      "Flintshire Weightlifting Club teaches the Olympic lifts — the snatch and the clean & jerk — in a supportive, technical environment. Whether you're curious about the sport or a seasoned lifter, you'll be challenged and supported at every level.",
+      "Flintshire Weightlifting Club teaches the Olympic lifts, the snatch and the clean & jerk, in a supportive, technical environment. Whether you're curious about the sport or a seasoned lifter, you'll be challenged and supported at every level.",
     targetAudience:
       'Open to adults of all experience levels. Complete beginners will start with foundational movement work before progressing to the barbell. Experienced lifters can train competitively under our qualified British Weightlifting coaches.',
     whatToExpect:

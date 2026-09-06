@@ -34,12 +34,12 @@ export function Footer() {
               onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block' }}
             />
             <span className="font-display font-black text-xl leading-none tracking-tight block mb-3" style={{ display: 'none' }}>
-              LIFT <span className="text-teal">FLINTSHIRE</span>
+              LIFT <span className="text-teal-light">FLINTSHIRE</span>
             </span>
-            <p className="font-body text-sm text-white/60 leading-relaxed mb-4">
+            <p className="font-body text-sm text-white/70 leading-relaxed mb-4">
               Building stronger communities through inclusive strength, fitness, and wellbeing programmes across Flintshire, North Wales.
             </p>
-            <p className="font-body text-xs text-white/40 leading-relaxed">
+            <p className="font-body text-xs text-white/60 leading-relaxed">
               Community Interest Company registered in England &amp; Wales.<br />
               Company No: 09379840<br />
               Registered office: M.01 Tomorrow Blue,<br />
@@ -50,12 +50,12 @@ export function Footer() {
           {/* Col 2: Nav */}
           <div>
             <h3 className="font-display font-bold text-base text-white mb-4 uppercase tracking-wider">Navigation</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               {navLinks.map(link => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
-                    className="font-body text-sm text-white/60 hover:text-white transition-colors"
+                    className="inline-flex min-h-[32px] items-center font-body text-sm text-white/70 hover:text-white transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -72,7 +72,7 @@ export function Footer() {
                 href="https://instagram.com/LiftFlintshire"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/60 hover:text-teal transition-colors min-h-[44px] flex items-center"
+                className="text-white/70 hover:text-teal-light transition-colors min-h-[44px] flex items-center"
                 aria-label="Lift Flintshire on Instagram"
               >
                 <InstagramIcon />
@@ -80,7 +80,7 @@ export function Footer() {
             </div>
             <a
               href="mailto:hello@liftflintshire.co.uk"
-              className="font-body text-sm text-white/60 hover:text-white transition-colors"
+              className="inline-flex min-h-[32px] items-center font-body text-sm text-white/70 hover:text-white transition-colors"
             >
               hello@liftflintshire.co.uk
             </a>
@@ -88,14 +88,14 @@ export function Footer() {
         </div>
 
         <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="font-body text-xs text-white/40">
+          <p className="font-body text-xs text-white/60">
             © {new Date().getFullYear()} Lift Flintshire CIC. All rights reserved. Community Interest Company registered in Wales.
           </p>
-          <div className="flex gap-6">
-            <a href="/privacy" className="font-body text-xs text-white/40 hover:text-white/70 transition-colors">
+          <div className="flex gap-5">
+            <a href="/privacy" className="inline-flex min-h-[32px] items-center font-body text-xs text-white/60 hover:text-white transition-colors">
               Privacy Policy
             </a>
-            <a href="/safeguarding" className="font-body text-xs text-white/40 hover:text-white/70 transition-colors">
+            <a href="/safeguarding" className="inline-flex min-h-[32px] items-center font-body text-xs text-white/60 hover:text-white transition-colors">
               Safeguarding
             </a>
           </div>

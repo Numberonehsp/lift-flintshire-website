@@ -47,7 +47,7 @@ function StarRating({ name, label, required }: StarRatingProps) {
             <button
               key={val}
               type="button"
-              aria-label={`${val} star${val !== '1' ? 's' : ''} — ${labels[val]}`}
+              aria-label={`${val} star${val !== '1' ? 's' : ''}, ${labels[val]}`}
               onClick={() => setSelected(val)}
               onMouseEnter={() => setHovered(val)}
               onMouseLeave={() => setHovered('')}
@@ -184,9 +184,9 @@ function QuestionnaireForm() {
         <p className={labelClass}>Has participating affected your physical or mental wellbeing?</p>
         <div className="flex flex-col gap-2 mt-1">
           {[
-            { value: 'improved-both', label: 'Yes — improved both physical and mental wellbeing' },
-            { value: 'improved-physical', label: 'Yes — improved physical wellbeing' },
-            { value: 'improved-mental', label: 'Yes — improved mental wellbeing' },
+            { value: 'improved-both', label: 'Yes, improved both physical and mental wellbeing' },
+            { value: 'improved-physical', label: 'Yes, improved physical wellbeing' },
+            { value: 'improved-mental', label: 'Yes, improved mental wellbeing' },
             { value: 'no-change', label: "No noticeable change yet" },
             { value: 'too-early', label: "Too early to say" },
           ].map(opt => (
@@ -228,7 +228,7 @@ function QuestionnaireForm() {
 
       {/* Optional name/email */}
       <div className="bg-surface-muted rounded-card p-4 border border-border">
-        <p className="font-body font-semibold text-xs text-ink uppercase tracking-wide mb-2">Optional — Leave your details</p>
+        <p className="font-body font-semibold text-xs text-ink uppercase tracking-wide mb-2">Optional, Leave your details</p>
         <p className="font-body text-xs text-ink-light mb-4 leading-relaxed">
           If you'd like us to follow up on your feedback or get in touch about future sessions, you can share your details below. This is entirely optional.
         </p>
@@ -283,20 +283,20 @@ export default function Questionnaire() {
   return (
     <>
       <Seo
-        title="Feedback — Lift Flintshire CIC"
+        title="Feedback · Lift Flintshire CIC"
         description="Share your feedback on a Lift Flintshire CIC programme session. Your responses help us keep improving."
         path="/questionnaire"
-        ogTitle="Session Feedback — Lift Flintshire CIC"
+        ogTitle="Session Feedback · Lift Flintshire CIC"
         noindex
       />
 
       <SectionWrapper variant="dark">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">
           Help us improve
         </p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">Session Feedback</h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          Takes about 3 minutes. Every piece of feedback shapes how we run our sessions — thank you.
+          Takes about 3 minutes. Every piece of feedback shapes how we run our sessions, thank you.
         </p>
       </SectionWrapper>
 

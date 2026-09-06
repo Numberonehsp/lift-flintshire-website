@@ -25,7 +25,7 @@ export default function Safeguarding() {
       />
 
       <SectionWrapper variant="dark">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Our commitment</p>
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">Our commitment</p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">Safeguarding Policy</h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
           Lift Flintshire CIC is committed to the safety, welfare, and dignity of every person who takes part in our programmes.

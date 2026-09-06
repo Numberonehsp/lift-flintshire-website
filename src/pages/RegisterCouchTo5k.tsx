@@ -8,7 +8,7 @@ const FORM_NAME = 'register-couch-to-5k'
 
 const INTRO =
   'Register below to secure your place on our free Couch to 5K programme. ' +
-  'The programme runs over 9 weeks, with a coached session every Wednesday at 17:30, and is open to complete beginners — no running experience needed. ' +
+  'The programme runs over 9 weeks, with a coached session every Wednesday at 17:30, and is open to complete beginners with no running experience needed. ' +
   'Please complete all sections including the health declaration and waiver before your first session.'
 
 function NextCohortInfo() {
@@ -17,7 +17,7 @@ function NextCohortInfo() {
       <div className="bg-teal-pale rounded-card p-4 border border-teal/20">
         <p className="font-body font-semibold text-sm text-teal mb-1">Next cohort</p>
         <p className="font-body text-sm text-ink-light">
-          Next start date to be announced soon — email us at{' '}
+          Next start date to be announced soon. Email us at{' '}
           <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
             hello@liftflintshire.co.uk
           </a>{' '}
@@ -48,18 +48,18 @@ export default function RegisterCouchTo5k() {
   return (
     <>
       <Seo
-        title="Register — Couch to 5K · Lift Flintshire CIC"
+        title="Register · Couch to 5K · Lift Flintshire CIC"
         description="Register for the free Lift Flintshire Couch to 5K programme. A 9-week beginner running programme in Flintshire, North Wales."
         path="/register/couch-to-5k"
-        ogTitle="Register for Couch to 5K — Lift Flintshire CIC"
+        ogTitle="Register for Couch to 5K · Lift Flintshire CIC"
       />
 
       <SectionWrapper variant="dark">
-        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">
+        <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">
           Free programme · Beginners welcome
         </p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">
-          Couch to 5K — Register
+          Register for Couch to 5K
         </h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
           Nine weeks from your sofa to your first 5K. Join our free, coach-led programme and run your first 5K in Flintshire.
@@ -88,7 +88,7 @@ export default function RegisterCouchTo5k() {
               <ol className="font-body text-sm text-ink-light space-y-2 list-decimal list-inside">
                 <li>We'll confirm your registration by email within 2 working days.</li>
                 <li>You'll receive session times, location, and a welcome pack.</li>
-                <li>Turn up in comfortable clothes and trainers — we'll handle the rest.</li>
+                <li>Turn up in comfortable clothes and trainers, and we'll handle the rest.</li>
               </ol>
             </div>
 

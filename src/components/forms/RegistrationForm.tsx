@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, ChangeEvent } from 'react'
 import { Button } from '../ui/Button'
 
@@ -25,17 +25,20 @@ async function submitForm(formName: string, data: Record<string, string>) {
 }
 
 const inputClass =
-  'w-full font-body text-sm border border-border rounded-btn px-4 py-3 bg-surface focus:outline-none focus:ring-2 focus:ring-teal min-h-[44px] placeholder:text-ink-light/60'
+  'w-full font-body text-sm border border-field rounded-btn px-4 py-3 bg-surface focus:outline-none focus:ring-2 focus:ring-teal min-h-[44px] placeholder:text-ink-light/70'
 const labelClass = 'block font-body font-medium text-sm text-ink mb-1'
 const sectionHeadingClass = 'font-display font-bold text-h3 text-ink mb-4 mt-8 first:mt-0 pb-2 border-b border-border'
 
-const WAIVER_TEXT = `Physical activity involves inherent risks. By submitting this form I confirm that:
+const WAIVER_INTRO =
+  'Physical activity involves inherent risks. By submitting this form I confirm that:'
 
-1. I am voluntarily participating in Lift Flintshire CIC activities and accept responsibility for my own safety.
-2. To the best of my knowledge I am medically fit to participate, or have sought appropriate medical advice before doing so.
-3. I will inform a Lift Flintshire CIC coach of any changes to my health before participating in a session.
-4. I understand that Lift Flintshire CIC, its coaches, staff, and volunteers shall not be held liable for any injury, illness, loss, or damage sustained during participation, except where caused by their negligence or wilful misconduct.
-5. I consent to emergency medical treatment being sought on my behalf in the event of a medical emergency.`
+const WAIVER_POINTS = [
+  'I am voluntarily participating in Lift Flintshire CIC activities and accept responsibility for my own safety.',
+  'To the best of my knowledge I am medically fit to participate, or have sought appropriate medical advice before doing so.',
+  'I will inform a Lift Flintshire CIC coach of any changes to my health before participating in a session.',
+  'I understand that Lift Flintshire CIC, its coaches, staff, and volunteers shall not be held liable for any injury, illness, loss, or damage sustained during participation, except where caused by their negligence or wilful misconduct.',
+  'I consent to emergency medical treatment being sought on my behalf in the event of a medical emergency.',
+]
 
 const STEP_LABELS = ['About you', 'Health & safety', 'Consents']
 
@@ -103,7 +106,7 @@ function SuccessState({ programmeLabel }: { programmeLabel: string }) {
         <ol className="font-body text-sm text-ink-light space-y-2 list-decimal list-inside leading-relaxed">
           <li>We'll confirm your registration by email within 2 working days.</li>
           <li>You'll receive session times, location, and anything else you need.</li>
-          <li>Turn up in comfortable clothing and trainers — we'll handle the rest.</li>
+          <li>Turn up in comfortable clothing and trainers, and we'll handle the rest.</li>
         </ol>
       </div>
 
@@ -132,11 +135,31 @@ function SuccessState({ programmeLabel }: { programmeLabel: string }) {
 }
 
 // ── Main form component ───────────────────────────────────────────────────────
+const RADIO_GROUP_MESSAGES: Record<string, string> = {
+  'has-medical-conditions': 'Please choose Yes or No so we know whether to ask for details.',
+  'has-injuries': 'Please choose Yes or No so we know whether to ask for details.',
+}
+
 export function RegistrationForm({ programme, formName, programmeLabel, intro, extraFields }: Props) {
   const [formState, setFormState] = useState<FormState>('idle')
   const [step, setStep] = useState(1)
   const [hasMedical, setHasMedical] = useState<'yes' | 'no' | ''>('')
   const [hasInjury, setHasInjury] = useState<'yes' | 'no' | ''>('')
+  const [radioErrors, setRadioErrors] = useState<Record<string, string>>({})
+
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null)
+  const isFirstRender = useRef(true)
+
+  // Move focus to the step heading on every step change so screen-reader and
+  // keyboard users land at the top of the new content instead of on a button
+  // that has scrolled away. Skips the initial mount.
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    stepHeadingRef.current?.focus()
+  }, [step])
 
   function validateCurrentStep(): boolean {
     const stepEl = document.getElementById(`${formName}-step-${step}`)
@@ -154,16 +177,24 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
       }
     }
 
-    // Check required radio groups
+    // Required radio groups: surface a visible, announced message per group
+    // rather than failing silently.
     const radioNames = new Set<string>()
     stepEl
       .querySelectorAll<HTMLInputElement>('input[type="radio"][required]')
       .forEach(r => radioNames.add(r.name))
+
+    const nextErrors: Record<string, string> = {}
     for (const name of radioNames) {
       if (!stepEl.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)) {
-        stepEl.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.focus()
-        return false
+        nextErrors[name] = RADIO_GROUP_MESSAGES[name] ?? 'Please choose an option.'
       }
+    }
+    setRadioErrors(nextErrors)
+    const firstMissing = Object.keys(nextErrors)[0]
+    if (firstMissing) {
+      stepEl.querySelector<HTMLInputElement>(`input[name="${firstMissing}"]`)?.focus()
+      return false
     }
 
     return true
@@ -171,14 +202,14 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
 
   function handleNext() {
     if (validateCurrentStep()) {
+      setRadioErrors({})
       setStep(s => s + 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
   function handleBack() {
+    setRadioErrors({})
     setStep(s => s - 1)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -188,7 +219,6 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
     try {
       await submitForm(formName, Object.fromEntries(fd.entries()) as Record<string, string>)
       setFormState('success')
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch {
       setFormState('error')
     }
@@ -205,10 +235,27 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
 
       <ProgressBar step={step} />
 
+      {/* Announced on step change; also the element focus moves to, so keyboard
+          and screen-reader users are told where they are. */}
+      <div
+        ref={stepHeadingRef}
+        tabIndex={-1}
+        role="status"
+        aria-live="polite"
+        className="sr-only"
+      >
+        {`Step ${step} of ${STEP_LABELS.length}: ${STEP_LABELS[step - 1]}`}
+      </div>
+
       {/* ═══════════════════════════════════════════════════════
           STEP 1 — About you
       ═══════════════════════════════════════════════════════ */}
-      <div id={`${formName}-step-1`} style={{ display: step === 1 ? 'block' : 'none' }}>
+      <div
+        id={`${formName}-step-1`}
+        role="group"
+        aria-label={`Step 1 of ${STEP_LABELS.length}: ${STEP_LABELS[0]}`}
+        style={{ display: step === 1 ? 'block' : 'none' }}
+      >
         <p className="font-body text-sm text-ink-light leading-relaxed mb-6">{intro}</p>
 
         <h2 className={sectionHeadingClass}>Personal Information</h2>
@@ -285,7 +332,7 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
           <select id={`${formName}-referral`} name="referral-source" required className={inputClass}>
             <option value="">Select an option</option>
             <option value="social-media">Social media (Facebook, Instagram)</option>
-            <option value="word-of-mouth">Word of mouth — friend or family</option>
+            <option value="word-of-mouth">Word of mouth (friend or family)</option>
             <option value="gp-referral">GP or health professional referral</option>
             <option value="flintshire-council">Flintshire County Council</option>
             <option value="school">School</option>
@@ -298,7 +345,12 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
       {/* ═══════════════════════════════════════════════════════
           STEP 2 — Health & safety
       ═══════════════════════════════════════════════════════ */}
-      <div id={`${formName}-step-2`} style={{ display: step === 2 ? 'block' : 'none' }}>
+      <div
+        id={`${formName}-step-2`}
+        role="group"
+        aria-label={`Step 2 of ${STEP_LABELS.length}: ${STEP_LABELS[1]}`}
+        style={{ display: step === 2 ? 'block' : 'none' }}
+      >
         <h2 className={sectionHeadingClass}>Emergency Contact</h2>
 
         <div className="mb-4">
@@ -340,13 +392,16 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
           This information is kept strictly confidential and used only to help our coaches support you safely.
         </p>
 
-        <div className="mb-4">
-          <p className={labelClass}>
+        <fieldset
+          className="mb-4 m-0 border-0 p-0"
+          aria-describedby={radioErrors['has-medical-conditions'] ? `${formName}-medical-error` : undefined}
+        >
+          <legend className={labelClass}>
             Do you have any medical conditions, disabilities, or health concerns we should know about?
-          </p>
-          <div className="flex gap-6 mt-1">
+          </legend>
+          <div className="flex gap-4 mt-1">
             {(['yes', 'no'] as const).map(val => (
-              <label key={val} className="flex items-center gap-2 font-body text-sm text-ink cursor-pointer">
+              <label key={val} className="flex items-center gap-2 py-1.5 font-body text-sm text-ink cursor-pointer">
                 <input
                   type="radio"
                   name="has-medical-conditions"
@@ -354,12 +409,17 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
                   required
                   checked={hasMedical === val}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setHasMedical(e.target.value as 'yes' | 'no')}
-                  className="accent-teal h-4 w-4"
+                  className="accent-teal h-[18px] w-[18px]"
                 />
                 {val === 'yes' ? 'Yes' : 'No'}
               </label>
             ))}
           </div>
+          {radioErrors['has-medical-conditions'] && (
+            <p id={`${formName}-medical-error`} role="alert" className="font-body text-xs text-danger mt-1">
+              {radioErrors['has-medical-conditions']}
+            </p>
+          )}
           {hasMedical === 'yes' && (
             <div className="mt-3">
               <label htmlFor={`${formName}-medical-details`} className={labelClass}>Please provide details</label>
@@ -373,13 +433,16 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
               />
             </div>
           )}
-        </div>
+        </fieldset>
 
-        <div className="mb-4">
-          <p className={labelClass}>Do you have any current injuries or physical limitations?</p>
-          <div className="flex gap-6 mt-1">
+        <fieldset
+          className="mb-4 m-0 border-0 p-0"
+          aria-describedby={radioErrors['has-injuries'] ? `${formName}-injuries-error` : undefined}
+        >
+          <legend className={labelClass}>Do you have any current injuries or physical limitations?</legend>
+          <div className="flex gap-4 mt-1">
             {(['yes', 'no'] as const).map(val => (
-              <label key={val} className="flex items-center gap-2 font-body text-sm text-ink cursor-pointer">
+              <label key={val} className="flex items-center gap-2 py-1.5 font-body text-sm text-ink cursor-pointer">
                 <input
                   type="radio"
                   name="has-injuries"
@@ -387,12 +450,17 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
                   required
                   checked={hasInjury === val}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setHasInjury(e.target.value as 'yes' | 'no')}
-                  className="accent-teal h-4 w-4"
+                  className="accent-teal h-[18px] w-[18px]"
                 />
                 {val === 'yes' ? 'Yes' : 'No'}
               </label>
             ))}
           </div>
+          {radioErrors['has-injuries'] && (
+            <p id={`${formName}-injuries-error`} role="alert" className="font-body text-xs text-danger mt-1">
+              {radioErrors['has-injuries']}
+            </p>
+          )}
           {hasInjury === 'yes' && (
             <div className="mt-3">
               <label htmlFor={`${formName}-injury-details`} className={labelClass}>Please provide details</label>
@@ -406,13 +474,18 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
               />
             </div>
           )}
-        </div>
+        </fieldset>
       </div>
 
       {/* ═══════════════════════════════════════════════════════
           STEP 3 — Consents & Waiver
       ═══════════════════════════════════════════════════════ */}
-      <div id={`${formName}-step-3`} style={{ display: step === 3 ? 'block' : 'none' }}>
+      <div
+        id={`${formName}-step-3`}
+        role="group"
+        aria-label={`Step 3 of ${STEP_LABELS.length}: ${STEP_LABELS[2]}`}
+        style={{ display: step === 3 ? 'block' : 'none' }}
+      >
         <h2 className={sectionHeadingClass}>Consents &amp; Waiver</h2>
 
         {/* GDPR */}
@@ -465,7 +538,12 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
         {/* Waiver */}
         <div className="bg-surface-muted rounded-card p-4 border border-border mb-4">
           <p className="font-body font-semibold text-xs text-ink uppercase tracking-wide mb-2">Participation Waiver</p>
-          <pre className="font-body text-xs text-ink-light leading-relaxed whitespace-pre-wrap mb-4">{WAIVER_TEXT}</pre>
+          <p className="font-body text-xs text-ink-light leading-relaxed mb-2">{WAIVER_INTRO}</p>
+          <ol className="font-body text-xs text-ink-light leading-relaxed list-decimal pl-5 space-y-1.5 mb-4">
+            {WAIVER_POINTS.map((point, i) => (
+              <li key={i}>{point}</li>
+            ))}
+          </ol>
           <div className="flex items-start gap-3 mb-4">
             <input
               id={`${formName}-waiver`}
@@ -521,8 +599,8 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
       </div>
 
       {formState === 'error' && (
-        <p className="font-body text-xs text-red-600 text-center mt-3">
-          Something went wrong. Please try again or email{' '}
+        <p role="alert" className="font-body text-xs text-danger text-center mt-3">
+          Something went wrong and your registration was not sent. Please try again, or email{' '}
           <a href="mailto:hello@liftflintshire.co.uk" className="underline">hello@liftflintshire.co.uk</a>.
         </p>
       )}

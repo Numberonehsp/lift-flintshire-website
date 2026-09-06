@@ -5,6 +5,10 @@ import { Footer } from './components/layout/Footer'
 import Home from './pages/Home'
 import About from './pages/About'
 import ProgrammesEvents from './pages/ProgrammesEvents'
+import Events from './pages/Events'
+import EventDetail from './pages/EventDetail'
+import EventEntry from './pages/EventEntry'
+import EntryConfirmed from './pages/EntryConfirmed'
 import ImpactDashboard from './pages/ImpactDashboard'
 import Contact from './pages/Contact'
 import RegisterCouchTo5k from './pages/RegisterCouchTo5k'
@@ -25,12 +29,19 @@ function Layout() {
   return (
     <>
       <ScrollToTop />
+      <a href="#main" className="skip-link font-body">
+        Skip to main content
+      </a>
       <Header />
-      <main className="pt-20">
+      <main id="main" tabIndex={-1} className="pt-20 focus:outline-none">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/programmes-events" element={<ProgrammesEvents />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/events/entry-confirmed" element={<EntryConfirmed />} />
+          <Route path="/events/:id" element={<EventDetail />} />
+          <Route path="/events/:id/enter" element={<EventEntry />} />
           <Route path="/impact" element={<ImpactDashboard />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/register/couch-to-5k" element={<RegisterCouchTo5k />} />
