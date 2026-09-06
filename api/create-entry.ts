@@ -21,8 +21,17 @@ function generateEntryRef(): string {
 async function fetchTicketTypes(): Promise<string[][]> {
   const sheetId = process.env.GOOGLE_SHEET_ID_PUBLIC
   const apiKey = process.env.GOOGLE_API_KEY
+  if (!sheetId || !apiKey) {
+    throw new Error(
+      `Ticket_Types config missing: GOOGLE_SHEET_ID_PUBLIC=${sheetId ? 'set' : 'MISSING'} GOOGLE_API_KEY=${apiKey ? 'set' : 'MISSING'}`,
+    )
+  }
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Ticket_Types?key=${apiKey}`
-  const json = (await (await fetch(url)).json()) as { values?: string[][] }
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Ticket_Types fetch failed: ${response.status} ${await response.text()}`)
+  }
+  const json = (await response.json()) as { values?: string[][] }
   return json.values ?? []
 }
 
@@ -36,6 +45,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const tiers = parseTicketTypesSheet(await fetchTicketTypes(), f.eventId)
+    if (tiers.length === 0) {
+      throw new Error(`No Ticket_Types rows matched eventId "${f.eventId}"`)
+    }
     const taken = await countTaken(f.eventId)
     const tier = pickAvailableTier(tiers, taken)
 
