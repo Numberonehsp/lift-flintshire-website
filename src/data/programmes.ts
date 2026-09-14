@@ -82,8 +82,8 @@ export const programmes: Programme[] = [
   {
     id: 'stay-strong',
     title: 'Stay Strong',
-    tagline: 'Building strength and confidence in the over-60s',
-    badge: '60+ · Strength Training',
+    tagline: 'Building strength and confidence in adults aged 55 and over',
+    badge: '55+ · Strength Training',
     description:
       'Stay Strong is our flagship programme for adults aged 55 and over. Using resistance training and functional movement, we help participants build the strength they need to stay active, independent, and confident in everyday life.',
     targetAudience:

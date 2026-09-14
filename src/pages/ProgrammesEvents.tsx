@@ -200,7 +200,7 @@ export default function ProgrammesEvents() {
     <>
       <Seo
         title="Programmes · Lift Flintshire CIC"
-        description="Explore our programmes, Stay Strong for the over-60s, Flintshire Run Club, Girls Gym Sessions, Couch to 5K, and Flintshire Weightlifting Club. Open to everyone."
+        description="Explore our programmes, Stay Strong for adults aged 55 and over, Flintshire Run Club, Girls Gym Sessions, Couch to 5K, and Flintshire Weightlifting Club. Open to everyone."
         path="/programmes-events"
       />
 
@@ -209,7 +209,7 @@ export default function ProgrammesEvents() {
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">What we offer</p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">Our Programmes</h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          From strength training for the over-60s to free gym sessions for young women, we have a programme for everyone. All sessions are led by qualified coaches and are fully inclusive.
+          From strength training for adults aged 55 and over to free gym sessions for young women, we have a programme for everyone. All sessions are led by qualified coaches and are fully inclusive.
         </p>
 
         <ProgrammeSnapshot programmes={programmesWithSessions} />
