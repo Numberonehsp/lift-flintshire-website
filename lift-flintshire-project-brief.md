@@ -1,5 +1,7 @@
 # Lift Flintshire CIC — Website Project Brief
 
+> **Note (2026-09-14):** this brief is the original planning doc and predates the move off Netlify. The site now runs on Vercel — see `HANDOFF.md` for current hosting, deploy and env var details.
+
 ## Organisation Overview
 
 **Name:** Lift Flintshire CIC  
