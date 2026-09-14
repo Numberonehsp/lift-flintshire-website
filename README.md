@@ -1,6 +1,6 @@
 # Lift Flintshire CIC Website
 
-Community Interest Company website built with Vite + React + TypeScript + Tailwind CSS. Hosted on Netlify.
+Community Interest Company website built with Vite + React + TypeScript + Tailwind CSS. Hosted on Vercel.
 
 ## Running Locally
 
@@ -26,13 +26,13 @@ cp .env.example .env.local
 
 Without these variables the site uses built-in sample data on the Impact Dashboard.
 
-## Deploying to Netlify
+## Deploying to Vercel
 
 1. Push this repository to GitHub.
-2. In Netlify: **Add new site → Import an existing project** → select the repo.
-3. Build command: `npm run build` · Publish directory: `dist`
-4. Add `VITE_GOOGLE_SHEET_ID` and `VITE_GOOGLE_API_KEY` under **Site configuration → Environment variables**.
-5. Deploy. Netlify Forms activates automatically on first deploy.
+2. In Vercel: **Add New → Project** → import `Numberonehsp/lift-flintshire-website`.
+3. Build command: `npm run build` · Output directory: `dist`. `vercel.json` already handles the SPA rewrite.
+4. Add `VITE_GOOGLE_SHEET_ID` and `VITE_GOOGLE_API_KEY` under **Project → Settings → Environment Variables** (Production + Preview). See `HANDOFF.md` for the full list of server-only vars.
+5. Deploy. `git push` to `main` auto-deploys via Vercel's GitHub integration.
 
 ## Setting Up the Google Sheet
 
@@ -63,13 +63,9 @@ Replace `ImagePlaceholder` components with `<img>` tags once photography is avai
 
 Place image files in `public/images/`.
 
-## Connecting Brevo Webhooks
+## Confirmation Emails
 
-To send confirmation emails from the contact and referral forms:
-
-1. Create a Netlify Function at `netlify/functions/brevo-contact.ts`.
-2. POST to the Brevo transactional email API with the form data.
-3. Add `BREVO_API_KEY` to Netlify environment variables.
+Form submissions POST to `/api/submit-form` (Vercel serverless function), which sends confirmation emails via Resend and appends rows to the private Google Sheet. See `HANDOFF.md` for the full data flow.
 
 ## Creating Stripe Payment Links for Events
 
@@ -93,4 +89,4 @@ Then update `src/components/layout/Header.tsx` and `src/components/layout/Footer
 - [React Router v6](https://reactrouter.com) — client-side routing
 - [Recharts](https://recharts.org) — Impact Dashboard charts
 - [react-helmet-async](https://github.com/staylor/react-helmet-async) — per-page SEO meta tags
-- [Netlify Forms](https://www.netlify.com/products/forms/) — contact and referral form handling
+- [Vercel Functions](https://vercel.com/docs/functions) — `/api/submit-form` handles contact, referral and registration form submissions
