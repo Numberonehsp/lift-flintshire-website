@@ -307,6 +307,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const fields = req.body as Record<string, string>
   const formName = fields['form-name'] ?? 'Registration'
+  // Enquiries are email-only, like contact messages: no sheet row, no confirmation email.
+  const isEnquiry = formName.startsWith('enquiry-')
 
   try {
     // 1 — Send email
@@ -317,7 +319,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       replyTo: fields['guardian-email'] ?? fields['email'],
       subject: formName === 'contact'
         ? `New contact message${fields['subject'] ? `: ${fields['subject']}` : ''}`
-        : `New registration: ${formName.replace(/-/g, ' ')}`,
+        : isEnquiry
+          ? `New enquiry: ${formName.replace(/^enquiry-/, '').replace(/-/g, ' ')}`
+          : `New registration: ${formName.replace(/-/g, ' ')}`,
       html: buildHtml(fields),
     })
 
@@ -327,7 +331,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 2 — Save to Google Sheet (non-fatal if it fails); contact messages are email-only
-    if (formName !== 'contact') {
+    if (formName !== 'contact' && !isEnquiry) {
       try {
         const isQuestionnaire = formName === 'programme-questionnaire'
         if (isQuestionnaire) {

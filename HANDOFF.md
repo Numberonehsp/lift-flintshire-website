@@ -324,3 +324,11 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 **Not done / deferred**
 - Per-route `<meta name="description">` still only updates at runtime (Helmet); crawlers get the static `index.html` description. Needs prerender/SSR — out of scope.
 - Header nav has an `Events` item; `/events` route exists on this branch (`Events.tsx` etc. still untracked).
+
+## 2026-10-06 — Youth Strength & Conditioning becomes enquiry-only
+
+- Thursday session no longer runs. `RegisterYouthStrengthConditioning.tsx` replaced by `src/pages/EnquireYouthStrengthConditioning.tsx` (route `/enquire/youth-strength-conditioning`; old `/register/...` URL redirects). Short form: guardian name/email/phone, young person's first name + school year, optional message, consent. No health or waiver data collected.
+- `api/submit-form.ts`: any `form-name` starting `enquiry-` is email-only (subject "New enquiry: …"), no sheet row, no confirmation email.
+- `programmes.ts` session line now "Enquiries open"; Programmes page CTA is "Enquire now"; Contact page link and sitemap updated; Privacy policy moves Youth out of the registration section and adds an enquiries paragraph.
+- If a `youth-strength-conditioning` row still exists in the public sheet's `Programme_Sessions` tab, it overrides the code and the Thursday line will still show. Delete that row.
+- Added `docs/SOP-editing-website-content.md` (how to edit copy manually).

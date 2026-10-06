@@ -35,7 +35,7 @@ const programmeImages: Record<string, string[]> = {
   'girls-gym-session': ['/images/oly-ohs.jpg'],
 }
 
-const REGISTER_DIRECTLY = ['couch-to-5k', 'womens-run-club', 'youth-strength-conditioning']
+const REGISTER_DIRECTLY = ['couch-to-5k', 'womens-run-club']
 
 // Condenses the full cost string ("4 weeks Free, then £16 per month") into something
 // that fits a snapshot card — the exact terms are shown in the programme's own section.
@@ -146,6 +146,8 @@ function ProgrammeSection({ programme, imageLeft = false }: { programme: Program
           <Button variant="primary" href={`/register/${programme.id}`}>
             Register now, it's free
           </Button>
+        ) : programme.id === 'youth-strength-conditioning' ? (
+          <Button variant="primary" href="/enquire/youth-strength-conditioning">Enquire now</Button>
         ) : programme.id === 'girls-gym-session' ? (
           <Button variant="primary" href="/contact">Contact us to arrange a session for your school</Button>
         ) : (

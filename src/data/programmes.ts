@@ -76,7 +76,7 @@ export const programmes: Programme[] = [
     whatToExpect:
       'Sessions combine fundamental movement skills, bodyweight and light resistance training, and games, building strength and confidence without pressure or competition. Groups are small and social.',
     sessions: [
-      { day: 'Thursday', time: '11:00–12:00', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free' },
+      { day: 'Enquiries open', time: 'Get in touch for session details', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free' },
     ],
   },
   {

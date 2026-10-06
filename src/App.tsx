@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
@@ -14,7 +14,7 @@ import Contact from './pages/Contact'
 import RegisterCouchTo5k from './pages/RegisterCouchTo5k'
 import RegisterWomensRunClub from './pages/RegisterWomensRunClub'
 import RegisterGirlsGymSession from './pages/RegisterGirlsGymSession'
-import RegisterYouthStrengthConditioning from './pages/RegisterYouthStrengthConditioning'
+import EnquireYouthStrengthConditioning from './pages/EnquireYouthStrengthConditioning'
 import Questionnaire from './pages/Questionnaire'
 import Privacy from './pages/Privacy'
 import Safeguarding from './pages/Safeguarding'
@@ -47,7 +47,8 @@ function Layout() {
           <Route path="/register/couch-to-5k" element={<RegisterCouchTo5k />} />
           <Route path="/register/womens-run-club" element={<RegisterWomensRunClub />} />
           <Route path="/register/girls-gym-session" element={<RegisterGirlsGymSession />} />
-          <Route path="/register/youth-strength-conditioning" element={<RegisterYouthStrengthConditioning />} />
+          <Route path="/enquire/youth-strength-conditioning" element={<EnquireYouthStrengthConditioning />} />
+          <Route path="/register/youth-strength-conditioning" element={<Navigate to="/enquire/youth-strength-conditioning" replace />} />
           <Route path="/questionnaire" element={<Questionnaire />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/safeguarding" element={<Safeguarding />} />
