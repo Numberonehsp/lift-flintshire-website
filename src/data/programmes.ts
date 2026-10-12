@@ -1,4 +1,3 @@
-import { RUN_CLUB_JOIN_URL, YOUTH_BEGINNERS_JOIN_URL } from './links'
 import { WOMENS_RUN_CLUB_NEXT_SESSION, COUCH_TO_5K_NEXT_COHORT_START, formatSessionDate } from './nextSessionDates'
 
 export interface SessionDetail {
@@ -20,8 +19,6 @@ export interface Programme {
   targetAudience: string
   whatToExpect: string
   sessions: SessionDetail[]
-  /** External sign-up link (GymMaster). Omit when the programme uses its own form. */
-  joinUrl?: string
 }
 
 export const programmes: Programme[] = [
@@ -42,7 +39,6 @@ export const programmes: Programme[] = [
       { day: 'Thursday', time: '18:00', location: 'Number One HSP, CH5 2TF', cost: 'Free, then £30 annually' },
       { day: 'Sunday', time: '09:00', location: 'Number One HSP, CH5 2TF', cost: 'Free, then £30 annually' },
     ],
-    joinUrl: RUN_CLUB_JOIN_URL,
   },
   {
     id: 'couch-to-5k',
@@ -109,7 +105,6 @@ export const programmes: Programme[] = [
     sessions: [
       { day: 'Wednesday', time: '16:30–17:30', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free (6-week beginners programme)' },
     ],
-    joinUrl: YOUTH_BEGINNERS_JOIN_URL,
   },
   {
     id: 'stay-strong',

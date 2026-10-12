@@ -37,7 +37,6 @@ const programmeImages: Record<string, string[]> = {
 export interface ProgrammeAction {
   label: string
   href: string
-  external?: boolean
 }
 
 interface ProgrammeSectionProps {
@@ -46,8 +45,6 @@ interface ProgrammeSectionProps {
   actions: ProgrammeAction[]
   imageLeft?: boolean
   muted?: boolean
-  /** Heading level: 'h2' for a page's main sections, 'h3' for sub-sections of a club page. */
-  headingLevel?: 'h2' | 'h3'
   children?: ReactNode
 }
 
@@ -56,16 +53,14 @@ export function ProgrammeSection({
   actions,
   imageLeft = false,
   muted = false,
-  headingLevel = 'h2',
   children,
 }: ProgrammeSectionProps) {
   const images = programmeImages[programme.id]
-  const Heading = headingLevel
 
   const content = (
     <div className="flex-1">
       <Badge className="mb-4">{programme.badge}</Badge>
-      <Heading className="font-display font-extrabold text-h2 text-ink mb-2">{programme.title}</Heading>
+      <h2 className="font-display font-extrabold text-h2 text-ink mb-2">{programme.title}</h2>
       <p className="font-body text-lg text-ink-light mb-4 leading-relaxed">{programme.tagline}</p>
       <p className="font-body text-base text-ink-light mb-4 leading-relaxed">{programme.description}</p>
       <p className="font-display font-bold text-h3 text-ink mb-1">Who is it for?</p>

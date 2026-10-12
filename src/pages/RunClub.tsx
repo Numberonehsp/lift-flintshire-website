@@ -45,7 +45,6 @@ export default function RunClub() {
           programme={couch}
           imageLeft
           muted
-          headingLevel="h2"
           actions={[{ label: "Register now, it's free", href: '/register/couch-to-5k' }]}
         />
       )}

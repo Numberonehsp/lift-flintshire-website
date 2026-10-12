@@ -13,7 +13,7 @@ function HeroStats({ stats }: { stats: { value: string; label: string; period?: 
   const period = stats.find(s => s.period)?.period
   return (
     <div className="border-t border-white/10 mt-10 pt-8">
-      <div className="grid grid-cols-3 gap-6">
+      <div className={stats.length > 3 ? 'grid grid-cols-2 md:grid-cols-4 gap-6' : 'grid grid-cols-3 gap-6'}>
         {stats.map(s => (
           <StatCard key={s.label} value={s.value} label={s.label} />
         ))}

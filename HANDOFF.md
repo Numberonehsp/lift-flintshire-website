@@ -19,7 +19,7 @@ Website for Lift Flintshire CIC, a not-for-profit community fitness organisation
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `src/hooks/useGoogleSheets.ts` | Fetches Sheet1 (impact data) + Summary tab (hero stats). Falls back to mock data. |
+| `src/hooks/useGoogleSheets.ts` | Fetches the `Form Responses 4` tab (impact session data) and, independently, the Summary tab (fallback hero stats). Uses bundled mock rows (`isSample`) when the sheet env vars are missing. |
 | `src/hooks/useContentSheets.ts` | Fetches Events + Programme_Sessions + Registrations tabs. Falls back to static data. |
 | `src/data/events.ts` | Static fallback events (used until Google Sheet is populated) |
 | `src/data/programmes.ts` | Static programme content — includes Couch to 5K and Women's Run Club |
@@ -349,9 +349,9 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 - `/programmes-events` is gone. Its content is split across `/run-club` (Couch to 5K, Women's Track Running), `/weightlifting-club` (incl. Youth Weightlifting enquiry) and `/wellbeing` (Stay Strong, Girls Gym Session). `/events` and `/safeguarding` are in the sitemap. Sitemap updated accordingly.
 - Youth programme id renamed `youth-strength-conditioning` to `youth-weightlifting` (programme id, route `/enquire/youth-weightlifting`, sheet `Programme_Sessions` id). The old `/enquire/youth-strength-conditioning` and `/register/youth-strength-conditioning` URLs redirect.
 - Navigation lives in `src/data/navigation.ts`; hamburger breakpoint is `lg`; sticky join bar added.
-- Home hero stats now come from the Impact feed (`src/lib/heroStats.ts`, built from Sheet1 rows). The Summary tab is a fallback only, used if the Impact feed is unavailable.
+- Home hero stats now come from the Impact feed (`src/lib/heroStats.ts`, built from the `Form Responses 4` tab): Attendances recorded, Sessions delivered, Programmes delivered (every programme with at least one recorded session, not just those running now). The Summary tab is fetched separately and used as a fallback when the feed fails or has no rows. In sample-data mode (no sheet env vars) Home shows no hero stats at all, so mock numbers never appear publicly.
 - The three GymMaster links live in `src/data/links.ts`: `RUN_CLUB_JOIN_URL`, `YOUTH_BEGINNERS_JOIN_URL`, `WEIGHTLIFTING_CONSULTATION_URL`.
-- Impact page: current (in-progress) month is flagged, and the "Print / save as PDF" button (`window.print()`, hidden in print via `print:hidden`) produces the one-page funder summary. Use the browser's Save as PDF.
+- Impact page: current (in-progress) month is flagged, and the "Download summary (PDF)" button calls `window.print()` (the button itself is hidden in print via `print:hidden`). Use the browser's Save as PDF. The summary spans several pages, not one. The placeholder "In their words" testimonial band is also `print:hidden` until a real quote replaces it; remove that class then.
 
 **Backend values that intentionally keep the old name** (do not rename; the backend and private sheet depend on them): `FORM_NAME` / form-name `enquiry-youth-strength-conditioning` in `EnquireYouthStrengthConditioning.tsx` and the hidden input `programme="youth-strength-conditioning"`. `api/submit-form.ts` is unchanged. Likewise the filename `EnquireYouthStrengthConditioning.tsx` was kept.
 
