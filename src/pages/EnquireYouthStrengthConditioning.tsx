@@ -58,7 +58,7 @@ function EnquiryFormContent() {
         </div>
         <h2 className="font-display font-bold text-h2 text-teal mb-3">Enquiry received!</h2>
         <p className="font-body text-base text-ink-light mb-6 leading-relaxed">
-          Thank you for your interest in Youth Strength &amp; Conditioning. We'll be in touch within 2 working days to tell you about upcoming sessions and answer any questions.
+          Thank you for your interest in Youth Weightlifting. We'll be in touch within 2 working days to tell you about upcoming sessions and answer any questions.
         </p>
         <p className="font-body text-xs text-ink-light">
           Questions in the meantime? Email{' '}
@@ -130,7 +130,7 @@ function EnquiryFormContent() {
 
       <div className="bg-surface-muted rounded-card p-4 border border-border">
         <p className="font-body text-xs text-ink-light leading-relaxed mb-3">
-          Lift Flintshire CIC will use these details only to reply to your enquiry and tell you about Youth Strength &amp; Conditioning sessions.
+          Lift Flintshire CIC will use these details only to reply to your enquiry and tell you about Youth Weightlifting sessions.
           We won't share them with third parties except where required by law. You can ask us to access, correct, or delete them at any time by emailing{' '}
           <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
             hello@liftflintshire.co.uk
@@ -172,10 +172,10 @@ export default function EnquireYouthStrengthConditioning() {
   return (
     <>
       <Seo
-        title="Enquire · Youth Strength & Conditioning · Lift Flintshire CIC"
-        description="Interested in Lift Flintshire's free Youth Strength & Conditioning sessions for Years 7–13? Send an enquiry and we'll be in touch."
-        path="/enquire/youth-strength-conditioning"
-        ogTitle="Enquire about Youth Strength & Conditioning · Lift Flintshire CIC"
+        title="Enquire · Youth Weightlifting · Lift Flintshire CIC"
+        description="Interested in Lift Flintshire's free Youth Weightlifting sessions for Years 7–13? Send an enquiry and we'll be in touch."
+        path="/enquire/youth-weightlifting"
+        ogTitle="Enquire about Youth Weightlifting · Lift Flintshire CIC"
       />
 
       <SectionWrapper variant="dark">
@@ -183,7 +183,7 @@ export default function EnquireYouthStrengthConditioning() {
           Free · Years 7–13
         </p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">
-          Youth Strength &amp; Conditioning enquiry
+          Youth Weightlifting enquiry
         </h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
           Free, coach-led strength and movement sessions for young people, no experience needed. Tell us you're interested and we'll get in touch.
