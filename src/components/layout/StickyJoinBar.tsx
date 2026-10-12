@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 interface StickyJoinBarProps {
   label: string
   href: string
@@ -5,10 +7,15 @@ interface StickyJoinBarProps {
 
 // Phone-only bar fixed to the bottom of the screen so the main action stays in thumb reach.
 export function StickyJoinBar({ label, href }: StickyJoinBarProps) {
+  // The footer renders after the page, so pad it (via a body class, see global.css)
+  // to stop the fixed bar covering its last line.
+  useEffect(() => {
+    document.body.classList.add('has-join-bar')
+    return () => document.body.classList.remove('has-join-bar')
+  }, [])
+
   return (
     <>
-      {/* Spacer so the bar never covers the footer's last line. */}
-      <div className="h-20 lg:hidden" aria-hidden="true" />
       <div className="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-ink/95 backdrop-blur-md border-t border-white/10 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <a
           href={href}
