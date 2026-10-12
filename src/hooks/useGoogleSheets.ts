@@ -161,7 +161,7 @@ export function aggregateData(rows: SheetRow[]): SheetData {
     .map(([key, d]) => {
       const [year, month] = key.split('-')
       const { _total, ...programmes } = d
-      return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, total: _total || 0, ...programmes }
+      return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, monthKey: key, total: _total || 0, ...programmes }
     })
 
   // Monthly breakdown by impact area (Running / Weightlifting / Community)
@@ -179,7 +179,7 @@ export function aggregateData(rows: SheetRow[]): SheetData {
     .map(([key, d]) => {
       const [year, month] = key.split('-')
       const { _total, ...areas } = d
-      return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, total: _total || 0, ...areas }
+      return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, monthKey: key, total: _total || 0, ...areas }
     })
 
   const allProgrammes = Array.from(new Set(rows.map(r => r.programme))).sort()
