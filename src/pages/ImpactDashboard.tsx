@@ -499,8 +499,9 @@ export default function ImpactDashboard() {
         )}
       </SectionWrapper>
 
-      {/* In their words */}
-      <SectionWrapper variant="dark">
+      {/* In their words. print:hidden keeps the placeholder quote out of the funder PDF;
+          remove it once a real, permission-cleared testimonial is in place. */}
+      <SectionWrapper variant="dark" className="print:hidden">
         <h2 className="font-display font-bold text-h2 text-white text-center mb-8">In their words</h2>
         <Testimonial
           placeholder
