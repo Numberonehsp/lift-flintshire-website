@@ -1,3 +1,4 @@
+import { RUN_CLUB_JOIN_URL, YOUTH_BEGINNERS_JOIN_URL } from './links'
 import { WOMENS_RUN_CLUB_NEXT_SESSION, COUCH_TO_5K_NEXT_COHORT_START, formatSessionDate } from './nextSessionDates'
 
 export interface SessionDetail {
@@ -7,8 +8,11 @@ export interface SessionDetail {
   cost: string
 }
 
+export type ProgrammeGroup = 'run-club' | 'weightlifting-club' | 'wellbeing'
+
 export interface Programme {
-  id: 'stay-strong' | 'run-club' | 'weightlifting' | 'couch-to-5k' | 'womens-run-club' | 'girls-gym-session' | 'youth-strength-conditioning'
+  id: 'stay-strong' | 'run-club' | 'weightlifting' | 'couch-to-5k' | 'womens-run-club' | 'girls-gym-session' | 'youth-weightlifting'
+  group: ProgrammeGroup
   title: string
   tagline: string
   badge: string
@@ -16,11 +20,33 @@ export interface Programme {
   targetAudience: string
   whatToExpect: string
   sessions: SessionDetail[]
+  /** External sign-up link (GymMaster). Omit when the programme uses its own form. */
+  joinUrl?: string
 }
 
 export const programmes: Programme[] = [
   {
+    id: 'run-club',
+    group: 'run-club',
+    title: 'Flintshire Run Club',
+    tagline: 'Running for every pace, every person',
+    badge: 'All Abilities · Running',
+    description:
+      "Flintshire Run Club is a welcoming, inclusive running group open to everyone, whether you've never run before or you're training for your next race. We focus on enjoyment, community, and getting outside together.",
+    targetAudience:
+      "Open to all abilities from complete beginners to experienced runners. We run as a group and no one gets left behind. Walkers are always welcome too.",
+    whatToExpect:
+      "We meet twice a week for guided group runs across Flintshire's beautiful countryside and parks. Sessions include a warm-up, the run itself, and a cool-down. We always finish together and often for a well-earned coffee.",
+    sessions: [
+      { day: 'Tuesday', time: '18:00', location: 'Hawarden - Tinkersdale Car Park', cost: 'Free, then £30 annually' },
+      { day: 'Thursday', time: '18:00', location: 'Number One HSP, CH5 2TF', cost: 'Free, then £30 annually' },
+      { day: 'Sunday', time: '09:00', location: 'Number One HSP, CH5 2TF', cost: 'Free, then £30 annually' },
+    ],
+    joinUrl: RUN_CLUB_JOIN_URL,
+  },
+  {
     id: 'couch-to-5k',
+    group: 'run-club',
     title: 'Couch to 5K',
     tagline: 'From first steps to 5 kilometres in 9 weeks',
     badge: 'All Ages · Beginners Welcome',
@@ -36,6 +62,7 @@ export const programmes: Programme[] = [
   },
   {
     id: 'womens-run-club',
+    group: 'run-club',
     title: "Women's Track Running",
     tagline: 'A safe, social space to run every first Saturday of the month',
     badge: 'Women & Girls · All Abilities',
@@ -50,69 +77,8 @@ export const programmes: Programme[] = [
     ],
   },
   {
-    id: 'girls-gym-session',
-    title: 'Girls Gym Session',
-    tagline: 'A free, confidence-building gym session for young women',
-    badge: 'High School Girls · Free',
-    description:
-      'Our Girls Gym Sessions give young women their first positive experience of the gym, a welcoming, coach-led session where no previous experience is needed. We focus on fun, confidence, and building a healthy relationship with movement.',
-    targetAudience:
-      'Open to girls in Years 7–13 (ages 11–18). Sessions are led by our qualified coaches and are designed specifically for young women. No gym experience required, this is exactly the kind of session you can bring a friend to.',
-    whatToExpect:
-      'A fun, structured gym session where our coaches explain how to use equipment safely and confidently. Groups are small, sessions are social, and the atmosphere is never competitive. We want every young woman who attends to leave feeling capable and welcomed.',
-    sessions: [
-      { day: 'By arrangement', time: 'TBC', location: 'Number One HSP, CH5 2TF', cost: 'Free' },
-    ],
-  },
-  {
-    id: 'youth-strength-conditioning',
-    title: 'Youth Strength & Conditioning',
-    tagline: 'Building strength, movement skills, and confidence in young people',
-    badge: 'Years 7–13 · Free',
-    description:
-      'Our Youth Strength & Conditioning sessions introduce young people to safe, structured strength training and movement skills in a fun, coach-led environment. No experience needed, every session is adapted to age and ability.',
-    targetAudience:
-      'Open to young people in Years 7–13 (ages 11–18). No previous gym experience required, our qualified coaches adapt every session to suit the group.',
-    whatToExpect:
-      'Sessions combine fundamental movement skills, bodyweight and light resistance training, and games, building strength and confidence without pressure or competition. Groups are small and social.',
-    sessions: [
-      { day: 'Enquiries open', time: 'Get in touch for session details', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free' },
-    ],
-  },
-  {
-    id: 'stay-strong',
-    title: 'Stay Strong',
-    tagline: 'Building strength and confidence in adults aged 55 and over',
-    badge: '55+ · Strength Training',
-    description:
-      'Stay Strong is our flagship programme for adults aged 55 and over. Using resistance training and functional movement, we help participants build the strength they need to stay active, independent, and confident in everyday life.',
-    targetAudience:
-      'Designed for adults aged 55 and over, including those recovering from falls, living with long-term conditions, or who have been inactive for a while. No experience required, our qualified coaches adapt every session to suit you.',
-    whatToExpect:
-      'Each 45-minute session combines seated and standing resistance exercises using bands and light weights, balance work, and time to connect with others in the group. Sessions are led by qualified strength coaches and are fully inclusive.',
-    sessions: [
-      { day: 'Wednesday', time: '11:00–11:45am', location: 'Number One HSP, CH5 2TF', cost: '4 weeks Free, then £16 per month' },
-    ],
-  },
-  {
-    id: 'run-club',
-    title: 'Flintshire Run Club',
-    tagline: 'Running for every pace, every person',
-    badge: 'All Abilities · Running',
-    description:
-      "Flintshire Run Club is a welcoming, inclusive running group open to everyone, whether you've never run before or you're training for your next race. We focus on enjoyment, community, and getting outside together.",
-    targetAudience:
-      "Open to all abilities from complete beginners to experienced runners. We run as a group and no one gets left behind. Walkers are always welcome too.",
-    whatToExpect:
-      "We meet twice a week for guided group runs across Flintshire's beautiful countryside and parks. Sessions include a warm-up, the run itself, and a cool-down. We always finish together and often for a well-earned coffee.",
-    sessions: [
-      { day: 'Tuesday', time: '18:00', location: 'Hawarden - Tinkersdale Car Park', cost: 'Free, then £30 annually' },
-      { day: 'Thursday', time: '18:00', location: 'Number One HSP, CH5 2TF', cost: 'Free, then £30 annually' },
-      { day: 'Sunday', time: '09:00', location: 'Number One HSP, CH5 2TF', cost: 'Free, then £30 annually' },
-    ],
-  },
-  {
     id: 'weightlifting',
+    group: 'weightlifting-club',
     title: 'Flintshire Weightlifting Club',
     tagline: 'Learn the snatch, clean & jerk, and build real strength',
     badge: 'All Levels · Olympic Lifting',
@@ -128,4 +94,57 @@ export const programmes: Programme[] = [
       { day: 'Friday', time: '16:30–17:30', location: 'Number One HSP, CH5 2TF', cost: '£9 per session or £25 per month' },
     ],
   },
+  {
+    id: 'youth-weightlifting',
+    group: 'weightlifting-club',
+    title: 'Youth Weightlifting',
+    tagline: 'A free 6-week beginners programme for young people',
+    badge: 'Ages 11–17 · Free',
+    description:
+      'Our Youth Weightlifting beginners programme introduces young people to safe, coached weightlifting in a fun, supportive group. It runs for six weeks, is free, and you can start at any time.',
+    targetAudience:
+      'Open to young people aged 11 to 17. No previous gym or lifting experience is needed. Our qualified coaches adapt every session to the group.',
+    whatToExpect:
+      'Sessions combine fundamental movement skills, technique work with light barbells, and games. Groups are small and social, with no pressure or competition.',
+    sessions: [
+      { day: 'Wednesday', time: '16:30–17:30', location: 'Number One HSP, CH5 2TF, Flintshire', cost: 'Free (6-week beginners programme)' },
+    ],
+    joinUrl: YOUTH_BEGINNERS_JOIN_URL,
+  },
+  {
+    id: 'stay-strong',
+    group: 'wellbeing',
+    title: 'Stay Strong',
+    tagline: 'Building strength and confidence in adults aged 55 and over',
+    badge: '55+ · Strength Training',
+    description:
+      'Stay Strong is our flagship programme for adults aged 55 and over. Using resistance training and functional movement, we help participants build the strength they need to stay active, independent, and confident in everyday life.',
+    targetAudience:
+      'Designed for adults aged 55 and over, including those recovering from falls, living with long-term conditions, or who have been inactive for a while. No experience required, our qualified coaches adapt every session to suit you.',
+    whatToExpect:
+      'Each 45-minute session combines seated and standing resistance exercises using bands and light weights, balance work, and time to connect with others in the group. Sessions are led by qualified strength coaches and are fully inclusive.',
+    sessions: [
+      { day: 'Wednesday', time: '11:00–11:45am', location: 'Number One HSP, CH5 2TF', cost: '4 weeks Free, then £16 per month' },
+    ],
+  },
+  {
+    id: 'girls-gym-session',
+    group: 'wellbeing',
+    title: 'Girls Gym Session',
+    tagline: 'A free, confidence-building gym session for young women',
+    badge: 'High School Girls · Free',
+    description:
+      'Our Girls Gym Sessions give young women their first positive experience of the gym, a welcoming, coach-led session where no previous experience is needed. We focus on fun, confidence, and building a healthy relationship with movement.',
+    targetAudience:
+      'Open to girls in Years 7–13 (ages 11–18). Sessions are led by our qualified coaches and are designed specifically for young women. No gym experience required, this is exactly the kind of session you can bring a friend to.',
+    whatToExpect:
+      'A fun, structured gym session where our coaches explain how to use equipment safely and confidently. Groups are small, sessions are social, and the atmosphere is never competitive. We want every young woman who attends to leave feeling capable and welcomed.',
+    sessions: [
+      { day: 'By arrangement', time: 'TBC', location: 'Number One HSP, CH5 2TF', cost: 'Free' },
+    ],
+  },
 ]
+
+export function programmesByGroup(group: ProgrammeGroup): Programme[] {
+  return programmes.filter(p => p.group === group)
+}
