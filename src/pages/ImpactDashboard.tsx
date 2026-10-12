@@ -31,7 +31,8 @@ function ChartDataTable({
   rows: (string | number)[][]
 }) {
   return (
-    <table className="sr-only">
+    <div className="sr-only">
+    <table>
       <caption>{caption}</caption>
       <thead>
         <tr>{columns.map(c => <th key={c} scope="col">{c}</th>)}</tr>
@@ -46,6 +47,7 @@ function ChartDataTable({
         ))}
       </tbody>
     </table>
+    </div>
   )
 }
 
