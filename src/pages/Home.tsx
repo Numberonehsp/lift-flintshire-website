@@ -24,8 +24,9 @@ function HeroStats({ stats }: { stats: { value: string; label: string; period?: 
 }
 
 export default function Home() {
-  const { data: sheetsData, loading: statsLoading, fallbackHeroStats } = useGoogleSheets()
-  const liveStats = sheetsData ? buildHeroStats(sheetsData) : []
+  const { data: sheetsData, loading: statsLoading, fallbackHeroStats, isSample } = useGoogleSheets()
+  // Never show figures built from the bundled sample rows on the public home page.
+  const liveStats = sheetsData && !isSample ? buildHeroStats(sheetsData) : []
   const heroStats = liveStats.length > 0 ? liveStats : fallbackHeroStats
 
   return (

@@ -211,7 +211,7 @@ function parseSummarySheet(values: string[][]): HeroStat[] {
 // the real sheet or the bundled sample data is known before the first render.
 const SHEET_ID = import.meta.env.VITE_GOOGLE_SHEET_ID
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY
-const HAS_SHEET_CONFIG = Boolean(SHEET_ID && API_KEY)
+export const HAS_SHEET_CONFIG = Boolean(SHEET_ID && API_KEY)
 
 export function useGoogleSheets() {
   const [data, setData] = useState<SheetData | null>(() =>
@@ -248,7 +248,8 @@ export function useGoogleSheets() {
       })
   }, [])
 
-  return { data, loading, error, fallbackHeroStats }
+  // isSample: data comes from the bundled mock rows, not the real sheet.
+  return { data, loading, error, fallbackHeroStats, isSample: !HAS_SHEET_CONFIG }
 }
 
 // toYearMonth exported for use in tests / other modules

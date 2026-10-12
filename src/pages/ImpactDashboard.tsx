@@ -371,7 +371,7 @@ function DemographicsSection({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ImpactDashboard() {
-  const { data, loading, error } = useGoogleSheets()
+  const { data, loading, error, isSample } = useGoogleSheets()
 
   const totalFemale = data?.byGender.find(g => g.name === 'Female')?.value ?? 0
   const pctFemale = data && data.totalParticipants > 0
@@ -491,7 +491,7 @@ export default function ImpactDashboard() {
             <div className="mt-4 text-center">
               <p className="font-body text-xs text-ink-light">
                 Data from Lift Flintshire CIC session records. Last updated: {data.lastUpdated}.
-                {!import.meta.env.VITE_GOOGLE_SHEET_ID &&
+                {isSample &&
                   ' (Currently showing sample data, connect a Google Sheet to show live figures.)'}
               </p>
             </div>
