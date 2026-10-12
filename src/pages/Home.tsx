@@ -24,9 +24,9 @@ function HeroStats({ stats }: { stats: { value: string; label: string; period?: 
 }
 
 export default function Home() {
-  const { data: sheetsData } = useGoogleSheets()
+  const { data: sheetsData, loading: statsLoading, fallbackHeroStats } = useGoogleSheets()
   const liveStats = sheetsData ? buildHeroStats(sheetsData) : []
-  const heroStats = liveStats.length > 0 ? liveStats : sheetsData?.heroStats ?? []
+  const heroStats = liveStats.length > 0 ? liveStats : fallbackHeroStats
 
   return (
     <>
@@ -62,7 +62,12 @@ export default function Home() {
             <Button variant="primary" href="/run-club" size="lg">Join Run Club</Button>
             <Button variant="outline" href="/weightlifting-club" size="lg" className="border-white/40 text-white hover:bg-white/10">Weightlifting Club</Button>
           </div>
-          {heroStats.length > 0 && <HeroStats stats={heroStats} />}
+          {heroStats.length > 0 ? (
+            <HeroStats stats={heroStats} />
+          ) : (
+            // Hold the stats block's height while the live feed loads to avoid layout shift.
+            statsLoading && <div className="mt-10 min-h-[9rem]" aria-hidden="true" />
+          )}
         </div>
       </section>
 
