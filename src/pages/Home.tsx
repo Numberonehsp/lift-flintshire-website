@@ -5,36 +5,28 @@ import { WaveDivider } from '../components/layout/WaveDivider'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { StatCard } from '../components/ui/StatCard'
-import { programmes } from '../data/programmes'
+import { Testimonial } from '../components/ui/Testimonial'
 import { useGoogleSheets } from '../hooks/useGoogleSheets'
-import type { HeroStat } from '../hooks/useGoogleSheets'
+import { buildHeroStats } from '../lib/heroStats'
 
-const programmeImages: Record<string, string> = {
-  'run-club':          '/images/frc-castle.jpeg',
-  'couch-to-5k':       '/images/c25k-26.jpg',
-  'womens-run-club':   '/images/women-run-club-2.jpeg',
-  'stay-strong':       '/images/strong-paul-sled-pull.jpg',
-  'weightlifting':     '/images/oly-coaching2.jpg',
-  'girls-gym-session': '/images/oly-ohs.jpg',
-}
-
-const programmeImagePositions: Record<string, string> = {
-  'stay-strong': 'object-top',
-}
-
-function HeroStats({ stats }: { stats: HeroStat[] }) {
+function HeroStats({ stats }: { stats: { value: string; label: string; period?: string }[] }) {
+  const period = stats.find(s => s.period)?.period
   return (
-    <div className="border-t border-white/10 mt-10 pt-8 grid grid-cols-2 md:grid-cols-4 gap-6">
-      {stats.map(s => (
-        <StatCard key={s.label} value={s.value} label={s.label} />
-      ))}
+    <div className="border-t border-white/10 mt-10 pt-8">
+      <div className="grid grid-cols-3 gap-6">
+        {stats.map(s => (
+          <StatCard key={s.label} value={s.value} label={s.label} />
+        ))}
+      </div>
+      {period && <p className="font-body text-xs text-white/60 text-center mt-4">{period}</p>}
     </div>
   )
 }
 
 export default function Home() {
   const { data: sheetsData } = useGoogleSheets()
-  const heroStats = sheetsData?.heroStats ?? []
+  const liveStats = sheetsData ? buildHeroStats(sheetsData) : []
+  const heroStats = liveStats.length > 0 ? liveStats : sheetsData?.heroStats ?? []
 
   return (
     <>
@@ -48,7 +40,7 @@ export default function Home() {
       {/* Hero — atmospheric photo background */}
       <section className="relative bg-ink overflow-hidden">
         <img
-          src="/images/frc-castle.jpeg"
+          src="/images/women-run-club-1.jpeg"
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-center opacity-20"
@@ -67,8 +59,8 @@ export default function Home() {
             Lift Flintshire CIC delivers inclusive strength, fitness, and wellbeing programmes across Flintshire, open to everyone regardless of age or ability. We believe movement changes lives.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Button variant="primary" href="/programmes-events" size="lg">View our programmes</Button>
-            <Button variant="outline" href="/contact" size="lg" className="border-white/40 text-white hover:bg-white/10">Get in touch</Button>
+            <Button variant="primary" href="/run-club" size="lg">Join Run Club</Button>
+            <Button variant="outline" href="/weightlifting-club" size="lg" className="border-white/40 text-white hover:bg-white/10">Weightlifting Club</Button>
           </div>
           {heroStats.length > 0 && <HeroStats stats={heroStats} />}
         </div>
@@ -86,81 +78,54 @@ export default function Home() {
         </p>
       </SectionWrapper>
 
-      <WaveDivider fromColor="#376A6B" toColor="#FAFAF8" />
-
-      {/* Aims and objectives */}
+      {/* Aims */}
       <SectionWrapper variant="light">
-        <div className="max-w-3xl mx-auto text-center mb-12">
+        <div className="max-w-3xl mx-auto text-center">
           <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Our aim</p>
-          <h2 className="font-display font-extrabold text-h2 text-ink mb-6">
-            A stronger, healthier Flintshire, open to everyone
-          </h2>
-          <p className="font-body text-lg text-ink-light leading-relaxed">
-            Our aim is simple: to improve the health, strength, and wellbeing of people across Flintshire by making fitness genuinely accessible, regardless of age, ability, income, or experience. We do this through four objectives.
+          <h2 className="font-display font-extrabold text-h2 text-ink mb-6">A stronger, healthier Flintshire, open to everyone</h2>
+          <p className="font-body text-lg text-ink-light leading-relaxed mb-6">
+            We make fitness genuinely accessible, whatever your age, ability, income or experience. Every programme starts free, and every coach is trained to welcome complete beginners.
           </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-surface rounded-card border border-border p-6 shadow-sm">
-            <p className="font-display font-black text-h3 text-teal mb-2">01</p>
-            <h3 className="font-display font-bold text-h3 text-ink mb-2">Reach underserved groups</h3>
-            <p className="font-body text-sm text-ink-light leading-relaxed">
-              Deliver programmes for people who are too often left out of fitness spaces: older adults through Stay Strong, complete beginners through Couch to 5K, and women and girls through our Women's Run Club and Girls Gym Sessions.
-            </p>
-          </div>
-          <div className="bg-surface rounded-card border border-border p-6 shadow-sm">
-            <p className="font-display font-black text-h3 text-teal mb-2">02</p>
-            <h3 className="font-display font-bold text-h3 text-ink mb-2">Remove the barriers to joining in</h3>
-            <p className="font-body text-sm text-ink-light leading-relaxed">
-              Keep cost, location, and confidence from standing in anyone's way. Every programme starts free, sessions run at accessible community venues across the county, and every coach is trained to welcome complete beginners.
-            </p>
-          </div>
-          <div className="bg-surface rounded-card border border-border p-6 shadow-sm">
-            <p className="font-display font-black text-h3 text-teal mb-2">03</p>
-            <h3 className="font-display font-bold text-h3 text-ink mb-2">Build community, not just fitness</h3>
-            <p className="font-body text-sm text-ink-light leading-relaxed">
-              Create spaces where people connect as well as move: social running groups, group strength sessions, and clubs where no one is left behind, whatever pace or level they're starting from.
-            </p>
-          </div>
-          <div className="bg-surface rounded-card border border-border p-6 shadow-sm">
-            <p className="font-display font-black text-h3 text-teal mb-2">04</p>
-            <h3 className="font-display font-bold text-h3 text-ink mb-2">Reinvest and prove our impact</h3>
-            <p className="font-body text-sm text-ink-light leading-relaxed">
-              As a Community Interest Company, every penny we raise goes back into running more sessions and reaching more people. We track and publish our impact data openly, because we believe in accountability.
-            </p>
-          </div>
+          <Link to="/about" className="font-body font-semibold text-teal hover:underline">Read our objectives →</Link>
         </div>
       </SectionWrapper>
 
-      <WaveDivider fromColor="#FAFAF8" toColor="#F0EFEA" />
-
-      {/* Programmes preview */}
+      {/* Entry cards */}
       <SectionWrapper variant="muted">
-        <div className="flex items-end justify-between mb-10">
-          <h2 className="font-display font-extrabold text-h2 text-ink">Our Programmes</h2>
-          <Link to="/programmes-events" className="font-body font-medium text-sm text-teal hover:underline hidden md:block">
-            View all →
-          </Link>
+        <h2 className="font-display font-extrabold text-h2 text-ink mb-10">Find your place</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card
+            variant="programme"
+            title="Flintshire Run Club"
+            description="Guided runs for every pace, plus Couch to 5K and Women's Track Running."
+            badge="Running"
+            href="/run-club"
+            imageSrc="/images/frc-castle.jpeg"
+          />
+          <Card
+            variant="programme"
+            title="Flintshire Weightlifting Club"
+            description="Coached Olympic lifting for all levels, and a free beginners programme for ages 11 to 17."
+            badge="Weightlifting"
+            href="/weightlifting-club"
+            imageSrc="/images/oly-coaching2.jpg"
+          />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {programmes.map(p => (
-            <Card
-              key={p.id}
-              variant="programme"
-              title={p.title}
-              description={p.tagline}
-              badge={p.badge}
-              href={`/programmes-events#${p.id}`}
-              imageSrc={programmeImages[p.id]}
-              imagePosition={programmeImagePositions[p.id]}
-            />
-          ))}
-        </div>
-        <div className="mt-8 text-center md:hidden">
-          <Button variant="outline" href="/programmes-events">View all programmes</Button>
-        </div>
+        <p className="font-body text-base text-ink-light mt-8 text-center">
+          Looking for something else? See our{' '}
+          <Link to="/wellbeing" className="text-teal font-semibold hover:underline">wellbeing programmes</Link>
+          {' '}for adults aged 55 and over and young women.
+        </p>
       </SectionWrapper>
 
-      <WaveDivider fromColor="#F0EFEA" toColor="#111111" />
+      {/* Testimonial */}
+      <SectionWrapper variant="dark">
+        <Testimonial
+          placeholder
+          quote="Replace this with a real quote from a member, with their permission."
+          attribution="Member name, programme"
+        />
+      </SectionWrapper>
 
       {/* Social strip */}
       <SectionWrapper variant="dark" innerClassName="text-center">
