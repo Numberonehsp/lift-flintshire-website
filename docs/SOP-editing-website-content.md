@@ -136,7 +136,7 @@ Alternative: in Vercel â†’ Deployments, find the last good deployment, click **â
 
 - **Google Sheet overrides the code.** If you edit session times in `programmes.ts` and nothing changes on the site, a row for that programme exists in the `Programme_Sessions` tab. Edit or delete that row. After the Youth Weightlifting change, delete any old `youth-strength-conditioning` or Thursday row if one is there.
 - **Two places for the dates.** The Women's Run Club and Couch to 5K dates live in two files. If they differ, the page and the confirmation email will disagree.
-- **Enquiries go to email only.** Youth Strength & Conditioning enquiries arrive at hello@liftflintshire.co.uk with the subject "New enquiry: youth strength conditioning". They are not saved to a sheet.
+- **Enquiries go to email only.** Youth Weightlifting enquiries arrive at hello@liftflintshire.co.uk with the subject "New enquiry: youth strength conditioning". They are not saved to a sheet.
 - **Changes need a hard refresh** (Cmd+Shift+R) to see on your own machine, because the browser caches the old page.
 - **Do not paste passwords, API keys or personal data** into any file in the repository.
 

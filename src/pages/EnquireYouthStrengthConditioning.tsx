@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Button } from '../components/ui/Button'
@@ -22,6 +23,7 @@ const inputClass =
   'w-full font-body text-sm border border-border rounded-btn px-4 py-3 bg-surface focus:outline-none focus:ring-2 focus:ring-teal min-h-[44px] placeholder:text-ink-light/60'
 const labelClass = 'block font-body font-medium text-sm text-ink mb-1'
 
+// The programme is for ages 11 to 17, so Year 13 is listed only for those still 17.
 const SCHOOL_YEARS = [
   'Year 7 (age 11–12)',
   'Year 8 (age 12–13)',
@@ -29,7 +31,7 @@ const SCHOOL_YEARS = [
   'Year 10 (age 14–15)',
   'Year 11 (age 15–16)',
   'Sixth Form / Year 12 (age 16–17)',
-  'Sixth Form / Year 13 (age 17–18)',
+  'Sixth Form / Year 13 (age 17 only)',
 ]
 
 function EnquiryFormContent() {
@@ -173,20 +175,27 @@ export default function EnquireYouthStrengthConditioning() {
     <>
       <Seo
         title="Enquire · Youth Weightlifting · Lift Flintshire CIC"
-        description="Interested in Lift Flintshire's free Youth Weightlifting sessions for Years 7–13? Send an enquiry and we'll be in touch."
+        description="Interested in Lift Flintshire's free 6-week Youth Weightlifting beginners programme for ages 11 to 17? Send an enquiry and we'll be in touch."
         path="/enquire/youth-weightlifting"
         ogTitle="Enquire about Youth Weightlifting · Lift Flintshire CIC"
       />
 
       <SectionWrapper variant="dark">
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">
-          Free · Years 7–13
+          Free · Ages 11 to 17
         </p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">
           Youth Weightlifting enquiry
         </h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
-          Free, coach-led strength and movement sessions for young people, no experience needed. Tell us you're interested and we'll get in touch.
+          A free 6-week beginners weightlifting programme for young people aged 11 to 17, coached and with no experience needed. Sessions run on Wednesdays, 16:30 to 17:30, and you can start at any time. Have a question first? Tell us you're interested and we'll get in touch.
+        </p>
+        <p className="font-body text-base text-white/70 max-w-xl leading-relaxed mt-4">
+          Ready to start? You can sign up online from the{' '}
+          <Link to="/weightlifting-club" className="text-teal-light font-semibold hover:underline">
+            Weightlifting Club page
+          </Link>
+          .
         </p>
       </SectionWrapper>
 
@@ -204,9 +213,10 @@ export default function EnquireYouthStrengthConditioning() {
             <div className="bg-teal-pale rounded-card p-4 border border-teal/20">
               <p className="font-body font-semibold text-sm text-teal mb-2">About the sessions</p>
               <ul className="font-body text-sm text-ink-light space-y-1">
-                <li><strong className="text-ink">Who:</strong> Young people in Years 7–13 (ages 11–18)</li>
+                <li><strong className="text-ink">Who:</strong> Young people aged 11 to 17</li>
+                <li><strong className="text-ink">When:</strong> Wednesdays, 16:30–17:30 (start any time)</li>
                 <li><strong className="text-ink">Location:</strong> Number One HSP, CH5 2TF, Flintshire</li>
-                <li><strong className="text-ink">Cost:</strong> Free</li>
+                <li><strong className="text-ink">Cost:</strong> Free 6-week beginners programme</li>
               </ul>
             </div>
 
