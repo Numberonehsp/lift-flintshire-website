@@ -400,6 +400,13 @@ export default function ImpactDashboard() {
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed">
           We believe in being open about the difference we're making. These figures come live from our session records.
         </p>
+        {data && (
+          <p className="font-body text-xs text-white/60 max-w-xl mt-3">
+            Data from Lift Flintshire CIC session records. Last updated: {data.lastUpdated}.
+            {isSample &&
+              ' (Currently showing sample data, connect a Google Sheet to show live figures.)'}
+          </p>
+        )}
         <Button variant="primary" onClick={() => window.print()} className="mt-6 print:hidden">
           Download summary (PDF)
         </Button>
@@ -486,15 +493,6 @@ export default function ImpactDashboard() {
 
             {/* ── Programme Reach ──────────────────────────────── */}
             <ProgrammeReach byProgramme={data.byProgramme} allProgrammes={data.allProgrammes} />
-
-            {/* ── Data note ────────────────────────────────────── */}
-            <div className="mt-4 text-center">
-              <p className="font-body text-xs text-ink-light">
-                Data from Lift Flintshire CIC session records. Last updated: {data.lastUpdated}.
-                {isSample &&
-                  ' (Currently showing sample data, connect a Google Sheet to show live figures.)'}
-              </p>
-            </div>
           </>
         )}
       </SectionWrapper>
