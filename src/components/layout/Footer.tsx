@@ -1,12 +1,5 @@
 import { Link } from 'react-router-dom'
-
-const navLinks = [
-  { label: 'Home', to: '/' },
-  { label: 'Programmes & Events', to: '/programmes-events' },
-  { label: 'Impact Dashboard', to: '/impact' },
-  { label: 'About Us', to: '/about' },
-  { label: 'Contact', to: '/contact' },
-]
+import { footerNav } from '../../data/navigation'
 
 function InstagramIcon() {
   return (
@@ -51,7 +44,7 @@ export function Footer() {
           <div>
             <h3 className="font-display font-bold text-base text-white mb-4 uppercase tracking-wider">Navigation</h3>
             <ul className="space-y-1">
-              {navLinks.map(link => (
+              {footerNav.map(link => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
