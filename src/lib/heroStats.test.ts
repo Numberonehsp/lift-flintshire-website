@@ -34,7 +34,7 @@ describe('buildHeroStats', () => {
     expect(stats.map(s => s.label)).toEqual([
       'Attendances recorded',
       'Sessions delivered',
-      'Programmes running',
+      'Programmes delivered',
     ])
     expect(stats.map(s => s.value)).toEqual(['90+', '3', '2'])
   })

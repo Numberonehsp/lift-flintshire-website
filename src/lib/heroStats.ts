@@ -20,6 +20,6 @@ export function buildHeroStats(data: SheetData): LiveHeroStat[] {
   return [
     { value: roundedCount(data.totalParticipants), label: 'Attendances recorded', period },
     { value: roundedCount(data.totalSessions), label: 'Sessions delivered', period },
-    { value: String(data.byProgramme.length), label: 'Programmes running', period },
+    { value: String(data.byProgramme.length), label: 'Programmes delivered', period },
   ]
 }

@@ -423,7 +423,7 @@ export default function ImpactDashboard() {
                 <StatNum value={data.totalSessions} colour="white" />
               </div>
               <div className="rounded-card p-6 flex flex-col justify-between min-h-[160px]" style={{ backgroundColor: '#111111' }}>
-                <p className="font-body text-sm font-semibold text-white/70">Programmes running</p>
+                <p className="font-body text-sm font-semibold text-white/70">Programmes delivered</p>
                 <StatNum value={numProgrammes} colour="white" />
               </div>
             </div>
