@@ -133,7 +133,7 @@ function EnquiryFormContent() {
 
       <div className="bg-surface-muted rounded-card p-4 border border-border">
         <p className="font-body text-xs text-ink-light leading-relaxed mb-3">
-          Lift Flintshire CIC will use these details only to reply to your enquiry and tell you about Youth Weightlifting sessions.
+          Lift Flintshire CIC will use these details only to reply to your enquiry.
           We won't share them with third parties except where required by law. You can ask us to access, correct, or delete them at any time by emailing{' '}
           <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
             hello@liftflintshire.co.uk

@@ -83,7 +83,7 @@ export default function Privacy() {
           <ul className={listClass}>
             <li><strong>Vercel</strong> — our website and form submission service are hosted on Vercel's infrastructure (USA). Vercel Inc. participates in the EU–US Data Privacy Framework and provides appropriate safeguards for international transfers.</li>
             <li><strong>Resend</strong> — form submissions are emailed to us via Resend, an email delivery service (USA). Resend relies on Standard Contractual Clauses to provide appropriate safeguards for international transfers.</li>
-            <li><strong>Brevo</strong> — if you choose to receive email updates from us (see section 6), your email address and the details listed there are held by Brevo, the email service we use to send them. We send Brevo only those details, and nothing from health, waiver or emergency contact forms.</li>
+            <li><strong>Brevo</strong> — if you choose to receive email updates from us (see section 6), your email address and the details listed there are held by Brevo, the email service we use to send them. We send Brevo only those details, never health, medical, emergency contact, date of birth or waiver information.</li>
             <li><strong>Google Sheets</strong> — participant registration records are also saved to a private Google Sheet accessible only to authorised Lift Flintshire CIC staff. Google LLC participates in the EU–US Data Privacy Framework. Contact enquiries are not saved to this sheet.</li>
           </ul>
           <p className={bodyClass}>

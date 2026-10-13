@@ -141,7 +141,7 @@ export default function Home() {
           <p className="font-body text-base text-ink-light leading-relaxed mb-6">
             Occasional emails about new programmes, events and session changes across Flintshire.
           </p>
-          <NewsletterSignup tone="light" />
+          <NewsletterSignup tone="light" label="Newsletter sign-up" />
         </div>
       </SectionWrapper>
 

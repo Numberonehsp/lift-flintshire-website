@@ -178,6 +178,39 @@ describe('upsertContact', () => {
     expect(contactCalls(calls).every(c => bodyOf(c).attributes !== undefined)).toBe(true)
   })
 
+  it('on a 404 from the contact upsert, reloads the list ids and retries once', async () => {
+    const lists = [{ id: 7, name: 'Newsletter' }]
+    const { calls } = stubBrevo({
+      lists,
+      contact: (_body, attempt) => {
+        if (attempt === 1) {
+          lists[0] = { id: 8, name: 'Newsletter' } // the cached list was deleted and recreated
+          return json({ code: 'document_not_found', message: 'List not found' }, 404)
+        }
+        return json({ id: 21 }, 201)
+      },
+    })
+    const listGets = () => calls.filter(c => new URL(c.url).pathname === '/v3/contacts/lists' && method(c.init) === 'GET')
+
+    await upsertContact({ email: 'a@example.com', lists: ['Newsletter'], source: 'x' })
+
+    const posts = contactCalls(calls)
+    expect(posts).toHaveLength(2)
+    expect(bodyOf(posts[0]).listIds).toEqual([7])
+    expect(bodyOf(posts[1]).listIds).toEqual([8])
+    expect(bodyOf(posts[1]).attributes).toBeDefined()
+    expect(listGets()).toHaveLength(2)
+  })
+
+  it('retries a stale-list failure only once, then throws', async () => {
+    const { calls } = stubBrevo({
+      lists: [{ id: 7, name: 'Newsletter' }],
+      contact: () => json({ code: 'document_not_found', message: 'nope' }, 404),
+    })
+    await expect(upsertContact({ email: 'a@example.com', lists: ['Newsletter'] })).rejects.toThrow(/404/)
+    expect(contactCalls(calls)).toHaveLength(2)
+  })
+
   it('throws on a non-2xx contact response', async () => {
     stubBrevo({
       lists: [{ id: 7, name: 'Newsletter' }],

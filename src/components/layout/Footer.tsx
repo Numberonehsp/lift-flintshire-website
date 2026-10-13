@@ -81,7 +81,7 @@ export function Footer() {
 
             <div className="mt-6">
               <p className="font-body font-semibold text-sm text-white mb-3">Get our news by email</p>
-              <NewsletterSignup tone="dark" />
+              <NewsletterSignup tone="dark" label="Footer newsletter sign-up" />
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Button } from '../ui/Button'
 import { newsletterInputError } from '../../lib/newsletter'
@@ -10,6 +10,8 @@ interface Props {
   /** `dark` for the footer and dark sections, `light` for light or muted sections. */
   tone?: 'dark' | 'light'
   className?: string
+  /** Accessible name for the form; must differ when more than one sign-up form is on a page. */
+  label?: string
 }
 
 const CONSENT_TEXT =
@@ -26,7 +28,7 @@ async function subscribe(email: string, website: string) {
   if (!res.ok) throw new Error('Subscribe failed')
 }
 
-export function NewsletterSignup({ tone = 'light', className = '' }: Props) {
+export function NewsletterSignup({ tone = 'light', className = '', label = 'Newsletter sign-up' }: Props) {
   const id = useId()
   const emailId = `${id}-email`
   const consentId = `${id}-consent`
@@ -35,6 +37,12 @@ export function NewsletterSignup({ tone = 'light', className = '' }: Props) {
 
   const [formState, setFormState] = useState<FormState>('idle')
   const [inputError, setInputError] = useState<NewsletterInputError | null>(null)
+  const successRef = useRef<HTMLDivElement>(null)
+
+  // The form disappears on success, which would drop keyboard focus to the page; move it to the message.
+  useEffect(() => {
+    if (formState === 'success') successRef.current?.focus()
+  }, [formState])
 
   const dark = tone === 'dark'
   const labelClass = `block font-body font-medium text-sm mb-1 ${dark ? 'text-white' : 'text-ink'}`
@@ -72,7 +80,7 @@ export function NewsletterSignup({ tone = 'light', className = '' }: Props) {
 
   if (formState === 'success') {
     return (
-      <div role="status" className={className}>
+      <div role="status" ref={successRef} tabIndex={-1} className={`focus:outline-none ${className}`}>
         <p className={`font-body font-semibold text-sm ${dark ? 'text-teal-light' : 'text-teal'}`}>
           Thanks, you're on the list.
         </p>
@@ -83,7 +91,7 @@ export function NewsletterSignup({ tone = 'light', className = '' }: Props) {
   const message = inputError?.message ?? (formState === 'error' ? SUBMIT_ERROR : null)
 
   return (
-    <form onSubmit={handleSubmit} noValidate className={`relative ${className}`} aria-label="Newsletter sign-up">
+    <form onSubmit={handleSubmit} noValidate className={`relative ${className}`} aria-label={label}>
       <label htmlFor={emailId} className={labelClass}>Email address</label>
       <div className="flex flex-col sm:flex-row gap-3">
         <input

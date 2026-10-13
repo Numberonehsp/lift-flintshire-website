@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  entryConfirmationHtml, entryConfirmationSubject, organiserNotification, isFreeAmount,
+  entryConfirmationHtml, entryConfirmationSubject, organiserNotification, isFreeAmount, subjectText,
 } from './entryEmails.js'
 
 const base = {
@@ -72,5 +72,27 @@ describe('organiserNotification', () => {
   it('escapes the entrant email in the html', () => {
     const n = organiserNotification({ ...base, email: 'a<x>@example.com', amount: '1.00' })
     expect(n.html).toContain('a&lt;x&gt;@example.com')
+  })
+})
+
+describe('subject line safety', () => {
+  it('replaces CR/LF with a space, trims, and caps the length', () => {
+    expect(subjectText('Run\r\nBcc: x@y.com', 50)).toBe('Run Bcc: x@y.com')
+    expect(subjectText('  Track Run  ', 50)).toBe('Track Run')
+    expect(subjectText('a'.repeat(200), 20)).toHaveLength(20)
+  })
+
+  it('applies to the entrant and organiser subjects', () => {
+    const subject = entryConfirmationSubject(`Run\r\n${'x'.repeat(300)}`, 'LF26-ABCDEF')
+    expect(subject).not.toMatch(/[\r\n]/)
+    expect(subject.length).toBeLessThanOrEqual(160)
+    expect(subject.endsWith('(LF26-ABCDEF)')).toBe(true)
+
+    const notice = organiserNotification({
+      ...base, amount: '0.00', email: 'a@example.com',
+      eventTitle: 'Run\nX', firstName: `Ann\r\n${'y'.repeat(200)}`,
+    })
+    expect(notice.subject).not.toMatch(/[\r\n]/)
+    expect(notice.subject.length).toBeLessThanOrEqual(220)
   })
 })

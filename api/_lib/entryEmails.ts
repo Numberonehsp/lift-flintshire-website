@@ -24,8 +24,16 @@ export interface EntryEmailDetails {
   amount: string
 }
 
+const MAX_TITLE_IN_SUBJECT = 120
+const MAX_NAME_IN_SUBJECT = 60
+
+/** Subject-safe text: CR/LF (and other line breaks) become a space, then trimmed and capped. */
+export function subjectText(value: string, max: number): string {
+  return value.replace(/[\r\n\u2028\u2029]+/g, ' ').trim().slice(0, max).trim()
+}
+
 export function entryConfirmationSubject(eventTitle: string, ref: string): string {
-  return `Entry confirmed: ${eventTitle} (${ref})`
+  return `Entry confirmed: ${subjectText(eventTitle, MAX_TITLE_IN_SUBJECT)} (${ref})`
 }
 
 export function entryConfirmationHtml({ firstName, eventTitle, tierLabel, ref, amount }: EntryEmailDetails): string {
@@ -59,7 +67,7 @@ export function organiserNotification(d: EntryEmailDetails & { email: string }):
   const free = isFreeAmount(d.amount)
   const price = free ? 'free entry' : `£${escapeHtml(d.amount)}`
   return {
-    subject: `New ${free ? 'free' : 'paid'} entry: ${d.eventTitle} — ${d.firstName} (${d.ref})`,
+    subject: `New ${free ? 'free' : 'paid'} entry: ${subjectText(d.eventTitle, MAX_TITLE_IN_SUBJECT)} — ${subjectText(d.firstName, MAX_NAME_IN_SUBJECT)} (${d.ref})`,
     html: `<p>${escapeHtml(d.firstName)} (${escapeHtml(d.email)}) entered ${escapeHtml(d.eventTitle)} — ${escapeHtml(d.tierLabel)}, ${price}. Reference ${escapeHtml(d.ref)}.</p>`,
   }
 }

@@ -114,7 +114,7 @@ export async function upsertContact(params: UpsertContactParams): Promise<void> 
   const apiKey = process.env.BREVO_API_KEY
   if (!apiKey) return
 
-  const listIds = await resolveListIds(apiKey, params.lists)
+  let listIds = await resolveListIds(apiKey, params.lists)
 
   const attributes: Record<string, string | number | boolean> = {
     ...(params.attributes ?? {}),
@@ -139,6 +139,16 @@ export async function upsertContact(params: UpsertContactParams): Promise<void> 
           'Check that CONSENT_DATE and CONSENT_SOURCE exist in Brevo.',
       )
       await brevoFetch(apiKey, 'contact upsert (without attributes)', '/contacts', { method: 'POST', body: base })
+      return
+    }
+    // Any other 400/404 may be a cached list id that no longer exists (a list deleted in Brevo
+    // while this instance was warm). Reload the list ids and retry once; a second failure throws.
+    if (err instanceof BrevoError && (err.status === 400 || err.status === 404)) {
+      resetListCache()
+      listIds = await resolveListIds(apiKey, params.lists)
+      await brevoFetch(apiKey, 'contact upsert (after list reload)', '/contacts', {
+        method: 'POST', body: { ...base, listIds, attributes },
+      })
       return
     }
     throw err
