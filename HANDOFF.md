@@ -397,12 +397,15 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 **Private sheet change**
 - `Event_Entries` has a new last column `Marketing Consent` (column AH): `yes` or blank. It must be added to the header row by hand (step 5 below). The Stripe webhook reads it so paid entries are added to Brevo only after payment is confirmed.
 
+- `Registrations` has a new last column `Marketing Consent` (column W): `yes` or blank. Add the header by hand (step 5b below).
+
 **Steps only Ed can do**
 1. In Brevo: Contacts, Settings, Contact attributes, create two text attributes: `CONSENT_DATE` and `CONSENT_SOURCE`. Check that `FIRSTNAME` and `LASTNAME` exist (Brevo normally has them).
 2. In Brevo: Contacts, Lists, create a folder (for example "Website") and note its numeric id.
 3. In Brevo: SMTP and API, create an API key. Copy it straight into Vercel (Project, Settings, Environment Variables) as `BREVO_API_KEY` for Production and Preview. Do not paste it into chat, a file in the repo, or a `VITE_` variable. Add `BREVO_FOLDER_ID` the same way.
 4. In Brevo: Senders, domains and dedicated IPs, add and authenticate `liftflintshire.co.uk` (DKIM and DMARC records) before sending campaigns. Resend's existing records on that domain do not cover Brevo.
 5. In the private sheet, `Event_Entries` tab: add a header `Marketing Consent` in column AH, the next free column after `Runner 4 Email`.
+5b. In the private sheet, `Registrations` tab: add a header `Marketing Consent` in column W, the next free column after `Referral Source`. New registrations write `yes` or blank there (the row layout lives in `api/_lib/registrationSheet.ts`). The code only writes the header itself when the tab is empty, so an existing tab needs this by hand.
 6. In the Events sheet: fill the `programme` column (H) for each event, for example `womens-run-club` for the Nov_WTR event.
 7. Redeploy after the env vars are set.
 8. Recommended: add a Vercel Firewall rate-limit rule on `/api/create-entry` (Vercel, Project, Firewall, add a rate-limit rule, for example a small number of requests per minute per IP). This does not exist yet. Free entries skip Stripe, so without a rate limit a script could use up a free event's places or trigger many confirmation emails. The honeypot and the duplicate-email check reduce this but do not stop a determined script.
