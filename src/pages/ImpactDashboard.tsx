@@ -497,14 +497,11 @@ export default function ImpactDashboard() {
         )}
       </SectionWrapper>
 
-      {/* In their words. print:hidden keeps the placeholder quote out of the funder PDF;
-          remove it once a real, permission-cleared testimonial is in place. */}
-      <SectionWrapper variant="dark" className="print:hidden">
+      <SectionWrapper variant="dark">
         <h2 className="font-display font-bold text-h2 text-white text-center mb-8">In their words</h2>
         <Testimonial
-          placeholder
-          quote="Replace this with a real quote from a participant, with their permission."
-          attribution="Participant name, programme"
+          quote="Do it! I have never been a runner, could never understand why people run but at the age of 52 I have found a love for running which has totally surprised me. I am now buying wet/cold weather running clothes and running socks! I have even got up at 5.45am to fit a run in before work. Who am I?! There is accountability, encouragement and before you know it you are running for 30 mins. Do it! You won't regret it 🏃‍♀️🏃✨️"
+          attribution="Claire, Couch to 5 km"
         />
       </SectionWrapper>
     </>
