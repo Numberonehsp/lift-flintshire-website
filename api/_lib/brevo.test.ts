@@ -141,7 +141,7 @@ describe('upsertContact', () => {
     expect(listGets()).toHaveLength(2)
   })
 
-  it('retries once without attributes when Brevo rejects them with a 400', async () => {
+  it('retries once without attributes when Brevo answers 400 invalid_parameter', async () => {
     const { calls } = stubBrevo({
       lists: [{ id: 7, name: 'Newsletter' }],
       contact: (body, attempt) =>
@@ -150,7 +150,6 @@ describe('upsertContact', () => {
           : json({ id: 21 }, 201),
     })
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     await upsertContact({ email: 'a@example.com', firstName: 'Ann', lists: ['Newsletter'], source: 'x' })
 
@@ -162,7 +161,21 @@ describe('upsertContact', () => {
     expect(retry.email).toBe('a@example.com')
     expect(retry.listIds).toEqual([7])
     expect(retry.updateEnabled).toBe(true)
-    expect(errSpy.mock.calls.length + warnSpy.mock.calls.length).toBeGreaterThan(0)
+    expect(errSpy).toHaveBeenCalledTimes(1)
+    const line = errSpy.mock.calls[0].map(String).join(' ')
+    expect(line).toContain('BREVO_CONSENT_ATTRS_DROPPED')
+    expect(line).not.toContain('a@example.com')
+    expect(line).not.toContain('Ann')
+  })
+
+  it('does not retry without attributes for a 400 with any other code', async () => {
+    const { calls } = stubBrevo({
+      lists: [{ id: 7, name: 'Newsletter' }],
+      contact: () => json({ code: 'missing_parameter', message: 'email is missing' }, 400),
+    })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    await expect(upsertContact({ email: 'a@example.com', lists: ['Newsletter'], source: 'x' })).rejects.toThrow(/400/)
+    expect(contactCalls(calls).every(c => bodyOf(c).attributes !== undefined)).toBe(true)
   })
 
   it('throws on a non-2xx contact response', async () => {

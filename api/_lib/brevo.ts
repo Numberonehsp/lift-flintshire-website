@@ -8,6 +8,7 @@
 
 const BASE_URL = 'https://api.brevo.com/v3'
 const PAGE_SIZE = 50
+const INVALID_PARAMETER = 'invalid_parameter'
 
 export interface UpsertContactParams {
   email: string
@@ -125,10 +126,12 @@ export async function upsertContact(params: UpsertContactParams): Promise<void> 
     await brevoFetch(apiKey, 'contact upsert', '/contacts', { method: 'POST', body: { ...base, attributes } })
   } catch (err) {
     // Brevo rejects attributes that do not exist in the account yet (CONSENT_DATE / CONSENT_SOURCE
-    // must be created by hand). Keep the list membership by retrying once without attributes.
-    if (err instanceof BrevoError && err.status === 400) {
-      console.warn(
-        `Brevo rejected contact attributes (${err.code ?? 'no code'}); retrying without attributes. ` +
+    // must be created by hand) with `invalid_parameter` ("wrong format or type", per
+    // developers.brevo.com/docs/how-it-works, checked 2026-10-13). Only that code is retried,
+    // once, without attributes, to keep the list membership. Fixed tag, no values.
+    if (err instanceof BrevoError && err.status === 400 && err.code === INVALID_PARAMETER) {
+      console.error(
+        'BREVO_CONSENT_ATTRS_DROPPED: Brevo answered invalid_parameter; retrying without attributes. ' +
           'Check that CONSENT_DATE and CONSENT_SOURCE exist in Brevo.',
       )
       await brevoFetch(apiKey, 'contact upsert (without attributes)', '/contacts', { method: 'POST', body: base })
