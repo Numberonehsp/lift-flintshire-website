@@ -33,6 +33,15 @@ export default function WeightliftingClub() {
       />
 
       <SectionWrapper variant="dark">
+        <div className="flex flex-col items-center gap-8 lg:flex-row-reverse lg:justify-between lg:gap-16">
+          <img
+            src="/images/logo-weightlifting-club.svg"
+            alt="Flintshire Weightlifting Club logo"
+            width={500}
+            height={500}
+            className="w-40 sm:w-48 lg:w-72 h-auto flex-shrink-0"
+          />
+          <div>
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">Lift Flintshire</p>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-4">Flintshire Weightlifting Club</h1>
         <p className="font-body text-lg text-white/70 max-w-xl leading-relaxed mb-8">
@@ -43,6 +52,8 @@ export default function WeightliftingClub() {
           <Button variant="outline" size="lg" href="#youth-weightlifting" className="border-white/40 text-white hover:bg-white/10">
             Ages 11 to 17
           </Button>
+        </div>
+          </div>
         </div>
       </SectionWrapper>
 
