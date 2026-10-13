@@ -98,6 +98,18 @@ describe('brevoContactForSubmission', () => {
     expect(JSON.stringify(contact)).not.toMatch(/Sam|Year 8|Gail|Jones|07700/)
   })
 
+  it('returns null for a guardian-led registration (guardian-email filled in)', () => {
+    expect(brevoContactForSubmission('register-couch-to-5k', {
+      ...register, 'guardian-email': 'gail@example.com', 'marketing-consent': 'yes',
+    })).toBeNull()
+  })
+
+  it("uses the registrant's own trimmed email when guardian-email is empty", () => {
+    expect(brevoContactForSubmission('register-couch-to-5k', {
+      ...register, email: '  ann@example.com ', 'guardian-email': '  ', 'marketing-consent': 'yes',
+    })).toEqual({ email: 'ann@example.com', firstName: 'Ann', lastName: 'Smith', lists: ['Newsletter', 'Programme: couch-to-5k'] })
+  })
+
   it('returns null for a register form with an unknown programme id', () => {
     expect(brevoContactForSubmission('register-made-up', { ...register, 'marketing-consent': 'yes' })).toBeNull()
   })

@@ -62,7 +62,8 @@ export interface BrevoContact {
  * - No `marketing-consent === 'yes'` -> null.
  * - Youth enquiry -> the parent or guardian's email only, guardian list only. Never the
  *   young person's name, school year or the guardian's name.
- * - `register-<known programme>` -> the registrant (or guardian) email and name, Newsletter plus programme list.
+ * - `register-<known programme>` -> the registrant's own email and name, Newsletter plus programme list.
+ *   A registration with a guardian email filled in -> null.
  * - Anything else (contact, other enquiries, questionnaires) -> null.
  */
 export function brevoContactForSubmission(
@@ -77,7 +78,10 @@ export function brevoContactForSubmission(
   }
 
   if (formName.startsWith(REGISTER_PREFIX)) {
-    const email = (fields['guardian-email'] ?? fields['email'])?.trim() ?? ''
+    // Guardian-led registrations need their own explicit consent path; never guess whose
+    // address to add. Only the registrant's own email is used.
+    if (fields['guardian-email']?.trim()) return null
+    const email = fields['email']?.trim() ?? ''
     if (!isValidEmail(email)) return null
     const lists = listsForRegistration(formName)
     if (!lists) return null
