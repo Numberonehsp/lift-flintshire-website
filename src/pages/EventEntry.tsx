@@ -105,7 +105,8 @@ export default function EventEntry() {
     )
   }
 
-  const priceLabel = (availableTier.pricePence / 100).toFixed(2)
+  const isFree = availableTier.pricePence === 0
+  const priceLabel = isFree ? 'Free' : `£${(availableTier.pricePence / 100).toFixed(2)}`
   const isTeam = availableTier.tierId === TEAM_TIER_ID
 
   return (
@@ -122,7 +123,7 @@ export default function EventEntry() {
           ← Back to event
         </Link>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-2">{event.title}</h1>
-        <p className="font-body text-white/70">{availableTier.label}, £{priceLabel}</p>
+        <p className="font-body text-white/70">{availableTier.label}, {priceLabel}</p>
       </SectionWrapper>
 
       <SectionWrapper variant="light" innerClassName="max-w-2xl">
@@ -131,10 +132,12 @@ export default function EventEntry() {
             <div>
               <p className="font-display font-bold text-ink">{availableTier.label}</p>
               <p className="font-body text-xs text-ink-light">
-                Price includes all card and booking fees, no extras at checkout.
+                {isFree
+                  ? 'No payment needed, your place is confirmed as soon as you submit.'
+                  : 'Price includes all card and booking fees, no extras at checkout.'}
               </p>
             </div>
-            <p className="font-display font-black text-teal text-2xl">£{priceLabel}</p>
+            <p className="font-display font-black text-teal text-2xl">{priceLabel}</p>
           </div>
 
           {isTeam && (
@@ -354,7 +357,9 @@ export default function EventEntry() {
           </div>
 
           <Button type="submit" variant="primary" size="lg" className="w-full" disabled={state === 'submitting'}>
-            {state === 'submitting' ? 'Redirecting to secure payment…' : `Pay £${priceLabel} and confirm entry`}
+            {isFree
+              ? (state === 'submitting' ? 'Confirming your entry…' : 'Enter for free')
+              : (state === 'submitting' ? 'Redirecting to secure payment…' : `Pay ${priceLabel} and confirm entry`)}
           </Button>
 
           {state === 'conflict' && (
@@ -367,7 +372,7 @@ export default function EventEntry() {
           )}
           {state === 'error' && (
             <p className="font-body text-xs text-red-600 text-center mt-3">
-              Something went wrong starting checkout. Please try again or email{' '}
+              Something went wrong {isFree ? 'saving your entry' : 'starting checkout'}. Please try again or email{' '}
               <a href="mailto:hello@liftflintshire.co.uk" className="underline">hello@liftflintshire.co.uk</a>.
             </p>
           )}

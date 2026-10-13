@@ -2,7 +2,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { randomBytes } from 'node:crypto'
 import Stripe from 'stripe'
 import { parseTicketTypesSheet, pickAvailableTier } from './_lib/tickets.js'
-import { countTaken, appendPendingEntry, HOLD_MS } from './_lib/entriesSheet.js'
+import { countTaken, appendPendingEntry, appendFreeEntry, HOLD_MS } from './_lib/entriesSheet.js'
+import type { PendingEntry } from './_lib/entriesSheet.js'
+import { finaliseEntry, describeError } from './_lib/finaliseEntry.js'
 
 const REQUIRED = [
   'eventId', 'eventTitle', 'tierId', 'first-name', 'last-name', 'email',
@@ -56,6 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
+  let isFree = false
   try {
     const tiers = parseTicketTypesSheet(await fetchTicketTypes(), f.eventId)
     if (tiers.length === 0) {
@@ -74,8 +77,55 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const entryRef = generateEntryRef()
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
     const site = process.env.SITE_URL ?? 'https://liftflintshire.co.uk'
+
+    const entry: PendingEntry = {
+      eventId: f.eventId,
+      tierId: tier.tierId,
+      tierLabel: tier.label,
+      entryRef,
+      sessionId: '',
+      firstName: f['first-name'],
+      lastName: f['last-name'],
+      email: f.email,
+      phone: f.phone ?? '',
+      dob: f['date-of-birth'],
+      gender: f.gender ?? '',
+      emergencyName: f['emergency-name'],
+      emergencyPhone: f['emergency-phone'],
+      medical: f['medical-details'] ?? '',
+      waiverAgreed: f['waiver-agreed'],
+      photoConsent: f['photo-consent'] ?? '',
+      gdprConsent: f['gdpr-consent'],
+      teamName: f['team-name'] ?? '',
+      clubOrGym: f['club-or-gym'] ?? '',
+      captainLiabilityAgreed: f['captain-liability-agreed'] ?? '',
+      runners: [1, 2, 3, 4].map(n => ({
+        name: f[`runner${n}-name`] ?? '',
+        email: f[`runner${n}-email`] ?? '',
+      })),
+    }
+
+    // Free tier: no Stripe. The availability check above has already run, and the row is
+    // written as `paid` (£0.00) so it counts against capacity like any confirmed entry.
+    if (tier.pricePence === 0) {
+      isFree = true
+      // Fails closed: if the row can't be saved, the user sees an error and is not confirmed.
+      await appendFreeEntry({ ...entry, sessionId: 'free' })
+      try {
+        await finaliseEntry({
+          entryRef, eventId: f.eventId, eventTitle: f.eventTitle, tierLabel: tier.label,
+          firstName: f['first-name'], lastName: f['last-name'], email: f.email, amount: '0.00',
+          marketingConsent: false,
+        })
+      } catch (finaliseErr) {
+        // finaliseEntry catches its own errors; this is a backstop so a saved entry is never reported as failed.
+        console.error(`finaliseEntry failed for ${entryRef} (entry is saved):`, describeError(finaliseErr))
+      }
+      return res.status(200).json({ url: `${site}/events/entry-confirmed?ref=${entryRef}` })
+    }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
     // Stripe receives no personal data beyond the email it needs for the receipt —
     // health and contact details stay in the private sheet.
@@ -97,36 +147,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
 
     // Fails closed: if this throws, the user sees an error and never reaches payment.
-    await appendPendingEntry({
-      eventId: f.eventId,
-      tierId: tier.tierId,
-      tierLabel: tier.label,
-      entryRef,
-      sessionId: session.id,
-      firstName: f['first-name'],
-      lastName: f['last-name'],
-      email: f.email,
-      phone: f.phone ?? '',
-      dob: f['date-of-birth'],
-      gender: f.gender ?? '',
-      emergencyName: f['emergency-name'],
-      emergencyPhone: f['emergency-phone'],
-      medical: f['medical-details'] ?? '',
-      waiverAgreed: f['waiver-agreed'],
-      photoConsent: f['photo-consent'] ?? '',
-      gdprConsent: f['gdpr-consent'],
-      teamName: f['team-name'] ?? '',
-      clubOrGym: f['club-or-gym'] ?? '',
-      captainLiabilityAgreed: f['captain-liability-agreed'] ?? '',
-      runners: [1, 2, 3, 4].map(n => ({
-        name: f[`runner${n}-name`] ?? '',
-        email: f[`runner${n}-email`] ?? '',
-      })),
-    })
+    await appendPendingEntry({ ...entry, sessionId: session.id })
 
     return res.status(200).json({ url: session.url })
   } catch (err) {
-    console.error('create-entry error:', err)
-    return res.status(500).json({ error: 'Could not start checkout. Please try again.' })
+    // Not the raw error: a Sheets API error carries the request body, which holds the entrant's details.
+    console.error('create-entry error:', describeError(err))
+    return res.status(500).json({
+      error: isFree ? 'Could not save your entry. Please try again.' : 'Could not start checkout. Please try again.',
+    })
   }
 }

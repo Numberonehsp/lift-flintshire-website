@@ -84,23 +84,46 @@ export interface PendingEntry {
   runners: { name: string; email: string }[]
 }
 
-export async function appendPendingEntry(e: PendingEntry): Promise<void> {
+export interface RowState {
+  status: 'pending' | 'paid'
+  timestamp?: string
+  amountGbp?: string
+  paidAt?: string
+}
+
+/** One value per ENTRY_COLUMNS entry, in the same order. */
+export function buildEntryRow(e: PendingEntry, state: RowState): string[] {
+  return [
+    state.timestamp ?? new Date().toISOString(), e.eventId, e.tierId, state.status, e.entryRef, e.tierLabel,
+    state.amountGbp ?? '', e.sessionId, state.paidAt ?? '', '',
+    e.firstName, e.lastName, e.email, e.phone, e.dob, e.gender,
+    e.emergencyName, e.emergencyPhone, e.medical,
+    e.waiverAgreed, e.photoConsent, e.gdprConsent,
+    e.teamName, e.clubOrGym, e.captainLiabilityAgreed,
+    ...e.runners.flatMap(r => [r.name, r.email]),
+  ]
+}
+
+async function appendRow(row: string[]): Promise<void> {
   await ensureHeaderRow()
   await sheets().spreadsheets.values.append({
     spreadsheetId: sheetId(), range: `${ENTRIES_TAB}!A1`,
     valueInputOption: 'RAW',
-    requestBody: {
-      values: [[
-        new Date().toISOString(), e.eventId, e.tierId, 'pending', e.entryRef, e.tierLabel,
-        '', e.sessionId, '', '',
-        e.firstName, e.lastName, e.email, e.phone, e.dob, e.gender,
-        e.emergencyName, e.emergencyPhone, e.medical,
-        e.waiverAgreed, e.photoConsent, e.gdprConsent,
-        e.teamName, e.clubOrGym, e.captainLiabilityAgreed,
-        ...e.runners.flatMap(r => [r.name, r.email]),
-      ]],
-    },
+    requestBody: { values: [row] },
   })
+}
+
+export async function appendPendingEntry(e: PendingEntry): Promise<void> {
+  await appendRow(buildEntryRow(e, { status: 'pending' }))
+}
+
+/**
+ * A free tier skips Stripe, so the row is written already confirmed (`paid`, £0.00) in a
+ * single append. `countTaken` counts `paid` rows, so free entries use up capacity.
+ */
+export async function appendFreeEntry(e: PendingEntry): Promise<void> {
+  const now = new Date().toISOString()
+  await appendRow(buildEntryRow(e, { status: 'paid', timestamp: now, amountGbp: '0.00', paidAt: now }))
 }
 
 export interface EntryRow {
@@ -113,24 +136,32 @@ export interface EntryRow {
   eventId: string
 }
 
+const at = (name: string) => ENTRY_COLUMNS.indexOf(name)
+
+/** Sheets drops trailing empty cells, so any index may be missing. */
+export function parseEntryRow(row: string[], rowNumber: number): EntryRow {
+  const cell = (name: string) => row[at(name)] ?? ''
+  return {
+    rowNumber,
+    status: cell('Status'),
+    entryRef: cell('Entry Ref'),
+    tierLabel: cell('Tier Label'),
+    firstName: cell('First Name'),
+    email: cell('Email'),
+    eventId: cell('Event ID'),
+  }
+}
+
 /** Finds a row by entry ref. Reads the full row (server-side only). */
 export async function findEntryByRef(entryRef: string): Promise<EntryRow | null> {
   const res = await sheets().spreadsheets.values.get({
     spreadsheetId: sheetId(), range: `${ENTRIES_TAB}!A:V`,
   })
   const rows = (res.data.values as string[][] | undefined) ?? []
-  const index = rows.findIndex((r, i) => i > 0 && r[4] === entryRef)
+  const refIndex = at('Entry Ref')
+  const index = rows.findIndex((r, i) => i > 0 && r[refIndex] === entryRef)
   if (index === -1) return null
-  const row = rows[index]
-  return {
-    rowNumber: index + 1, // sheet rows are 1-based
-    status: row[3] ?? '',
-    entryRef: row[4] ?? '',
-    tierLabel: row[5] ?? '',
-    firstName: row[10] ?? '',
-    email: row[12] ?? '',
-    eventId: row[1] ?? '',
-  }
+  return parseEntryRow(rows[index], index + 1) // sheet rows are 1-based
 }
 
 export async function markEntryPaid(rowNumber: number, amountGbp: string): Promise<void> {
