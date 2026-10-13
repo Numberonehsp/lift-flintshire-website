@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { footerNav } from '../../data/navigation'
+import { NewsletterSignup } from '../forms/NewsletterSignup'
 
 function InstagramIcon() {
   return (
@@ -77,6 +78,11 @@ export function Footer() {
             >
               hello@liftflintshire.co.uk
             </a>
+
+            <div className="mt-6">
+              <p className="font-body font-semibold text-sm text-white mb-3">Get our news by email</p>
+              <NewsletterSignup tone="dark" />
+            </div>
           </div>
         </div>
 

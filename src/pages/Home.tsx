@@ -4,6 +4,7 @@ import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { WaveDivider } from '../components/layout/WaveDivider'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
+import { NewsletterSignup } from '../components/forms/NewsletterSignup'
 import { StatCard } from '../components/ui/StatCard'
 import { Testimonial } from '../components/ui/Testimonial'
 import { useGoogleSheets } from '../hooks/useGoogleSheets'
@@ -130,6 +131,18 @@ export default function Home() {
           quote="I love the running sessions at the track!! I would have never gone on my own, I always felt intimidated and like I would be too slow but the group are amazing so welcoming and they have created such a safe space for women and girls"
           attribution="Sarah, Women's Track Sessions"
         />
+      </SectionWrapper>
+
+      {/* Newsletter */}
+      <SectionWrapper variant="muted">
+        <div className="max-w-xl mx-auto">
+          <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal mb-4">Newsletter</p>
+          <h2 className="font-display font-extrabold text-h2 text-ink mb-4">Hear about new sessions first</h2>
+          <p className="font-body text-base text-ink-light leading-relaxed mb-6">
+            Occasional emails about new programmes, events and session changes across Flintshire.
+          </p>
+          <NewsletterSignup tone="light" />
+        </div>
       </SectionWrapper>
 
       {/* Social strip */}
