@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom'
 import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Button } from '../components/ui/Button'
+import { MarketingConsent } from '../components/forms/MarketingConsent'
 import { useContentSheets } from '../hooks/useContentSheets'
 import { useTicketAvailability } from '../hooks/useTicketAvailability'
 
@@ -336,6 +337,15 @@ export default function EventEntry() {
                 <span className="text-ink-light font-normal">(Optional)</span>
               </label>
             </div>
+          </div>
+
+          {/* Marketing consent: optional and unticked; separate from GDPR consent. Only the
+              person filling in the form (the captain, for a team) is added, never teammates. */}
+          <div className="bg-surface-muted rounded-card p-4 border border-border mb-4">
+            <p className="font-body font-semibold text-xs text-ink uppercase tracking-wide mb-2">
+              Email updates
+            </p>
+            <MarketingConsent id="entry-marketing" topic="news about this event and other Lift Flintshire sessions" />
           </div>
 
           <div className="bg-surface-muted rounded-card p-4 border border-border mb-6">

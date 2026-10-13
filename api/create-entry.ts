@@ -5,6 +5,7 @@ import { parseTicketTypesSheet, pickAvailableTier } from './_lib/tickets.js'
 import { countTaken, appendPendingEntry, appendFreeEntry, HOLD_MS } from './_lib/entriesSheet.js'
 import type { PendingEntry } from './_lib/entriesSheet.js'
 import { finaliseEntry, describeError } from './_lib/finaliseEntry.js'
+import { hasMarketingConsent } from './_lib/marketing.js'
 
 const REQUIRED = [
   'eventId', 'eventTitle', 'tierId', 'first-name', 'last-name', 'email',
@@ -77,6 +78,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const entryRef = generateEntryRef()
+    // Strictly 'yes'. Stored on the row so the webhook can add the entrant to Brevo after payment.
+    const marketingConsent = hasMarketingConsent(f)
     const site = process.env.SITE_URL ?? 'https://liftflintshire.co.uk'
 
     const entry: PendingEntry = {
@@ -104,6 +107,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         name: f[`runner${n}-name`] ?? '',
         email: f[`runner${n}-email`] ?? '',
       })),
+      marketingConsent: marketingConsent ? 'yes' : '',
     }
 
     // Free tier: no Stripe. The availability check above has already run, and the row is
@@ -116,7 +120,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await finaliseEntry({
           entryRef, eventId: f.eventId, eventTitle: f.eventTitle, tierLabel: tier.label,
           firstName: f['first-name'], lastName: f['last-name'], email: f.email, amount: '0.00',
-          marketingConsent: false,
+          marketingConsent,
         })
       } catch (finaliseErr) {
         // finaliseEntry catches its own errors; this is a backstop so a saved entry is never reported as failed.

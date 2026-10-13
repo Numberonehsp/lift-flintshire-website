@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Stripe from 'stripe'
 import { findEntryByRef, markEntryPaid } from './_lib/entriesSheet.js'
 import { finaliseEntry, describeError } from './_lib/finaliseEntry.js'
+import { hasMarketingConsent } from './_lib/marketing.js'
 
 // Stripe signature verification needs the raw body, not the parsed one.
 export const config = { api: { bodyParser: false } }
@@ -54,7 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const amount = ((session.amount_total ?? 0) / 100).toFixed(2)
   await markEntryPaid(entry.rowNumber, amount)
 
-  // The entry is saved and paid. Emails are best-effort:
+  // The entry is saved and paid. Emails and the Brevo opt-in are best-effort:
   // finaliseEntry never throws, so a failure here cannot trigger a Stripe retry loop.
   try {
     await finaliseEntry({
@@ -63,10 +64,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       eventTitle: eventTitle || entry.eventId,
       tierLabel: entry.tierLabel,
       firstName: entry.firstName,
-      lastName: '',
+      lastName: entry.lastName,
       email: entry.email,
       amount,
-      marketingConsent: false,
+      // Only the entrant who ticked the box; teammates' emails on a team row are never sent.
+      marketingConsent: hasMarketingConsent({ 'marketing-consent': entry.marketingConsent }),
     })
   } catch (finaliseErr) {
     console.error(`finaliseEntry failed for ${entry.entryRef} (entry is saved):`, describeError(finaliseErr))

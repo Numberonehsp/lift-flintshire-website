@@ -9,6 +9,7 @@ const entry: PendingEntry = {
   waiverAgreed: 'yes', photoConsent: '', gdprConsent: 'yes',
   teamName: '', clubOrGym: '', captainLiabilityAgreed: '',
   runners: [1, 2, 3, 4].map(() => ({ name: '', email: '' })),
+  marketingConsent: '',
 }
 
 const col = (name: string) => ENTRY_COLUMNS.indexOf(name)
@@ -16,6 +17,12 @@ const col = (name: string) => ENTRY_COLUMNS.indexOf(name)
 describe('ENTRY_COLUMNS', () => {
   it('keeps A–D as the only columns the public availability endpoint reads', () => {
     expect(ENTRY_COLUMNS.slice(0, 4)).toEqual(['Timestamp', 'Event ID', 'Tier ID', 'Status'])
+  })
+
+  it('appends Marketing Consent as the last column, after Runner 4 Email (column AH)', () => {
+    expect(ENTRY_COLUMNS.at(-1)).toBe('Marketing Consent')
+    expect(ENTRY_COLUMNS.at(-2)).toBe('Runner 4 Email')
+    expect(ENTRY_COLUMNS.indexOf('Marketing Consent')).toBe(33) // AH
   })
 })
 
@@ -43,7 +50,20 @@ describe('buildEntryRow', () => {
   })
 })
 
+describe('buildEntryRow marketing consent', () => {
+  it('stores the consent value in the Marketing Consent column', () => {
+    const row = buildEntryRow({ ...entry, marketingConsent: 'yes' }, { status: 'pending' })
+    expect(row).toHaveLength(ENTRY_COLUMNS.length)
+    expect(row[col('Marketing Consent')]).toBe('yes')
+  })
+})
+
 describe('parseEntryRow', () => {
+  it('returns last name and marketing consent', () => {
+    const row = buildEntryRow({ ...entry, marketingConsent: 'yes' }, { status: 'pending' })
+    expect(parseEntryRow(row, 2)).toMatchObject({ lastName: 'Jones', marketingConsent: 'yes' })
+  })
+
   it('reads back what buildEntryRow wrote', () => {
     const row = buildEntryRow(entry, { status: 'pending', timestamp: 'T' })
     expect(parseEntryRow(row, 5)).toMatchObject({
@@ -54,7 +74,7 @@ describe('parseEntryRow', () => {
 
   it('tolerates a short row (Sheets drops trailing empty cells)', () => {
     expect(parseEntryRow(['T', 'Nov_WTR', 'entry', 'pending', 'LF26-X'], 2)).toMatchObject({
-      status: 'pending', entryRef: 'LF26-X', firstName: '', email: '',
+      status: 'pending', entryRef: 'LF26-X', firstName: '', email: '', lastName: '', marketingConsent: '',
     })
   })
 })

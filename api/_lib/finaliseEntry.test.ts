@@ -19,6 +19,8 @@ function deps(overrides: Partial<FinaliseEntryDeps> = {}): FinaliseEntryDeps & {
   return {
     sent,
     sendEmail: vi.fn(async (msg: EntryEmail) => { sent.push(msg) }),
+    lookupProgramme: vi.fn(async () => undefined),
+    addContact: vi.fn(async () => {}),
     ...overrides,
   }
 }
@@ -59,5 +61,68 @@ describe('finaliseEntry emails', () => {
     expect(sendEmail).toHaveBeenCalledTimes(2)
     expect(errors.length).toBeGreaterThan(0)
     expect(JSON.stringify(errors)).not.toContain('ann@example.com')
+  })
+})
+
+describe('finaliseEntry Brevo', () => {
+  it('adds nobody to Brevo without marketing consent', async () => {
+    const d = deps()
+    await finaliseEntry({ ...entry, marketingConsent: false }, d)
+    expect(d.addContact).not.toHaveBeenCalled()
+    expect(d.lookupProgramme).not.toHaveBeenCalled()
+  })
+
+  it('adds the entrant (only) to Newsletter, the event list and the programme list', async () => {
+    const d = deps({ lookupProgramme: vi.fn(async () => 'womens-run-club') })
+    await finaliseEntry({ ...entry, marketingConsent: true }, d)
+    expect(d.lookupProgramme).toHaveBeenCalledWith('Nov_WTR')
+    expect(d.addContact).toHaveBeenCalledTimes(1)
+    expect(d.addContact).toHaveBeenCalledWith({
+      email: 'ann@example.com',
+      firstName: 'Ann',
+      lastName: 'Jones',
+      lists: ['Newsletter', 'Event: Nov_WTR', 'Programme: womens-run-club'],
+      source: 'event-entry',
+    })
+  })
+
+  it('leaves out a blank last name', async () => {
+    const d = deps()
+    await finaliseEntry({ ...entry, lastName: '', marketingConsent: true }, d)
+    expect(d.addContact).toHaveBeenCalledWith({
+      email: 'ann@example.com', firstName: 'Ann', lists: ['Newsletter', 'Event: Nov_WTR'], source: 'event-entry',
+    })
+  })
+
+  it('still adds the contact without a programme list when the lookup fails', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const d = deps({ lookupProgramme: vi.fn(async () => { throw new Error('Events fetch failed: 500') }) })
+    await finaliseEntry({ ...entry, marketingConsent: true }, d)
+    expect(d.addContact).toHaveBeenCalledWith(expect.objectContaining({ lists: ['Newsletter', 'Event: Nov_WTR'] }))
+  })
+
+  it('never throws when Brevo fails, still sends the emails, and logs no address', async () => {
+    const errors: unknown[][] = []
+    vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { errors.push(args) })
+    const d = deps({ addContact: vi.fn(async () => { throw new Error('Brevo contact upsert failed for ann@example.com') }) })
+    await expect(finaliseEntry({ ...entry, marketingConsent: true }, d)).resolves.toBeUndefined()
+    expect(d.sent).toHaveLength(2)
+    expect(errors.length).toBeGreaterThan(0)
+    expect(JSON.stringify(errors)).not.toContain('ann@example.com')
+  })
+
+  it('skips Brevo when the entrant email is not a valid address', async () => {
+    const d = deps()
+    await finaliseEntry({ ...entry, email: 'not-an-email', marketingConsent: true }, d)
+    expect(d.addContact).not.toHaveBeenCalled()
+  })
+})
+
+describe('finaliseEntry Brevo time limit', () => {
+  it('gives up on a hung Brevo call so a confirmed entry still gets its response', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const d = deps({ addContact: vi.fn(() => new Promise<void>(() => {})) })
+    await expect(finaliseEntry({ ...entry, marketingConsent: true }, d, { brevoTimeoutMs: 20 })).resolves.toBeUndefined()
+    expect(d.sent).toHaveLength(2)
   })
 })

@@ -8,6 +8,10 @@
 
 import { Resend } from 'resend'
 import { entryConfirmationHtml, entryConfirmationSubject, organiserNotification } from './entryEmails.js'
+import { upsertContact } from './brevo.js'
+import type { UpsertContactParams } from './brevo.js'
+import { fetchEventProgramme } from './eventLookup.js'
+import { listsForEvent, isValidEmail } from './marketing.js'
 
 export interface FinaliseEntryParams {
   entryRef: string
@@ -19,6 +23,8 @@ export interface FinaliseEntryParams {
   email: string
   /** GBP, two decimals. "0.00" for a free entry. */
   amount: string
+  /** True only when the stored consent was exactly 'yes'. Only this person is added to
+   *  Brevo, never a team captain's teammates. */
   marketingConsent: boolean
 }
 
@@ -32,6 +38,10 @@ export interface EntryEmail {
 export interface FinaliseEntryDeps {
   /** Sends one email; throws on failure. */
   sendEmail(msg: EntryEmail): Promise<void>
+  /** The Events sheet `programme` column for this event, or undefined. */
+  lookupProgramme(eventId: string): Promise<string | undefined>
+  /** Adds or updates the Brevo contact; throws on failure. */
+  addContact(params: UpsertContactParams): Promise<void>
 }
 
 const EMAIL_PATTERN = /[^\s@<>"'`,;:()]+@[^\s@<>"'`,;:()]+/g
@@ -47,7 +57,7 @@ export function describeError(err: unknown): string {
   return 'unknown error'
 }
 
-function resendDeps(): FinaliseEntryDeps {
+function defaultDeps(): FinaliseEntryDeps {
   return {
     async sendEmail(msg) {
       const apiKey = process.env.RESEND_API_KEY
@@ -58,10 +68,24 @@ function resendDeps(): FinaliseEntryDeps {
         throw new Error(`Resend ${error.name ?? 'error'}${status}: ${error.message ?? ''}`)
       }
     },
+    lookupProgramme: fetchEventProgramme,
+    addContact: upsertContact,
   }
 }
 
-export async function finaliseEntry(p: FinaliseEntryParams, deps: FinaliseEntryDeps = resendDeps()): Promise<void> {
+export interface FinaliseEntryOptions {
+  /** The Brevo step (programme lookup plus contact upsert) is abandoned after this long, so a
+   *  slow Brevo cannot hold up the free-entry response or time the function out. */
+  brevoTimeoutMs?: number
+}
+
+const DEFAULT_BREVO_TIMEOUT_MS = 8000
+
+export async function finaliseEntry(
+  p: FinaliseEntryParams,
+  deps: FinaliseEntryDeps = defaultDeps(),
+  { brevoTimeoutMs = DEFAULT_BREVO_TIMEOUT_MS }: FinaliseEntryOptions = {},
+): Promise<void> {
   const details = {
     firstName: p.firstName, eventTitle: p.eventTitle, tierLabel: p.tierLabel, ref: p.entryRef, amount: p.amount,
   }
@@ -87,5 +111,40 @@ export async function finaliseEntry(p: FinaliseEntryParams, deps: FinaliseEntryD
     })
   } catch (err) {
     console.error(`Organiser email failed for ${p.entryRef} (entry is saved):`, describeError(err))
+  }
+
+  if (p.marketingConsent) {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const timedOut = new Promise<'timeout'>(resolve => { timer = setTimeout(() => resolve('timeout'), brevoTimeoutMs) })
+    const outcome = await Promise.race([addToBrevo(p, deps), timedOut])
+    clearTimeout(timer)
+    if (outcome === 'timeout') {
+      console.error(`Brevo step timed out for ${p.entryRef} after ${brevoTimeoutMs} ms (non-fatal, entry is saved)`)
+    }
+  }
+}
+
+async function addToBrevo(p: FinaliseEntryParams, deps: FinaliseEntryDeps): Promise<void> {
+  const email = p.email.trim()
+  if (!isValidEmail(email)) return
+
+  let programme: string | undefined
+  try {
+    programme = await deps.lookupProgramme(p.eventId)
+  } catch (err) {
+    // Still add them to Newsletter and the event list; only the programme list is missed.
+    console.warn(`Programme lookup failed for ${p.entryRef}; adding to Brevo without a programme list:`, describeError(err))
+  }
+
+  const contact: UpsertContactParams = { email, lists: listsForEvent(p.eventId, programme), source: 'event-entry' }
+  const firstName = p.firstName.trim()
+  const lastName = p.lastName.trim()
+  if (firstName) contact.firstName = firstName
+  if (lastName) contact.lastName = lastName
+
+  try {
+    await deps.addContact(contact)
+  } catch (err) {
+    console.error(`Brevo error for ${p.entryRef} (non-fatal, entry is saved):`, describeError(err))
   }
 }

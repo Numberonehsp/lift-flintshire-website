@@ -15,6 +15,8 @@ export const ENTRY_COLUMNS = [
   'Team Name', 'Club/Gym', 'Captain Liability Accepted',
   'Runner 1 Name', 'Runner 1 Email', 'Runner 2 Name', 'Runner 2 Email',
   'Runner 3 Name', 'Runner 3 Email', 'Runner 4 Name', 'Runner 4 Email',
+  // New columns go on the END only. Marketing Consent is column AH: 'yes' or blank.
+  'Marketing Consent',
 ]
 
 /** A pending row holds its place for this long, matching the Stripe session expiry. */
@@ -82,6 +84,8 @@ export interface PendingEntry {
   clubOrGym: string
   captainLiabilityAgreed: string
   runners: { name: string; email: string }[]
+  /** 'yes' when the entrant ticked the optional email opt-in, otherwise ''. */
+  marketingConsent: string
 }
 
 export interface RowState {
@@ -101,6 +105,7 @@ export function buildEntryRow(e: PendingEntry, state: RowState): string[] {
     e.waiverAgreed, e.photoConsent, e.gdprConsent,
     e.teamName, e.clubOrGym, e.captainLiabilityAgreed,
     ...e.runners.flatMap(r => [r.name, r.email]),
+    e.marketingConsent,
   ]
 }
 
@@ -132,8 +137,10 @@ export interface EntryRow {
   entryRef: string
   tierLabel: string
   firstName: string
+  lastName: string
   email: string
   eventId: string
+  marketingConsent: string
 }
 
 const at = (name: string) => ENTRY_COLUMNS.indexOf(name)
@@ -147,15 +154,17 @@ export function parseEntryRow(row: string[], rowNumber: number): EntryRow {
     entryRef: cell('Entry Ref'),
     tierLabel: cell('Tier Label'),
     firstName: cell('First Name'),
+    lastName: cell('Last Name'),
     email: cell('Email'),
     eventId: cell('Event ID'),
+    marketingConsent: cell('Marketing Consent'),
   }
 }
 
 /** Finds a row by entry ref. Reads the full row (server-side only). */
 export async function findEntryByRef(entryRef: string): Promise<EntryRow | null> {
   const res = await sheets().spreadsheets.values.get({
-    spreadsheetId: sheetId(), range: `${ENTRIES_TAB}!A:V`,
+    spreadsheetId: sheetId(), range: `${ENTRIES_TAB}!A:AH`, // through Marketing Consent
   })
   const rows = (res.data.values as string[][] | undefined) ?? []
   const refIndex = at('Entry Ref')
