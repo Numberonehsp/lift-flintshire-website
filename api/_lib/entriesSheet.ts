@@ -62,6 +62,34 @@ export async function countTaken(eventId: string, now = Date.now()): Promise<Tak
   return counts
 }
 
+/**
+ * The entry ref of an existing `paid` row for this event and email (case-insensitive), if any.
+ * `bToE` is columns B:E (event id, tier id, status, entry ref) and `emails` is column M,
+ * both read from row 1 so their indexes line up; index 0 is the header row.
+ */
+export function findPaidEntryRef(
+  bToE: string[][], emails: string[][], eventId: string, email: string,
+): string | undefined {
+  const wanted = email.trim().toLowerCase()
+  if (!wanted) return undefined
+  for (let i = 1; i < bToE.length; i++) {
+    const [rowEvent, , status, entryRef] = bToE[i] ?? []
+    if (rowEvent !== eventId || status !== 'paid' || !entryRef) continue
+    if ((emails[i]?.[0] ?? '').trim().toLowerCase() === wanted) return entryRef
+  }
+  return undefined
+}
+
+/** Reads ONLY columns B:E and M (event, tier, status, ref, email) to find an existing paid entry. */
+export async function findPaidEntryForEmail(eventId: string, email: string): Promise<string | undefined> {
+  const res = await sheets().spreadsheets.values.batchGet({
+    spreadsheetId: sheetId(),
+    ranges: [`${ENTRIES_TAB}!B:E`, `${ENTRIES_TAB}!M:M`],
+  })
+  const [bToE, emails] = (res.data.valueRanges ?? []).map(r => (r.values as string[][] | undefined) ?? [])
+  return findPaidEntryRef(bToE ?? [], emails ?? [], eventId, email)
+}
+
 export interface PendingEntry {
   eventId: string
   tierId: string

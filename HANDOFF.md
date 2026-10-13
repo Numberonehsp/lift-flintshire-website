@@ -386,7 +386,10 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 - **Attribute-name caveat:** the client sends `FIRSTNAME`, `LASTNAME`, `CONSENT_DATE`, `CONSENT_SOURCE` and, on any HTTP 400 from Brevo, retries once WITHOUT attributes. If those names do not exist in the Brevo account, contacts are still added to their lists but without consent attributes, and the log shows "retrying without attributes". Ed must check the exact names under Brevo, Contacts, Settings, Contact attributes (`CONSENT_DATE` and `CONSENT_SOURCE` need creating as text attributes).
 
 **Free event entries**
-- A ticket tier with price 0 skips Stripe: `api/create-entry.ts` writes the row straight to `Event_Entries` as `paid` with amount £0.00 and session id `free`, runs the same `finaliseEntry` (confirmation email to the entrant, notification to the organisers, Brevo) and returns the entry-confirmed URL. Free entries count against capacity. If the row cannot be saved the entrant sees an error. Free events are price `0` in the Events sheet.
+- A ticket tier with price 0 skips Stripe: `api/create-entry.ts` writes the row straight to `Event_Entries` as `paid` with amount £0.00 and session id `free`, runs the same `finaliseEntry` (confirmation email to the entrant, notification to the organisers, Brevo) and returns the entry-confirmed URL. Free entries count against capacity. If the row cannot be saved the entrant sees an error.
+- The event title in emails and at Stripe comes from the Events sheet (`title`, column B), never from the browser. If the Events sheet cannot be read, a free entry fails with a generic error; a paid entry uses the event id as the title.
+- A free entry from an email that already has a `paid` row for the same event (case-insensitive) is sent to the existing confirmation page: no new row, no new email.
+- The entry form has a hidden honeypot field `website`. If it is filled, `/api/create-entry` returns a normal-looking success and writes nothing. Free events are price `0` in the Events sheet.
 
 **Private sheet change**
 - `Event_Entries` has a new last column `Marketing Consent` (column AH): `yes` or blank. It must be added to the header row by hand (step 5 below). The Stripe webhook reads it so paid entries are added to Brevo only after payment is confirmed.
@@ -399,5 +402,6 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 5. In the private sheet, `Event_Entries` tab: add a header `Marketing Consent` in column AH, the next free column after `Runner 4 Email`.
 6. In the Events sheet: fill the `programme` column (H) for each event, for example `womens-run-club` for the Nov_WTR event.
 7. Redeploy after the env vars are set.
+8. Recommended: add a Vercel Firewall rate-limit rule on `/api/create-entry` (Vercel, Project, Firewall, add a rate-limit rule, for example a small number of requests per minute per IP). This does not exist yet. Free entries skip Stripe, so without a rate limit a script could use up a free event's places or trigger many confirmation emails. The honeypot and the duplicate-email check reduce this but do not stop a determined script.
 
 Also check where Brevo holds data (UK, EEA or elsewhere) and that Brevo's terms give an appropriate transfer mechanism; the privacy policy deliberately does not state a location.

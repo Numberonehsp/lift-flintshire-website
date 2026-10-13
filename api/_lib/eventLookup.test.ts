@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { programmeFromEventsSheet } from './eventLookup.js'
+import { programmeFromEventsSheet, eventFromEventsSheet } from './eventLookup.js'
 
 const HEADER = ['id', 'title', 'date', 'time', 'location', 'price', 'description', 'programme', 'bookingLink']
 const ROWS = [
@@ -26,5 +26,22 @@ describe('programmeFromEventsSheet', () => {
 
   it('never matches the header row', () => {
     expect(programmeFromEventsSheet(ROWS, 'id')).toBeUndefined()
+  })
+})
+
+describe('eventFromEventsSheet', () => {
+  it('returns the trimmed title and programme for the matching event', () => {
+    expect(eventFromEventsSheet(ROWS, 'Nov_WTR')).toEqual({ title: 'Track Run', programme: 'womens-run-club' })
+  })
+
+  it('leaves programme undefined when blank', () => {
+    expect(eventFromEventsSheet(ROWS, 'No_Prog')).toEqual({ title: 'Other', programme: undefined })
+  })
+
+  it('returns undefined for an unknown event, the header row, or a blank title', () => {
+    expect(eventFromEventsSheet(ROWS, 'nope')).toBeUndefined()
+    expect(eventFromEventsSheet(ROWS, 'id')).toBeUndefined()
+    expect(eventFromEventsSheet([HEADER, ['Blank', '  ', '2026-12-01']], 'Blank')).toBeUndefined()
+    expect(eventFromEventsSheet([], 'Nov_WTR')).toBeUndefined()
   })
 })

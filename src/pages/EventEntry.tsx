@@ -128,7 +128,7 @@ export default function EventEntry() {
       </SectionWrapper>
 
       <SectionWrapper variant="light" innerClassName="max-w-2xl">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="relative">
           <div className="bg-teal-pale rounded-card p-4 border border-teal/20 mb-6 flex items-center justify-between">
             <div>
               <p className="font-display font-bold text-ink">{availableTier.label}</p>
@@ -364,6 +364,12 @@ export default function EventEntry() {
                 <span className="text-teal font-medium">(Required)</span>
               </label>
             </div>
+          </div>
+
+          {/* Honeypot: hidden from people and assistive tech. The server ignores entries that fill it. */}
+          <div aria-hidden="true" className="absolute left-[-10000px] top-auto w-px h-px overflow-hidden">
+            <label htmlFor="entry-website">Website</label>
+            <input id="entry-website" type="text" name="website" tabIndex={-1} autoComplete="off" defaultValue="" />
           </div>
 
           <Button type="submit" variant="primary" size="lg" className="w-full" disabled={state === 'submitting'}>

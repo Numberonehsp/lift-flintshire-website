@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { ENTRY_COLUMNS, buildEntryRow, parseEntryRow } from './entriesSheet.js'
+import { ENTRY_COLUMNS, buildEntryRow, parseEntryRow, findPaidEntryRef } from './entriesSheet.js'
 import type { PendingEntry } from './entriesSheet.js'
 
 const entry: PendingEntry = {
@@ -76,5 +76,37 @@ describe('parseEntryRow', () => {
     expect(parseEntryRow(['T', 'Nov_WTR', 'entry', 'pending', 'LF26-X'], 2)).toMatchObject({
       status: 'pending', entryRef: 'LF26-X', firstName: '', email: '', lastName: '', marketingConsent: '',
     })
+  })
+})
+
+describe('findPaidEntryRef', () => {
+  it('relies on Email being column M and Entry Ref column E', () => {
+    expect(col('Email')).toBe(12)
+    expect(col('Entry Ref')).toBe(4)
+  })
+
+  // B:E -> event id, tier id, status, entry ref. M:M -> email. Both include the header row.
+  const bToE = [
+    ['Event ID', 'Tier ID', 'Status', 'Entry Ref'],
+    ['Nov_WTR', 'entry', 'pending', 'LF26-PEND01'],
+    ['Nov_WTR', 'entry', 'paid', 'LF26-PAID01'],
+    ['Other', 'entry', 'paid', 'LF26-OTHER1'],
+    [],
+  ]
+  const emails = [['Email'], ['ann@example.com'], ['Ann@Example.com '], ['bob@example.com'], []]
+
+  it('finds a paid row for the same event and email, ignoring case and spaces', () => {
+    expect(findPaidEntryRef(bToE, emails, 'Nov_WTR', ' ANN@example.com')).toBe('LF26-PAID01')
+  })
+
+  it('ignores pending rows, other events, and the header row', () => {
+    expect(findPaidEntryRef(bToE, emails, 'Nov_WTR', 'bob@example.com')).toBeUndefined()
+    expect(findPaidEntryRef(bToE, [['Email'], ['ann@example.com']], 'Nov_WTR', 'ann@example.com')).toBeUndefined()
+    expect(findPaidEntryRef(bToE, emails, 'Event ID', 'Email')).toBeUndefined()
+  })
+
+  it('returns undefined for a blank email or empty sheet', () => {
+    expect(findPaidEntryRef(bToE, emails, 'Nov_WTR', '  ')).toBeUndefined()
+    expect(findPaidEntryRef([], [], 'Nov_WTR', 'ann@example.com')).toBeUndefined()
   })
 })
