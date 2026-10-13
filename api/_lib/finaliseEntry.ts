@@ -54,6 +54,11 @@ export function redactEmails(text: string): string {
 /** A log-safe one-line summary: no stack, no request config (which can hold the entrant's row), no email addresses. */
 export function describeError(err: unknown): string {
   if (err instanceof Error) return redactEmails(`${err.name}: ${err.message}`)
+  // Resend returns { name, message, statusCode } objects rather than Error instances.
+  if (err && typeof err === 'object' && typeof (err as { message?: unknown }).message === 'string') {
+    const { name, message } = err as { name?: unknown; message: string }
+    return redactEmails(`${typeof name === 'string' ? name : 'Error'}: ${message}`)
+  }
   return 'unknown error'
 }
 

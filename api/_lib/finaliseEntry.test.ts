@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { finaliseEntry, redactEmails } from './finaliseEntry.js'
+import { finaliseEntry, redactEmails, describeError } from './finaliseEntry.js'
 import type { FinaliseEntryDeps, EntryEmail } from './finaliseEntry.js'
 
 const entry = {
@@ -31,6 +31,22 @@ describe('redactEmails', () => {
   it('removes anything that looks like an email address', () => {
     expect(redactEmails('Invalid `to` field: ann@example.com, bob.x@y.co.uk'))
       .toBe('Invalid `to` field: [email], [email]')
+  })
+})
+
+describe('describeError', () => {
+  it('summarises an Error without its stack, redacting addresses', () => {
+    expect(describeError(new TypeError('bad to: ann@example.com'))).toBe('TypeError: bad to: [email]')
+  })
+  it("summarises a plain { name, message } object like Resend's error, and nothing else", () => {
+    expect(describeError({ name: 'validation_error', message: 'Invalid ann@example.com', statusCode: 422, extra: 'x' }))
+      .toBe('validation_error: Invalid [email]')
+    expect(describeError({ message: 'oops' })).toBe('Error: oops')
+  })
+  it('falls back for anything else', () => {
+    expect(describeError('ann@example.com')).toBe('unknown error')
+    expect(describeError({ data: 'x' })).toBe('unknown error')
+    expect(describeError(null)).toBe('unknown error')
   })
 })
 

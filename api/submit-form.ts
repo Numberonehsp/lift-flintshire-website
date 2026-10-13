@@ -4,6 +4,7 @@ import { google } from 'googleapis'
 import { upsertContact } from './_lib/brevo.js'
 import { brevoContactForSubmission } from './_lib/marketing.js'
 import { SHEET_COLUMNS, buildSheetRow } from './_lib/registrationSheet.js'
+import { describeError } from './_lib/finaliseEntry.js'
 
 // Duplicated from src/data/nextSessionDates.ts rather than imported: Vercel
 // builds each file under api/ as an isolated function, and an import that
@@ -271,7 +272,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
 
     if (error) {
-      console.error('Resend error:', error)
+      console.error('Resend error:', describeError(error))
       return res.status(500).json({ error: 'Email failed' })
     }
 
@@ -285,7 +286,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           await appendToSheet(buildSheetRow(fields), 'Registrations', SHEET_COLUMNS)
         }
       } catch (sheetErr) {
-        console.error('Sheet write error (non-fatal):', sheetErr)
+        console.error('Sheet write error (non-fatal):', describeError(sheetErr))
       }
     }
 
@@ -300,9 +301,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           subject: confirmation.subject,
           html: confirmation.html,
         })
-        if (confirmError) console.error('Confirmation email error (non-fatal):', confirmError)
+        if (confirmError) console.error('Confirmation email error (non-fatal):', describeError(confirmError))
       } catch (confirmErr) {
-        console.error('Confirmation email error (non-fatal):', confirmErr)
+        console.error('Confirmation email error (non-fatal):', describeError(confirmErr))
       }
     }
 
@@ -313,14 +314,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         await upsertContact({ ...brevoContact, source: formName })
       } catch (brevoErr) {
-        // BrevoError messages carry only the HTTP status and Brevo's error code, never the email.
-        console.error('Brevo error (non-fatal):', brevoErr instanceof Error ? brevoErr.message : 'unknown error')
+        console.error('Brevo error (non-fatal):', describeError(brevoErr))
       }
     }
 
     return res.status(200).json({ success: true })
   } catch (err) {
-    console.error('Submit error:', err)
+    console.error('Submit error:', describeError(err))
     return res.status(500).json({ error: 'Unexpected error' })
   }
 }
