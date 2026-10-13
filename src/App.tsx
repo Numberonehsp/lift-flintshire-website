@@ -4,7 +4,9 @@ import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import Home from './pages/Home'
 import About from './pages/About'
-import ProgrammesEvents from './pages/ProgrammesEvents'
+import RunClub from './pages/RunClub'
+import WeightliftingClub from './pages/WeightliftingClub'
+import Wellbeing from './pages/Wellbeing'
 import Events from './pages/Events'
 import EventDetail from './pages/EventDetail'
 import EventEntry from './pages/EventEntry'
@@ -37,7 +39,9 @@ function Layout() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/programmes-events" element={<ProgrammesEvents />} />
+          <Route path="/run-club" element={<RunClub />} />
+          <Route path="/weightlifting-club" element={<WeightliftingClub />} />
+          <Route path="/wellbeing" element={<Wellbeing />} />
           <Route path="/events" element={<Events />} />
           <Route path="/events/entry-confirmed" element={<EntryConfirmed />} />
           <Route path="/events/:id" element={<EventDetail />} />
@@ -47,8 +51,9 @@ function Layout() {
           <Route path="/register/couch-to-5k" element={<RegisterCouchTo5k />} />
           <Route path="/register/womens-run-club" element={<RegisterWomensRunClub />} />
           <Route path="/register/girls-gym-session" element={<RegisterGirlsGymSession />} />
-          <Route path="/enquire/youth-strength-conditioning" element={<EnquireYouthStrengthConditioning />} />
-          <Route path="/register/youth-strength-conditioning" element={<Navigate to="/enquire/youth-strength-conditioning" replace />} />
+          <Route path="/enquire/youth-weightlifting" element={<EnquireYouthStrengthConditioning />} />
+          <Route path="/enquire/youth-strength-conditioning" element={<Navigate to="/enquire/youth-weightlifting" replace />} />
+          <Route path="/register/youth-strength-conditioning" element={<Navigate to="/enquire/youth-weightlifting" replace />} />
           <Route path="/questionnaire" element={<Questionnaire />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/safeguarding" element={<Safeguarding />} />

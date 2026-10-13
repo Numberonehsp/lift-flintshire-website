@@ -1,6 +1,6 @@
 # Lift Flintshire CIC Website
 
-Community Interest Company website built with Vite + React + TypeScript + Tailwind CSS. Hosted on Vercel.
+Community Interest Company website built with Vite + React 19 + React Router 7 + TypeScript + Tailwind CSS 3. Hosted on Vercel.
 
 ## Running Locally
 
@@ -84,9 +84,8 @@ Then update `src/components/layout/Header.tsx` and `src/components/layout/Footer
 
 ## Tech Stack
 
-- [Vite](https://vitejs.dev) + [React 18](https://react.dev) + [TypeScript](https://www.typescriptlang.org)
+- [Vite](https://vitejs.dev) + [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org)
 - [Tailwind CSS v3](https://tailwindcss.com) — design tokens in `tailwind.config.ts`
-- [React Router v6](https://reactrouter.com) — client-side routing
-- [Recharts](https://recharts.org) — Impact Dashboard charts
+- [React Router 7](https://reactrouter.com) — client-side routing
 - [react-helmet-async](https://github.com/staylor/react-helmet-async) — per-page SEO meta tags
 - [Vercel Functions](https://vercel.com/docs/functions) — `/api/submit-form` handles contact, referral and registration form submissions

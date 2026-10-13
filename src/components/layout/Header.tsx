@@ -1,14 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-
-const navItems = [
-  { label: 'Home', to: '/' },
-  { label: 'Programmes & Events', to: '/programmes-events' },
-  { label: 'Events', to: '/events' },
-  { label: 'Impact', to: '/impact' },
-  { label: 'About', to: '/about' },
-  { label: 'Contact', to: '/contact' },
-]
+import { primaryNav, contactNav, mobileLargeNav, mobileSmallNav } from '../../data/navigation'
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -56,6 +48,7 @@ export function Header() {
           {/* Logo */}
           <Link
             to="/"
+            aria-label="Lift Flintshire CIC, home"
             className="flex-shrink-0 flex items-center min-h-[44px]"
             onClick={() => setIsOpen(false)}
           >
@@ -78,12 +71,11 @@ export function Header() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
-            {navItems.map(item => (
+          <nav className="hidden lg:flex items-center gap-6" aria-label="Main navigation">
+            {primaryNav.map(item => (
               <NavLink
                 key={item.to}
                 to={item.to}
-                end={item.to === '/'}
                 className={({ isActive }) =>
                   `font-body font-medium text-sm transition-colors duration-150 ${
                     isActive ? 'text-white' : 'text-white/70 hover:text-white'
@@ -93,13 +85,19 @@ export function Header() {
                 {item.label}
               </NavLink>
             ))}
+            <NavLink
+              to={contactNav.to}
+              className="ml-2 rounded-full bg-teal px-4 py-2 font-body font-semibold text-sm text-white hover:bg-teal-light transition-colors min-h-[36px] inline-flex items-center"
+            >
+              {contactNav.label}
+            </NavLink>
           </nav>
 
           {/* Hamburger morphs into a cross */}
           <button
             ref={toggleRef}
             onClick={() => setIsOpen(prev => !prev)}
-            className="md:hidden text-white min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="lg:hidden text-white min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label={isOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isOpen}
             aria-controls="mobile-menu"
@@ -128,7 +126,7 @@ export function Header() {
       {/* Full-screen mobile overlay */}
       <div
         id="mobile-menu"
-        className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ease-in-out ${
+        className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ease-in-out ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         style={{ backgroundColor: 'rgba(17,17,17,0.97)', backdropFilter: 'blur(12px)' }}
@@ -140,12 +138,11 @@ export function Header() {
           aria-label="Mobile navigation"
           onClick={e => e.stopPropagation()}
         >
-          {navItems.map((item, i) => (
+          {mobileLargeNav.map((item, i) => (
             <NavLink
               key={item.to}
               ref={i === 0 ? firstLinkRef : undefined}
               to={item.to}
-              end={item.to === '/'}
               onClick={() => setIsOpen(false)}
               tabIndex={isOpen ? undefined : -1}
               style={{
@@ -153,7 +150,7 @@ export function Header() {
                 fontSize: 'clamp(26px, 7vw, 40px)',
               }}
               className={({ isActive }) =>
-                `font-display font-black uppercase py-3 transition-all duration-300 ease-out ${
+                `font-display font-black uppercase py-2 transition-all duration-300 ease-out ${
                   isActive ? 'text-teal-light' : 'text-white hover:text-teal-light'
                 } ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`
               }
@@ -161,6 +158,19 @@ export function Header() {
               {item.label}
             </NavLink>
           ))}
+          <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-1">
+            {mobileSmallNav.map(item => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setIsOpen(false)}
+                tabIndex={isOpen ? undefined : -1}
+                className="font-body font-medium text-sm text-white/70 hover:text-white min-h-[44px] inline-flex items-center"
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
         </nav>
       </div>
     </>

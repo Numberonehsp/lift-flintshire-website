@@ -71,8 +71,8 @@ export default function Privacy() {
             Health and medical information is <strong>special category data</strong> under UK GDPR. We collect it solely to enable our coaches to support your safe participation. The legal basis for processing this data is your <strong>explicit consent</strong> (or, for young people, the consent of their parent or guardian), given when the registration form is completed.
           </p>
 
-          <h3 className={subheadingClass}>Youth Strength &amp; Conditioning enquiries</h3>
-          <p className={bodyClass}>When a parent or guardian sends an enquiry about Youth Strength &amp; Conditioning, we collect their name, email address, phone number (optional), the young person's first name and school year, and any message they choose to add. We use this only to reply to the enquiry and tell you about sessions. We do not collect health information at this stage. The legal basis is your <strong>consent</strong>. If the young person goes on to take part, we will ask for registration and health details separately.</p>
+          <h3 className={subheadingClass}>Youth Weightlifting enquiries</h3>
+          <p className={bodyClass}>When a parent or guardian sends an enquiry about Youth Weightlifting, we collect their name, email address, phone number (optional), the young person's first name and school year, and any message they choose to add. We use this only to reply to the enquiry and tell you about sessions. We do not collect health information at this stage. The legal basis is your <strong>consent</strong>. If the young person goes on to take part, we will ask for registration and health details separately.</p>
 
           <h3 className={subheadingClass}>Session feedback (questionnaire)</h3>
           <p className={bodyClass}>When you complete our feedback questionnaire, we collect your ratings and comments. You may optionally provide your name and email for follow-up. The legal basis is your <strong>consent</strong>.</p>

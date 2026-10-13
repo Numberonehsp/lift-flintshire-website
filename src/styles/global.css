@@ -36,6 +36,11 @@ body {
   overflow-x: hidden;
 }
 
+/* Room under the footer for the phone-only sticky join bar. */
+@media (max-width: 1023px) {
+  body.has-join-bar footer { padding-bottom: 5.5rem; }
+}
+
 /* Skip link: off-screen until it receives keyboard focus. */
 .skip-link {
   position: absolute;
@@ -55,6 +60,21 @@ body {
   box-shadow: 0 10px 15px -3px rgba(17, 17, 17, 0.25);
   outline: 2px solid #376A6B;
   outline-offset: 2px;
+}
+
+/* "Download summary (PDF)" on /impact uses the browser's print dialog. */
+@media print {
+  header[class*="fixed"], footer, #mobile-menu, .skip-link { display: none !important; }
+  main { padding-top: 0 !important; }
+  .animate-pulse { animation: none; }
+  details > summary { display: none; }
+  details > div { display: block; }
+  details:not([open]) > :not(summary) { display: block; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* Newer Chrome hides closed <details> content through this slot, which
+     the child rules above cannot reach. Kept as its own rule so browsers
+     that don't know the pseudo-element only drop this line. */
+  details::details-content { content-visibility: visible; display: contents; }
 }
 
 @media (prefers-reduced-motion: reduce) {

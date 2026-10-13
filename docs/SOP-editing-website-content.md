@@ -27,7 +27,7 @@
 
 1. Open the Lift Flintshire content Google Sheet (the one whose ID is in `VITE_GOOGLE_SHEET_ID`, see Vercel → Project → Settings → Environment Variables if you have lost the link).
 2. Open the tab you need:
-   - `Programme_Sessions`: columns are `programme id | day | time | location | cost`. Programme ids are `couch-to-5k`, `womens-run-club`, `girls-gym-session`, `youth-strength-conditioning`, `stay-strong`, `run-club`, `weightlifting`.
+   - `Programme_Sessions`: columns are `programme id | day | time | location | cost`. Programme ids are `couch-to-5k`, `womens-run-club`, `girls-gym-session`, `youth-weightlifting`, `stay-strong`, `run-club`, `weightlifting`.
    - `Events`: columns are `id | title | date (YYYY-MM-DD) | time | location | price | description | programme | bookingLink`.
 3. Edit the cell. Keep the first row (headers) exactly as it is. Do not rename tabs.
 4. Reload the website. Changes appear straight away, with no deploy step. If it does not change, hard refresh (Cmd+Shift+R).
@@ -99,17 +99,21 @@ If you want to see a change before it goes live, choose **Create a new branch** 
 | Text | File |
 |---|---|
 | Programme titles, taglines, badges, descriptions, "Who is it for?", "What to expect", default session lines | `src/data/programmes.ts` |
-| Programmes page intro (top of page), page title/SEO | `src/pages/ProgrammesEvents.tsx` |
+| Run Club page (intro, Couch to 5K and Women's Track Running sections), page title/SEO | `src/pages/RunClub.tsx` |
+| Weightlifting Club page (includes Youth Weightlifting enquiry link), page title/SEO | `src/pages/WeightliftingClub.tsx` |
+| Wellbeing page (Stay Strong, Girls Gym Session), page title/SEO | `src/pages/Wellbeing.tsx` |
+| The three GymMaster links (Run Club join, Youth Beginners join, Weightlifting consultation booking) | `src/data/links.ts` (edit the URL string only; every page and button that uses it updates) |
+| Menu items and footer links | `src/data/navigation.ts` (shared by header and footer) |
+| Events listing page | `src/pages/Events.tsx` |
 | Home page | `src/pages/Home.tsx` |
 | About page | `src/pages/About.tsx` |
 | Contact page, subject dropdown, "Register for a programme" box | `src/pages/Contact.tsx` |
-| Youth Strength & Conditioning enquiry form wording | `src/pages/EnquireYouthStrengthConditioning.tsx` |
+| Youth Weightlifting enquiry form wording (route `/enquire/youth-weightlifting`) | `src/pages/EnquireYouthStrengthConditioning.tsx` |
 | Girls Gym Session registration form | `src/pages/RegisterGirlsGymSession.tsx` |
 | Couch to 5K / Women's Run Club registration pages | `src/pages/RegisterCouchTo5k.tsx`, `src/pages/RegisterWomensRunClub.tsx` |
 | Privacy policy | `src/pages/Privacy.tsx` |
 | Safeguarding page | `src/pages/Safeguarding.tsx` |
 | Footer (all pages) | `src/components/layout/Footer.tsx` |
-| Menu items | `src/components/layout/Header.tsx` |
 | Next Women's Run Club date, next Couch to 5K start | `src/data/nextSessionDates.ts` **and** the same two dates near the top of `api/submit-form.ts` (change both, they must match) |
 | Confirmation emails sent to people who register | `api/submit-form.ts` (search for `CONFIRMATION_TEMPLATES`) |
 
@@ -130,9 +134,9 @@ Alternative: in Vercel → Deployments, find the last good deployment, click **�
 
 ## 7. Gotchas
 
-- **Google Sheet overrides the code.** If you edit session times in `programmes.ts` and nothing changes on the site, a row for that programme exists in the `Programme_Sessions` tab. Edit or delete that row. After the Youth Strength & Conditioning change, delete its Thursday row if one is there.
+- **Google Sheet overrides the code.** If you edit session times in `programmes.ts` and nothing changes on the site, a row for that programme exists in the `Programme_Sessions` tab. Edit or delete that row. After the Youth Weightlifting change, delete any old `youth-strength-conditioning` or Thursday row if one is there.
 - **Two places for the dates.** The Women's Run Club and Couch to 5K dates live in two files. If they differ, the page and the confirmation email will disagree.
-- **Enquiries go to email only.** Youth Strength & Conditioning enquiries arrive at hello@liftflintshire.co.uk with the subject "New enquiry: youth strength conditioning". They are not saved to a sheet.
+- **Enquiries go to email only.** Youth Weightlifting enquiries arrive at hello@liftflintshire.co.uk with the subject "New enquiry: youth strength conditioning". They are not saved to a sheet.
 - **Changes need a hard refresh** (Cmd+Shift+R) to see on your own machine, because the browser caches the old page.
 - **Do not paste passwords, API keys or personal data** into any file in the repository.
 

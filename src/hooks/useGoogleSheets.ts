@@ -27,7 +27,6 @@ export interface SheetData {
   byGender: { name: string; value: number }[]
   byAge: { name: string; participants: number }[]
   lastUpdated: string
-  heroStats: HeroStat[]
 }
 
 // Maps each programme to one of the three main impact areas
@@ -161,7 +160,7 @@ export function aggregateData(rows: SheetRow[]): SheetData {
     .map(([key, d]) => {
       const [year, month] = key.split('-')
       const { _total, ...programmes } = d
-      return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, total: _total || 0, ...programmes }
+      return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, monthKey: key, total: _total || 0, ...programmes }
     })
 
   // Monthly breakdown by impact area (Running / Weightlifting / Community)
@@ -179,7 +178,7 @@ export function aggregateData(rows: SheetRow[]): SheetData {
     .map(([key, d]) => {
       const [year, month] = key.split('-')
       const { _total, ...areas } = d
-      return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, total: _total || 0, ...areas }
+      return { month: `${MONTH_LABELS[month] ?? month} '${year.slice(2)}`, monthKey: key, total: _total || 0, ...areas }
     })
 
   const allProgrammes = Array.from(new Set(rows.map(r => r.programme))).sort()
@@ -196,7 +195,6 @@ export function aggregateData(rows: SheetRow[]): SheetData {
     byGender,
     byAge,
     lastUpdated: now.toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' }),
-    heroStats: defaultHeroStats,
   }
 }
 
@@ -213,7 +211,7 @@ function parseSummarySheet(values: string[][]): HeroStat[] {
 // the real sheet or the bundled sample data is known before the first render.
 const SHEET_ID = import.meta.env.VITE_GOOGLE_SHEET_ID
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY
-const HAS_SHEET_CONFIG = Boolean(SHEET_ID && API_KEY)
+export const HAS_SHEET_CONFIG = Boolean(SHEET_ID && API_KEY)
 
 export function useGoogleSheets() {
   const [data, setData] = useState<SheetData | null>(() =>
@@ -221,21 +219,27 @@ export function useGoogleSheets() {
   )
   const [loading, setLoading] = useState(HAS_SHEET_CONFIG)
   const [error, setError] = useState<string | null>(null)
+  // Hand-entered headline figures from the Summary tab. Fetched independently of the
+  // session feed so they can still stand in when the feed fails. Empty in sample mode.
+  const [fallbackHeroStats, setFallbackHeroStats] = useState<HeroStat[]>(defaultHeroStats)
 
   useEffect(() => {
     if (!HAS_SHEET_CONFIG) return
 
     const base = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values`
     const sessionTab = encodeURIComponent('Form Responses 4')
-    Promise.all([
-      fetch(`${base}/${sessionTab}?key=${API_KEY}`).then(r => { if (!r.ok) throw new Error(); return r.json() }),
-      fetch(`${base}/Summary?key=${API_KEY}`).then(r => r.json()).catch(() => ({ values: [] })),
-    ])
-      .then(([impactJson, summaryJson]: [{ values: string[][] }, { values: string[][] }]) => {
-        const rows = parseSheetRows(impactJson.values)
-        const aggregated = aggregateData(rows)
-        aggregated.heroStats = parseSummarySheet(summaryJson.values)
-        setData(aggregated)
+
+    fetch(`${base}/Summary?key=${API_KEY}`)
+      .then(r => { if (!r.ok) throw new Error(); return r.json() })
+      .then((summaryJson: { values?: string[][] }) => {
+        setFallbackHeroStats(parseSummarySheet(summaryJson.values ?? []))
+      })
+      .catch(() => { /* Summary tab is optional */ })
+
+    fetch(`${base}/${sessionTab}?key=${API_KEY}`)
+      .then(r => { if (!r.ok) throw new Error(); return r.json() })
+      .then((impactJson: { values: string[][] }) => {
+        setData(aggregateData(parseSheetRows(impactJson.values)))
         setLoading(false)
       })
       .catch(() => {
@@ -244,7 +248,8 @@ export function useGoogleSheets() {
       })
   }, [])
 
-  return { data, loading, error }
+  // isSample: data comes from the bundled mock rows, not the real sheet.
+  return { data, loading, error, fallbackHeroStats, isSample: !HAS_SHEET_CONFIG }
 }
 
 // toYearMonth exported for use in tests / other modules

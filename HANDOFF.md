@@ -6,12 +6,12 @@ Website for Lift Flintshire CIC, a not-for-profit community fitness organisation
 ---
 
 ## Tech Stack
-- Vite + React 18 + TypeScript (strict, `verbatimModuleSyntax` — always use `import type` for type-only imports)
+- Vite + React 19 + TypeScript (strict, `verbatimModuleSyntax` — always use `import type` for type-only imports)
 - Tailwind CSS v3 with custom tokens: `teal` #376A6B, `ink` #111111, `bg` #FAFAF8
-- React Router v6 + ScrollToTop on route change
+- React Router 7 + ScrollToTop on route change
 - Forms submit to `/api/submit-form` (Vercel serverless function: Resend email + Google Sheets append). The `data-netlify` attributes still in the JSX are dead leftovers from the Netlify era. `Contact.tsx` was briefly broken after the Vercel move (still POSTing to `/`, old Netlify Forms style) — fixed in `bb98f20`.
 - Google Sheets API v4 (public fetch via `VITE_GOOGLE_SHEET_ID` + `VITE_GOOGLE_API_KEY`)
-- Recharts for Impact Dashboard
+- Impact Dashboard charts are hand-built (no Recharts dependency)
 - react-helmet-async for SEO
 
 ---
@@ -19,13 +19,23 @@ Website for Lift Flintshire CIC, a not-for-profit community fitness organisation
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `src/hooks/useGoogleSheets.ts` | Fetches Sheet1 (impact data) + Summary tab (hero stats). Falls back to mock data. |
+| `src/hooks/useGoogleSheets.ts` | Fetches the `Form Responses 4` tab (impact session data) and, independently, the Summary tab (fallback hero stats). Uses bundled mock rows (`isSample`) when the sheet env vars are missing. |
 | `src/hooks/useContentSheets.ts` | Fetches Events + Programme_Sessions + Registrations tabs. Falls back to static data. |
 | `src/data/events.ts` | Static fallback events (used until Google Sheet is populated) |
 | `src/data/programmes.ts` | Static programme content — includes Couch to 5K and Women's Run Club |
 | `src/data/mockData.ts` | Mock impact rows for dev/fallback |
-| `src/pages/Home.tsx` | Hero stats driven by `useGoogleSheets` (heroStats field) |
-| `src/pages/ProgrammesEvents.tsx` | Sessions overridden by `useContentSheets`, events fully live from sheet |
+| `src/pages/Home.tsx` | Club entry cards, live hero stats (from `heroStats.ts`), testimonial placeholder |
+| `src/pages/RunClub.tsx`, `WeightliftingClub.tsx`, `Wellbeing.tsx` | The three club pages that replaced `/programmes-events`; render `ProgrammeSection` blocks |
+| `src/pages/Events.tsx`, `EventDetail.tsx`, `EventEntry.tsx`, `EntryConfirmed.tsx` | Events listing, detail, entry and confirmation |
+| `src/pages/ImpactDashboard.tsx` | Funder-focused Impact page: in-progress month, "How we count", testimonial placeholder, print-to-PDF summary |
+| `src/pages/EnquireYouthStrengthConditioning.tsx` | Youth Weightlifting enquiry form (route `/enquire/youth-weightlifting`; filename kept) |
+| `src/data/links.ts` | The three GymMaster URLs (Run Club join, Youth Beginners join, Weightlifting consultation) |
+| `src/data/navigation.ts` | Shared header/footer navigation items |
+| `src/lib/heroStats.ts` | Builds Home hero stats from the Impact feed (tested in `heroStats.test.ts`) |
+| `src/lib/months.ts` | In-progress month helper and month keys (tested in `months.test.ts`) |
+| `src/components/programmes/ProgrammeSection.tsx`, `useProgrammesWithSessions.ts` | Shared programme block and the merge of sheet sessions over `programmes.ts` |
+| `src/components/layout/StickyJoinBar.tsx` | Sticky join bar |
+| `src/components/ui/Testimonial.tsx` | Testimonial block; `placeholder` prop shows the holding state |
 | `src/pages/RegisterCouchTo5k.tsx` | C25K registration page with full waiver + Netlify Form submission |
 | `src/pages/RegisterWomensRunClub.tsx` | Women's Run Club registration page (monthly, first Saturday) |
 | `src/pages/Questionnaire.tsx` | Post-programme feedback form with star ratings and wellbeing impact |
@@ -43,7 +53,7 @@ security boundary, not a filing preference:
 - **Public content sheet** (`VITE_GOOGLE_SHEET_ID`, read client-side with `VITE_GOOGLE_API_KEY`).
   Fetched directly from every visitor's browser, so it has to be shared "anyone with the
   link" for the API key to work at all — **anything in this sheet is effectively public**,
-  whether or not the site's own code happens to display it. Tabs: `Summary` (homepage hero
+  whether or not the site's own code happens to display it. Tabs: `Summary` (fallback hero
   stats), `Events`, `Programme_Sessions`, `Ticket_Types` (event ticketing).
 - **Private data sheet** (`PRIVATE_SHEET_ID`, written server-side only, from `api/`
   functions using `GOOGLE_SERVICE_ACCOUNT_KEY`). Shared *only* with the service account —
@@ -52,7 +62,7 @@ security boundary, not a filing preference:
 
 **Public sheet tabs:**
 
-**Summary** — drives hero stats on homepage
+**Summary** — fallback only for homepage hero stats (see Site restructure notes; live stats now come from the Impact feed)
 | Value | Label |
 |-------|-------|
 | 1,200+ | Participants supported |
@@ -332,3 +342,22 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 - `programmes.ts` session line now "Enquiries open"; Programmes page CTA is "Enquire now"; Contact page link and sitemap updated; Privacy policy moves Youth out of the registration section and adds an enquiries paragraph.
 - If a `youth-strength-conditioning` row still exists in the public sheet's `Programme_Sessions` tab, it overrides the code and the Thursday line will still show. Delete that row.
 - Added `docs/SOP-editing-website-content.md` (how to edit copy manually).
+
+## 2026-10-12 — Site restructure and Impact page
+
+**Structure**
+- `/programmes-events` is gone. Its content is split across `/run-club` (Couch to 5K, Women's Track Running), `/weightlifting-club` (incl. Youth Weightlifting enquiry) and `/wellbeing` (Stay Strong, Girls Gym Session). `/events` and `/safeguarding` are in the sitemap. Sitemap updated accordingly.
+- Youth programme id renamed `youth-strength-conditioning` to `youth-weightlifting` (programme id, route `/enquire/youth-weightlifting`, sheet `Programme_Sessions` id). The old `/enquire/youth-strength-conditioning` and `/register/youth-strength-conditioning` URLs redirect.
+- Navigation lives in `src/data/navigation.ts`; hamburger breakpoint is `lg`; sticky join bar added.
+- Home hero stats now come from the Impact feed (`src/lib/heroStats.ts`, built from the `Form Responses 4` tab): Attendances recorded, Sessions delivered, Programmes delivered (every programme with at least one recorded session, not just those running now). The Summary tab is fetched separately and used as a fallback when the feed fails or has no rows. In sample-data mode (no sheet env vars) Home shows no hero stats at all, so mock numbers never appear publicly.
+- The three GymMaster links live in `src/data/links.ts`: `RUN_CLUB_JOIN_URL`, `YOUTH_BEGINNERS_JOIN_URL`, `WEIGHTLIFTING_CONSULTATION_URL`.
+- Impact page: current (in-progress) month is flagged, and the "Download summary (PDF)" button calls `window.print()` (the button itself is hidden in print via `print:hidden`). Use the browser's Save as PDF. The summary spans several pages, not one. The placeholder "In their words" testimonial band is also `print:hidden` until a real quote replaces it; remove that class then.
+
+**Backend values that intentionally keep the old name** (do not rename; the backend and private sheet depend on them): `FORM_NAME` / form-name `enquiry-youth-strength-conditioning` in `EnquireYouthStrengthConditioning.tsx` and the hidden input `programme="youth-strength-conditioning"`. `api/submit-form.ts` is unchanged. Likewise the filename `EnquireYouthStrengthConditioning.tsx` was kept.
+
+**Pending content (Ed to confirm)**
+- Replace the two testimonial placeholders (Home and Impact).
+- Choose the hero photo.
+- Confirm the Girls Gym registration route is live.
+- Confirm the "How we count" wording on the Impact page.
+- Check September 2026 data is complete in the Impact sheet.
