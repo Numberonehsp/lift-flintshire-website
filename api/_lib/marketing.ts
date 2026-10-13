@@ -29,3 +29,53 @@ export function listsForEvent(eventId: string, programme: string | undefined): s
 export function listsForYouthGuardian(): string[] {
   return [YOUTH_GUARDIAN_LIST]
 }
+
+export const YOUTH_ENQUIRY_FORM = 'enquiry-youth-strength-conditioning'
+
+// Deliberately simple: one @, no spaces, a dot in the domain. Brevo does its own checks.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MAX_EMAIL_LENGTH = 254
+
+export function isValidEmail(value: string): boolean {
+  return value.length > 0 && value.length <= MAX_EMAIL_LENGTH && EMAIL_RE.test(value)
+}
+
+export interface BrevoContact {
+  email: string
+  firstName?: string
+  lastName?: string
+  lists: string[]
+}
+
+/**
+ * Who (if anyone) a form submission adds to Brevo, and on which lists.
+ * - No `marketing-consent === 'yes'` -> null.
+ * - Youth enquiry -> the parent or guardian's email only, guardian list only. Never the
+ *   young person's name, school year or the guardian's name.
+ * - `register-<programme>` -> the registrant (or guardian) email and name, Newsletter plus programme list.
+ * - Anything else (contact, other enquiries, questionnaires) -> null.
+ */
+export function brevoContactForSubmission(
+  formName: string,
+  fields: Record<string, string | undefined>,
+): BrevoContact | null {
+  if (!hasMarketingConsent(fields)) return null
+
+  if (formName === YOUTH_ENQUIRY_FORM) {
+    const email = fields['guardian-email']?.trim() ?? ''
+    return isValidEmail(email) ? { email, lists: listsForYouthGuardian() } : null
+  }
+
+  if (formName.startsWith(REGISTER_PREFIX)) {
+    const email = (fields['guardian-email'] ?? fields['email'])?.trim() ?? ''
+    if (!isValidEmail(email)) return null
+    const contact: BrevoContact = { email, lists: listsForRegistration(formName) }
+    const firstName = fields['first-name']?.trim()
+    const lastName = fields['last-name']?.trim()
+    if (firstName) contact.firstName = firstName
+    if (lastName) contact.lastName = lastName
+    return contact
+  }
+
+  return null
+}

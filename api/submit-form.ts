@@ -1,6 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Resend } from 'resend'
 import { google } from 'googleapis'
+import { upsertContact } from './_lib/brevo.js'
+import { brevoContactForSubmission } from './_lib/marketing.js'
 
 // Duplicated from src/data/nextSessionDates.ts rather than imported: Vercel
 // builds each file under api/ as an isolated function, and an import that
@@ -43,6 +45,7 @@ const FORM_LABELS: Record<string, string> = {
   'injury-details':                 'Injury details',
   'gdpr-consent':                   'GDPR consent',
   'photo-consent':                  'Photo consent',
+  'marketing-consent':              'Marketing emails',
   'waiver-agreed':                  'Waiver agreed',
   'guardian-initials':              'Guardian initials',
   'first-name':                     'First name',
@@ -358,6 +361,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (confirmError) console.error('Confirmation email error (non-fatal):', confirmError)
       } catch (confirmErr) {
         console.error('Confirmation email error (non-fatal):', confirmErr)
+      }
+    }
+
+    // 4 — Add opted-in registrants and youth guardians to Brevo (non-fatal if it fails).
+    // Only `marketing-consent === 'yes'` gets here; the youth path sends the guardian email only.
+    const brevoContact = brevoContactForSubmission(formName, fields)
+    if (brevoContact) {
+      try {
+        await upsertContact({ ...brevoContact, source: formName })
+      } catch (brevoErr) {
+        // BrevoError messages carry only the HTTP status and Brevo's error code, never the email.
+        console.error('Brevo error (non-fatal):', brevoErr instanceof Error ? brevoErr.message : 'unknown error')
       }
     }
 
