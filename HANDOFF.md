@@ -24,10 +24,10 @@ Website for Lift Flintshire CIC, a not-for-profit community fitness organisation
 | `src/data/events.ts` | Static fallback events (used until Google Sheet is populated) |
 | `src/data/programmes.ts` | Static programme content — includes Couch to 5K and Women's Run Club |
 | `src/data/mockData.ts` | Mock impact rows for dev/fallback |
-| `src/pages/Home.tsx` | Club entry cards, live hero stats (from `heroStats.ts`), testimonial placeholder |
+| `src/pages/Home.tsx` | Club entry cards, live hero stats (from `heroStats.ts`), testimonial (Sarah, Women's Track) |
 | `src/pages/RunClub.tsx`, `WeightliftingClub.tsx`, `Wellbeing.tsx` | The three club pages that replaced `/programmes-events`; render `ProgrammeSection` blocks |
 | `src/pages/Events.tsx`, `EventDetail.tsx`, `EventEntry.tsx`, `EntryConfirmed.tsx` | Events listing, detail, entry and confirmation |
-| `src/pages/ImpactDashboard.tsx` | Funder-focused Impact page: in-progress month, "How we count", testimonial placeholder, print-to-PDF summary |
+| `src/pages/ImpactDashboard.tsx` | Funder-focused Impact page: in-progress month, "How we count", testimonial (Claire, Couch to 5 km), print-to-PDF summary |
 | `src/pages/EnquireYouthStrengthConditioning.tsx` | Youth Weightlifting enquiry form (route `/enquire/youth-weightlifting`; filename kept) |
 | `src/data/links.ts` | The three GymMaster URLs (Run Club join, Youth Beginners join, Weightlifting consultation) |
 | `src/data/navigation.ts` | Shared header/footer navigation items |
@@ -35,7 +35,7 @@ Website for Lift Flintshire CIC, a not-for-profit community fitness organisation
 | `src/lib/months.ts` | In-progress month helper and month keys (tested in `months.test.ts`) |
 | `src/components/programmes/ProgrammeSection.tsx`, `useProgrammesWithSessions.ts` | Shared programme block and the merge of sheet sessions over `programmes.ts` |
 | `src/components/layout/StickyJoinBar.tsx` | Sticky join bar |
-| `src/components/ui/Testimonial.tsx` | Testimonial block; `placeholder` prop shows the holding state |
+| `src/components/ui/Testimonial.tsx` | Testimonial block; `placeholder` prop shows a labelled holding state; long quotes switch to body type |
 | `src/pages/RegisterCouchTo5k.tsx` | C25K registration page with full waiver + Netlify Form submission |
 | `src/pages/RegisterWomensRunClub.tsx` | Women's Run Club registration page (monthly, first Saturday) |
 | `src/pages/Questionnaire.tsx` | Post-programme feedback form with star ratings and wellbeing impact |
@@ -351,12 +351,11 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 - Navigation lives in `src/data/navigation.ts`; hamburger breakpoint is `lg`; sticky join bar added.
 - Home hero stats now come from the Impact feed (`src/lib/heroStats.ts`, built from the `Form Responses 4` tab): Attendances recorded, Sessions delivered, Programmes delivered (every programme with at least one recorded session, not just those running now). The Summary tab is fetched separately and used as a fallback when the feed fails or has no rows. In sample-data mode (no sheet env vars) Home shows no hero stats at all, so mock numbers never appear publicly.
 - The three GymMaster links live in `src/data/links.ts`: `RUN_CLUB_JOIN_URL`, `YOUTH_BEGINNERS_JOIN_URL`, `WEIGHTLIFTING_CONSULTATION_URL`.
-- Impact page: current (in-progress) month is flagged, and the "Download summary (PDF)" button calls `window.print()` (the button itself is hidden in print via `print:hidden`). Use the browser's Save as PDF. The summary spans several pages, not one. The placeholder "In their words" testimonial band is also `print:hidden` until a real quote replaces it; remove that class then.
+- Impact page: current (in-progress) month is flagged, and the "Download summary (PDF)" button calls `window.print()` (the button itself is hidden in print via `print:hidden`). Use the browser's Save as PDF. The summary spans several pages, not one.
 
 **Backend values that intentionally keep the old name** (do not rename; the backend and private sheet depend on them): `FORM_NAME` / form-name `enquiry-youth-strength-conditioning` in `EnquireYouthStrengthConditioning.tsx` and the hidden input `programme="youth-strength-conditioning"`. `api/submit-form.ts` is unchanged. Likewise the filename `EnquireYouthStrengthConditioning.tsx` was kept.
 
 **Pending content (Ed to confirm)**
-- Replace the two testimonial placeholders (Home and Impact).
 - Choose the hero photo.
 - Confirm the Girls Gym registration route is live.
 - Confirm the "How we count" wording on the Impact page.

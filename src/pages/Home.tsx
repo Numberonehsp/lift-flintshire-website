@@ -127,9 +127,8 @@ export default function Home() {
       {/* Testimonial */}
       <SectionWrapper variant="dark">
         <Testimonial
-          placeholder
-          quote="Replace this with a real quote from a member, with their permission."
-          attribution="Member name, programme"
+          quote="I love the running sessions at the track!! I would have never gone on my own, I always felt intimidated and like I would be too slow but the group are amazing so welcoming and they have created such a safe space for women and girls"
+          attribution="Sarah, Women's Track Sessions"
         />
       </SectionWrapper>
 
