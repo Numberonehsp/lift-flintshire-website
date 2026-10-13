@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Button } from '../components/ui/Button'
@@ -21,6 +22,8 @@ const labelClass = 'block font-body font-medium text-sm text-ink mb-1'
 
 function ContactForm() {
   const [state, setState] = useState<FormState>('idle')
+  const [params] = useSearchParams()
+  const defaultSubject = params.get('subject') === 'school-team' ? 'School or Sports Team Booking' : ''
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -59,9 +62,10 @@ function ContactForm() {
       </div>
       <div>
         <label htmlFor="contact-subject" className={labelClass}>Subject</label>
-        <select id="contact-subject" name="subject" required className={inputClass}>
+        <select id="contact-subject" name="subject" required defaultValue={defaultSubject} className={inputClass}>
           <option value="">Select a subject</option>
           <option>General Enquiry</option>
+          <option>School or Sports Team Booking</option>
           <option>Volunteering</option>
           <option>Partnership</option>
           <option>Media</option>

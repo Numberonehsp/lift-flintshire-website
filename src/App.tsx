@@ -15,7 +15,6 @@ import ImpactDashboard from './pages/ImpactDashboard'
 import Contact from './pages/Contact'
 import RegisterCouchTo5k from './pages/RegisterCouchTo5k'
 import RegisterWomensRunClub from './pages/RegisterWomensRunClub'
-import RegisterGirlsGymSession from './pages/RegisterGirlsGymSession'
 import EnquireYouthStrengthConditioning from './pages/EnquireYouthStrengthConditioning'
 import Questionnaire from './pages/Questionnaire'
 import Privacy from './pages/Privacy'
@@ -50,7 +49,7 @@ function Layout() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/register/couch-to-5k" element={<RegisterCouchTo5k />} />
           <Route path="/register/womens-run-club" element={<RegisterWomensRunClub />} />
-          <Route path="/register/girls-gym-session" element={<RegisterGirlsGymSession />} />
+          <Route path="/register/girls-gym-session" element={<Navigate to="/contact?subject=school-team" replace />} />
           <Route path="/enquire/youth-weightlifting" element={<EnquireYouthStrengthConditioning />} />
           <Route path="/enquire/youth-strength-conditioning" element={<Navigate to="/enquire/youth-weightlifting" replace />} />
           <Route path="/register/youth-strength-conditioning" element={<Navigate to="/enquire/youth-weightlifting" replace />} />

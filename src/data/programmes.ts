@@ -125,17 +125,17 @@ export const programmes: Programme[] = [
   {
     id: 'girls-gym-session',
     group: 'wellbeing',
-    title: 'Girls Gym Session',
-    tagline: 'A free, confidence-building gym session for young women',
+    title: 'Girls Gym Sessions',
+    tagline: 'Free, confidence-building gym sessions for schools and sports teams',
     badge: 'High School Girls · Free',
     description:
       'Our Girls Gym Sessions give young women their first positive experience of the gym, a welcoming, coach-led session where no previous experience is needed. We focus on fun, confidence, and building a healthy relationship with movement.',
     targetAudience:
-      'Open to girls in Years 7–13 (ages 11–18). Sessions are led by our qualified coaches and are designed specifically for young women. No gym experience required, this is exactly the kind of session you can bring a friend to.',
+      'Open to girls in Years 7–13 (ages 11–18), booked for a whole school group or sports team. Sessions are led by our qualified coaches and are designed specifically for young women. No gym experience required.',
     whatToExpect:
       'A fun, structured gym session where our coaches explain how to use equipment safely and confidently. Groups are small, sessions are social, and the atmosphere is never competitive. We want every young woman who attends to leave feeling capable and welcomed.',
     sessions: [
-      { day: 'By arrangement', time: 'TBC', location: 'Number One HSP, CH5 2TF', cost: 'Free' },
+      { day: 'Booked by arrangement for schools and sports teams', time: 'Dates to be agreed', location: 'Number One HSP, CH5 2TF', cost: 'Free' },
     ],
   },
 ]
