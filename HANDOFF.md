@@ -363,3 +363,41 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 - Events sheet dates are normalised by `src/lib/eventDate.ts`: `YYYY-MM-DD` and `DD/MM/YYYY` are accepted, and `YYYY-DD-MM` is corrected when the middle part cannot be a month (for example `2026-21-11` becomes `2026-11-21`). A date that cannot be read is skipped with a console warning. Before this, an invalid date made the event vanish from the site with no message. Enter dates as `YYYY-MM-DD`.
 - Run Club logo is the transparent vector cropped to the artwork (`public/images/logo-run-club.svg`).
 - September 2026 low attendance figure confirmed as correct for now; the "How we count" wording is approved.
+
+## 2026-10-13 — Brevo mailing lists and free event entries
+
+**Brevo flow (opt-in only)**
+- Every form has an unticked "email me" checkbox (`marketing-consent` = `yes`); there is also a newsletter form (`POST /api/subscribe`). Nobody is added to Brevo without that exact value. Marketing consent is separate from `gdpr-consent`.
+- Code: `api/_lib/brevo.ts` (client), `api/_lib/marketing.ts` (who, which lists), `api/_lib/finaliseEntry.ts` (event entries, paid and free), `api/_lib/eventLookup.ts` (reads the Events sheet `programme` column), `api/subscribe.ts`, `api/submit-form.ts` (registrations and youth enquiry), `api/create-entry.ts`.
+- Env vars (server-only, set in Vercel, see `.env.example`): `BREVO_API_KEY`, `BREVO_FOLDER_ID`. Without the key the client does nothing; `/api/subscribe` returns an error instead of pretending it worked.
+- Lists are found or created by name inside the `BREVO_FOLDER_ID` folder:
+
+| Who | List name |
+|---|---|
+| Anyone who opts in on registration, event entry or the newsletter form | `Newsletter` |
+| Programme registrants | `Programme: couch-to-5k`, `Programme: womens-run-club` |
+| Event entrants | `Event: <event id>`, for example `Event: Nov_WTR` |
+| Event entrants, by programme | `Programme: <Events sheet programme column>` when that column is filled |
+| Parent or guardian of a Youth Weightlifting enquirer | `Guardians: youth-weightlifting` (only this list, not `Newsletter`) |
+
+- Youth Weightlifting: only the guardian's email goes to Brevo, never the young person's name or school year or the guardian's name.
+- Attributes sent: `FIRSTNAME`, `LASTNAME` (when collected), `CONSENT_DATE`, `CONSENT_SOURCE` (`newsletter-signup`, `event-entry`, or the form name such as `register-couch-to-5k`).
+- Failures are non-fatal: a Brevo error is logged (status and Brevo error code only, never the email) and the registration or entry still succeeds. Event-entry Brevo calls are abandoned after 8 seconds. A failed programme lookup still adds the contact to `Newsletter` and the event list, just not the programme list.
+- **Attribute-name caveat:** the client sends `FIRSTNAME`, `LASTNAME`, `CONSENT_DATE`, `CONSENT_SOURCE` and, on any HTTP 400 from Brevo, retries once WITHOUT attributes. If those names do not exist in the Brevo account, contacts are still added to their lists but without consent attributes, and the log shows "retrying without attributes". Ed must check the exact names under Brevo, Contacts, Settings, Contact attributes (`CONSENT_DATE` and `CONSENT_SOURCE` need creating as text attributes).
+
+**Free event entries**
+- A ticket tier with price 0 skips Stripe: `api/create-entry.ts` writes the row straight to `Event_Entries` as `paid` with amount £0.00 and session id `free`, runs the same `finaliseEntry` (confirmation email to the entrant, notification to the organisers, Brevo) and returns the entry-confirmed URL. Free entries count against capacity. If the row cannot be saved the entrant sees an error. Free events are price `0` in the Events sheet.
+
+**Private sheet change**
+- `Event_Entries` has a new last column `Marketing Consent` (column AH): `yes` or blank. It must be added to the header row by hand (step 5 below). The Stripe webhook reads it so paid entries are added to Brevo only after payment is confirmed.
+
+**Steps only Ed can do**
+1. In Brevo: Contacts, Settings, Contact attributes, create two text attributes: `CONSENT_DATE` and `CONSENT_SOURCE`. Check that `FIRSTNAME` and `LASTNAME` exist (Brevo normally has them).
+2. In Brevo: Contacts, Lists, create a folder (for example "Website") and note its numeric id.
+3. In Brevo: SMTP and API, create an API key. Copy it straight into Vercel (Project, Settings, Environment Variables) as `BREVO_API_KEY` for Production and Preview. Do not paste it into chat, a file in the repo, or a `VITE_` variable. Add `BREVO_FOLDER_ID` the same way.
+4. In Brevo: Senders, domains and dedicated IPs, add and authenticate `liftflintshire.co.uk` (DKIM and DMARC records) before sending campaigns. Resend's existing records on that domain do not cover Brevo.
+5. In the private sheet, `Event_Entries` tab: add a header `Marketing Consent` in column AH, the next free column after `Runner 4 Email`.
+6. In the Events sheet: fill the `programme` column (H) for each event, for example `womens-run-club` for the Nov_WTR event.
+7. Redeploy after the env vars are set.
+
+Also check where Brevo holds data (UK, EEA or elsewhere) and that Brevo's terms give an appropriate transfer mechanism; the privacy policy deliberately does not state a location.
