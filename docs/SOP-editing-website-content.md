@@ -29,9 +29,12 @@
 2. Open the tab you need:
    - `Programme_Sessions`: columns are `programme id | day | time | location | cost`. Programme ids are `couch-to-5k`, `womens-run-club`, `girls-gym-session`, `youth-weightlifting`, `stay-strong`, `run-club`, `weightlifting`.
    - `Events`: columns are `id | title | date (YYYY-MM-DD) | time | location | price | description | programme | bookingLink`.
-   - `programme` column on `Events` (column H): controls which programme mailing list an event's entrants join. Valid ids: `womens-run-club`, `couch-to-5k`, `run-club`, `stay-strong`, `weightlifting`. Spell it exactly; a typo silently creates a junk list called `Programme: <typo>` in Brevo. Leave it blank if the event belongs to no programme.
+   - `programme` column on `Events` (column H): controls which programme mailing list an event's entrants join. Valid ids: `womens-run-club`, `couch-to-5k`, `run-club`, `stay-strong`, `weightlifting`. Spell it exactly; any other value is ignored (entrants still join `Newsletter` and the event's own list, just not a programme list). Leave it blank if the event belongs to no programme.
    - `date` on `Events`: enter as `YYYY-MM-DD` (for example `2026-11-21`).
-   - `price` on `Events`: a free event is price `0`. It then shows as free and entrants skip payment.
+   - Free events need two cells set to `0`:
+     - the tier's `price_gbp` on the `Ticket_Types` tab. **This is what skips payment**: only a tier priced `0` confirms entries without Stripe.
+     - `price` on the `Events` tab, so the listing shows the event as Free. On its own this does not skip payment.
+   - Free entries are saved in the private `Event_Entries` tab with status `paid`, amount `0.00` and Stripe session `free`. When reconciling entries with Stripe, filter on the amount (or the session column): free entries have no Stripe payment.
 3. Edit the cell. Keep the first row (headers) exactly as it is. Do not rename tabs.
 4. Reload the website. Changes appear straight away, with no deploy step. If it does not change, hard refresh (Cmd+Shift+R).
 

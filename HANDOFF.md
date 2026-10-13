@@ -392,7 +392,9 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 - A free entry from an email that already has a `paid` row for the same event (case-insensitive) is sent to the existing confirmation page: no new row, no new email.
 - Overbooking guard: after writing a free row, create-entry re-reads columns A:E and, if the row is beyond the tier's capacity among `paid` rows (in sheet order), changes its status to `oversold`, sends no email and tells the entrant the event is fully booked. `oversold` rows do not count against capacity and can be ignored or deleted. If that re-check itself fails, the entry stands.
 - The confirmation emails and Brevo step still run before the free-entry response is sent: `@vercel/functions` (`waitUntil`) is not a dependency, so there is no safe way to run them after responding.
-- The entry form has a hidden honeypot field `website`. If it is filled, `/api/create-entry` returns a normal-looking success and writes nothing. Free events are price `0` in the Events sheet.
+- The entry form has a hidden honeypot field `website`. If it is filled, `/api/create-entry` returns a normal-looking success and writes nothing.
+- **Setting up a free event:** set the tier's `price_gbp` to `0` in `Ticket_Types`. That alone is what skips Stripe. Also set the Events sheet `price` to `0` so the listing shows Free; the Events `price` by itself does not skip payment.
+- **Reconciling with Stripe:** free entries are stored with status `paid`, Amount `0.00` and Stripe Session ID `free`. Filter on the amount (or session `free`) when matching `Event_Entries` against Stripe payouts, or free entries will look like missing payments.
 
 **Private sheet change**
 - `Event_Entries` has a new last column `Marketing Consent` (column AH): `yes` or blank. It must be added to the header row by hand (step 5 below). The Stripe webhook reads it so paid entries are added to Brevo only after payment is confirmed.
