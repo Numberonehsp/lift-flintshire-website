@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { events as staticEvents } from '../data/events'
 import type { Event } from '../data/events'
 import type { SessionDetail } from '../data/programmes'
+import { normaliseEventDate } from '../lib/eventDate'
 
 interface ContentSheetsData {
   events: Event[]
@@ -14,10 +15,19 @@ function parseEventsSheet(values: string[][]): Event[] {
   const [, ...rows] = values
   const parsed = rows
     .filter(row => row[0] && row[1] && row[2])
-    .map(row => ({
+    .flatMap(row => {
+      const date = normaliseEventDate(row[2])
+      if (!date) {
+        // An unreadable date would hide the event with no explanation, so say why in the console.
+        console.warn(`Events sheet: skipped "${row[0]}" because "${row[2]}" is not a valid date (use YYYY-MM-DD).`)
+        return []
+      }
+      return [{ row, date }]
+    })
+    .map(({ row, date }) => ({
       id: row[0],
       title: row[1],
-      date: row[2],
+      date,
       time: row[3] || '',
       location: row[4] || '',
       price: parseFloat(row[5]) || 0,

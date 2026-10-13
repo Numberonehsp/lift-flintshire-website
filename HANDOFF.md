@@ -357,6 +357,9 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 
 **Pending content (Ed to confirm)**
 - Choose the hero photo.
-- Confirm the Girls Gym registration route is live.
-- Confirm the "How we count" wording on the Impact page.
-- Check September 2026 data is complete in the Impact sheet.
+
+**2026-10-13 follow-ups**
+- Girls Gym Sessions no longer have a registration form: `RegisterGirlsGymSession.tsx` is deleted. Schools and sports teams enquire through the Contact form (subject "School or Sports Team Booking", prefilled by `/contact?subject=school-team`). The old `/register/girls-gym-session` URL redirects there. `api/submit-form.ts` still contains handling for the old form name; it is unused and was left untouched.
+- Events sheet dates are normalised by `src/lib/eventDate.ts`: `YYYY-MM-DD` and `DD/MM/YYYY` are accepted, and `YYYY-DD-MM` is corrected when the middle part cannot be a month (for example `2026-21-11` becomes `2026-11-21`). A date that cannot be read is skipped with a console warning. Before this, an invalid date made the event vanish from the site with no message. Enter dates as `YYYY-MM-DD`.
+- Run Club logo is the transparent vector cropped to the artwork (`public/images/logo-run-club.svg`).
+- September 2026 low attendance figure confirmed as correct for now; the "How we count" wording is approved.

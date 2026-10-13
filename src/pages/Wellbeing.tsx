@@ -12,7 +12,7 @@ export default function Wellbeing() {
     <>
       <Seo
         title="Wellbeing Programmes · Lift Flintshire CIC"
-        description="Wellbeing programmes from Lift Flintshire CIC: Stay Strong for adults aged 55 and over, and free Girls Gym Sessions for young women."
+        description="Wellbeing programmes from Lift Flintshire CIC: Stay Strong for adults aged 55 and over, and free Girls Gym Sessions for schools and sports teams."
         path="/wellbeing"
       />
 
@@ -35,10 +35,7 @@ export default function Wellbeing() {
           programme={girls}
           imageLeft
           muted
-          actions={[
-            { label: 'Register for a session', href: '/register/girls-gym-session' },
-            { label: 'Arrange a session for your school', href: '/contact' },
-          ]}
+          actions={[{ label: 'Enquire about a school or team session', href: '/contact?subject=school-team' }]}
         />
       )}
     </>

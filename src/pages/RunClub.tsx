@@ -25,9 +25,9 @@ export default function RunClub() {
           <img
             src="/images/logo-run-club.svg"
             alt="Flintshire Run Club logo"
-            width={500}
-            height={500}
-            className="w-40 sm:w-48 lg:w-72 h-auto flex-shrink-0"
+            width={301}
+            height={163}
+            className="w-56 sm:w-64 lg:w-80 h-auto flex-shrink-0"
           />
           <div>
         <p className="font-body font-semibold text-[11px] uppercase tracking-[0.08em] text-teal-light mb-4">Lift Flintshire</p>

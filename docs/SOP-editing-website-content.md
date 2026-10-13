@@ -109,7 +109,7 @@ If you want to see a change before it goes live, choose **Create a new branch** 
 | About page | `src/pages/About.tsx` |
 | Contact page, subject dropdown, "Register for a programme" box | `src/pages/Contact.tsx` |
 | Youth Weightlifting enquiry form wording (route `/enquire/youth-weightlifting`) | `src/pages/EnquireYouthStrengthConditioning.tsx` |
-| Girls Gym Session registration form | `src/pages/RegisterGirlsGymSession.tsx` |
+| Girls Gym Sessions enquiries (school or sports team bookings) | Contact form subject "School or Sports Team Booking" in `src/pages/Contact.tsx` |
 | Couch to 5K / Women's Run Club registration pages | `src/pages/RegisterCouchTo5k.tsx`, `src/pages/RegisterWomensRunClub.tsx` |
 | Privacy policy | `src/pages/Privacy.tsx` |
 | Safeguarding page | `src/pages/Safeguarding.tsx` |
