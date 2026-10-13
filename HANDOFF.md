@@ -380,6 +380,7 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 | Event entrants, by programme | `Programme: <Events sheet programme column>` when that column is filled |
 | Parent or guardian of a Youth Weightlifting enquirer | `Guardians: youth-weightlifting` (only this list, not `Newsletter`) |
 
+- Programme lists are limited to the ids in `PROGRAMME_IDS` (`api/_lib/marketing.ts`): `couch-to-5k`, `womens-run-club`, `run-club`, `stay-strong`, `weightlifting`. A registration form with any other id adds nobody to Brevo, and an Events sheet `programme` value outside the set is dropped (Newsletter and the event list are still used). Add a new programme there before using its id.
 - Youth Weightlifting: only the guardian's email goes to Brevo, never the young person's name or school year or the guardian's name.
 - Attributes sent: `FIRSTNAME`, `LASTNAME` (when collected), `CONSENT_DATE`, `CONSENT_SOURCE` (`newsletter-signup`, `event-entry`, or the form name such as `register-couch-to-5k`).
 - Failures are non-fatal: a Brevo error is logged (status and Brevo error code only, never the email) and the registration or entry still succeeds. Event-entry Brevo calls are abandoned after 8 seconds. A failed programme lookup still adds the contact to `Newsletter` and the event list, just not the programme list.

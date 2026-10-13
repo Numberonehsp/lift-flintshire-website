@@ -1,8 +1,10 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
   listsForRegistration, listsForEvent, listsForYouthGuardian, hasMarketingConsent,
-  brevoContactForSubmission, isValidEmail,
+  brevoContactForSubmission, isValidEmail, PROGRAMME_IDS,
 } from './marketing.js'
+
+afterEach(() => vi.restoreAllMocks())
 
 describe('hasMarketingConsent', () => {
   it('is true only for "yes"', () => {
@@ -17,8 +19,16 @@ describe('listsForRegistration', () => {
     expect(listsForRegistration('register-womens-run-club')).toEqual(['Newsletter', 'Programme: womens-run-club'])
     expect(listsForRegistration('register-couch-to-5k')).toEqual(['Newsletter', 'Programme: couch-to-5k'])
   })
-  it('returns only Newsletter for an unknown form', () => {
-    expect(listsForRegistration('something-else')).toEqual(['Newsletter'])
+  it('accepts every known programme id', () => {
+    expect([...PROGRAMME_IDS].sort()).toEqual(['couch-to-5k', 'run-club', 'stay-strong', 'weightlifting', 'womens-run-club'])
+    for (const id of PROGRAMME_IDS) {
+      expect(listsForRegistration(`register-${id}`)).toEqual(['Newsletter', `Programme: ${id}`])
+    }
+  })
+  it('returns null for an unknown programme id or a non-register form', () => {
+    expect(listsForRegistration('register-made-up')).toBeNull()
+    expect(listsForRegistration('register-')).toBeNull()
+    expect(listsForRegistration('something-else')).toBeNull()
   })
 })
 
@@ -30,6 +40,12 @@ describe('listsForEvent', () => {
   })
   it('skips the programme list when the event has none', () => {
     expect(listsForEvent('Nov_WTR', undefined)).toEqual(['Newsletter', 'Event: Nov_WTR'])
+  })
+  it('drops an unknown programme but keeps Newsletter and the event list, logging no values', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    expect(listsForEvent('Nov_WTR', 'Spam List')).toEqual(['Newsletter', 'Event: Nov_WTR'])
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(JSON.stringify(warn.mock.calls)).not.toMatch(/Spam List|Nov_WTR/)
   })
 })
 
@@ -80,6 +96,10 @@ describe('brevoContactForSubmission', () => {
     expect(contact).not.toHaveProperty('firstName')
     expect(contact).not.toHaveProperty('lastName')
     expect(JSON.stringify(contact)).not.toMatch(/Sam|Year 8|Gail|Jones|07700/)
+  })
+
+  it('returns null for a register form with an unknown programme id', () => {
+    expect(brevoContactForSubmission('register-made-up', { ...register, 'marketing-consent': 'yes' })).toBeNull()
   })
 
   it('ignores contact messages, other enquiries and questionnaires', () => {

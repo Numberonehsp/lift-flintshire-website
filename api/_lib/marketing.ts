@@ -11,17 +11,27 @@ export function hasMarketingConsent(fields: Record<string, string | undefined>):
   return fields['marketing-consent'] === 'yes'
 }
 
-/** `register-<programme id>` -> Newsletter plus `Programme: <programme id>`; anything else -> Newsletter only. */
-export function listsForRegistration(formName: string): string[] {
-  const programme = formName.startsWith(REGISTER_PREFIX) ? formName.slice(REGISTER_PREFIX.length).trim() : ''
-  return programme ? [NEWSLETTER_LIST, `Programme: ${programme}`] : [NEWSLETTER_LIST]
+/** The only programme ids that get a `Programme: <id>` list. Anything else (a made-up form
+ *  name, a typo in the Events sheet) never creates a Brevo list. */
+export const PROGRAMME_IDS: ReadonlySet<string> = new Set([
+  'couch-to-5k', 'womens-run-club', 'run-club', 'stay-strong', 'weightlifting',
+])
+
+/** `register-<known programme id>` -> Newsletter plus `Programme: <id>`; anything else -> null (no Brevo call). */
+export function listsForRegistration(formName: string): string[] | null {
+  if (!formName.startsWith(REGISTER_PREFIX)) return null
+  const programme = formName.slice(REGISTER_PREFIX.length).trim()
+  return PROGRAMME_IDS.has(programme) ? [NEWSLETTER_LIST, `Programme: ${programme}`] : null
 }
 
-/** Newsletter, the event's own list and, when the Events sheet names one, its programme list. */
+/** Newsletter, the event's own list and, when the Events sheet names a known programme, its programme list. */
 export function listsForEvent(eventId: string, programme: string | undefined): string[] {
   const lists = [NEWSLETTER_LIST, `Event: ${eventId}`]
   const p = programme?.trim()
-  if (p) lists.push(`Programme: ${p}`)
+  if (p) {
+    if (PROGRAMME_IDS.has(p)) lists.push(`Programme: ${p}`)
+    else console.warn('Events sheet programme is not a known programme id; skipping the programme list')
+  }
   return lists
 }
 
@@ -52,7 +62,7 @@ export interface BrevoContact {
  * - No `marketing-consent === 'yes'` -> null.
  * - Youth enquiry -> the parent or guardian's email only, guardian list only. Never the
  *   young person's name, school year or the guardian's name.
- * - `register-<programme>` -> the registrant (or guardian) email and name, Newsletter plus programme list.
+ * - `register-<known programme>` -> the registrant (or guardian) email and name, Newsletter plus programme list.
  * - Anything else (contact, other enquiries, questionnaires) -> null.
  */
 export function brevoContactForSubmission(
@@ -69,7 +79,9 @@ export function brevoContactForSubmission(
   if (formName.startsWith(REGISTER_PREFIX)) {
     const email = (fields['guardian-email'] ?? fields['email'])?.trim() ?? ''
     if (!isValidEmail(email)) return null
-    const contact: BrevoContact = { email, lists: listsForRegistration(formName) }
+    const lists = listsForRegistration(formName)
+    if (!lists) return null
+    const contact: BrevoContact = { email, lists }
     const firstName = fields['first-name']?.trim()
     const lastName = fields['last-name']?.trim()
     if (firstName) contact.firstName = firstName
