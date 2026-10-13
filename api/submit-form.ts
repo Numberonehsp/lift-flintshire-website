@@ -1,6 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Resend } from 'resend'
 import { google } from 'googleapis'
+import { upsertContact } from './_lib/brevo.js'
+import { brevoContactForSubmission } from './_lib/marketing.js'
+import { SHEET_COLUMNS, buildSheetRow } from './_lib/registrationSheet.js'
+import { describeError } from './_lib/finaliseEntry.js'
 
 // Duplicated from src/data/nextSessionDates.ts rather than imported: Vercel
 // builds each file under api/ as an isolated function, and an import that
@@ -43,6 +47,7 @@ const FORM_LABELS: Record<string, string> = {
   'injury-details':                 'Injury details',
   'gdpr-consent':                   'GDPR consent',
   'photo-consent':                  'Photo consent',
+  'marketing-consent':              'Marketing emails',
   'waiver-agreed':                  'Waiver agreed',
   'guardian-initials':              'Guardian initials',
   'first-name':                     'First name',
@@ -95,31 +100,6 @@ function buildFeedbackRow(fields: Record<string, string>): string[] {
     fields['contact-consent']    ?? '',
   ]
 }
-
-const SHEET_COLUMNS = [
-  'Timestamp',
-  'Form',
-  'Programme',
-  'First Name',
-  'Last Name',
-  'Date of Birth',
-  'Gender',
-  'School Year',
-  'Guardian Name',
-  'Guardian Email',
-  'Guardian Phone',
-  'Emergency Contact',
-  'Emergency Phone',
-  'Medical Conditions',
-  'Medical Details',
-  'Injuries',
-  'Injury Details',
-  'GDPR Consent',
-  'Photo Consent',
-  'Waiver Agreed',
-  'Initials',
-  'Referral Source',
-]
 
 // ── Registrant confirmation emails ──────────────────────────────────────────
 // Keyed by the `programme` field submitted from each registration form.
@@ -216,40 +196,6 @@ function buildHtml(fields: Record<string, string>): string {
     </div>`
 }
 
-function buildSheetRow(fields: Record<string, string>): string[] {
-  // Handles both Girls Gym (yp-* fields) and general forms (first-name etc.)
-  const firstName = fields['yp-first-name'] ?? fields['first-name'] ?? ''
-  const lastName  = fields['yp-last-name']  ?? fields['last-name']  ?? ''
-  const guardianFirst = fields['guardian-first-name'] ?? ''
-  const guardianLast  = fields['guardian-last-name']  ?? ''
-  const guardianName  = [guardianFirst, guardianLast].filter(Boolean).join(' ')
-
-  return [
-    new Date().toISOString(),
-    fields['form-name']                    ?? '',
-    fields['programme']                    ?? '',
-    firstName,
-    lastName,
-    fields['yp-date-of-birth']             ?? fields['date-of-birth'] ?? '',
-    fields['yp-gender']                    ?? fields['gender']        ?? '',
-    fields['yp-school-year']               ?? '',
-    guardianName,
-    fields['guardian-email']               ?? fields['email']         ?? '',
-    fields['guardian-phone']               ?? fields['phone']         ?? '',
-    fields['emergency-contact-name']       ?? fields['emergency-name']  ?? '',
-    fields['emergency-contact-phone']      ?? fields['emergency-phone'] ?? '',
-    fields['has-medical-conditions']       ?? '',
-    fields['medical-conditions-details']   ?? '',
-    fields['has-injuries']                 ?? '',
-    fields['injury-details']               ?? '',
-    fields['gdpr-consent']                 ?? '',
-    fields['photo-consent']                ?? '',
-    fields['waiver-agreed']                ?? '',
-    fields['guardian-initials']            ?? fields['waiver-initials'] ?? '',
-    fields['referral-source']              ?? '',
-  ]
-}
-
 // Registrations and Feedback hold personal data (names, DOBs, medical details, guardian
 // contacts) — they live in PRIVATE_SHEET_ID, a spreadsheet shared only with the service
 // account, never in the public content sheet VITE_GOOGLE_SHEET_ID reads from. That sheet
@@ -326,7 +272,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
 
     if (error) {
-      console.error('Resend error:', error)
+      console.error('Resend error:', describeError(error))
       return res.status(500).json({ error: 'Email failed' })
     }
 
@@ -340,7 +286,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           await appendToSheet(buildSheetRow(fields), 'Registrations', SHEET_COLUMNS)
         }
       } catch (sheetErr) {
-        console.error('Sheet write error (non-fatal):', sheetErr)
+        console.error('Sheet write error (non-fatal):', describeError(sheetErr))
       }
     }
 
@@ -355,15 +301,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           subject: confirmation.subject,
           html: confirmation.html,
         })
-        if (confirmError) console.error('Confirmation email error (non-fatal):', confirmError)
+        if (confirmError) console.error('Confirmation email error (non-fatal):', describeError(confirmError))
       } catch (confirmErr) {
-        console.error('Confirmation email error (non-fatal):', confirmErr)
+        console.error('Confirmation email error (non-fatal):', describeError(confirmErr))
+      }
+    }
+
+    // 4 — Add opted-in registrants and youth guardians to Brevo (non-fatal if it fails).
+    // Only `marketing-consent === 'yes'` gets here; the youth path sends the guardian email only.
+    const brevoContact = brevoContactForSubmission(formName, fields)
+    if (brevoContact) {
+      try {
+        await upsertContact({ ...brevoContact, source: formName })
+      } catch (brevoErr) {
+        console.error('Brevo error (non-fatal):', describeError(brevoErr))
       }
     }
 
     return res.status(200).json({ success: true })
   } catch (err) {
-    console.error('Submit error:', err)
+    console.error('Submit error:', describeError(err))
     return res.status(500).json({ error: 'Unexpected error' })
   }
 }

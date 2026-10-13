@@ -29,12 +29,31 @@
 2. Open the tab you need:
    - `Programme_Sessions`: columns are `programme id | day | time | location | cost`. Programme ids are `couch-to-5k`, `womens-run-club`, `girls-gym-session`, `youth-weightlifting`, `stay-strong`, `run-club`, `weightlifting`.
    - `Events`: columns are `id | title | date (YYYY-MM-DD) | time | location | price | description | programme | bookingLink`.
+   - `programme` column on `Events` (column H): controls which programme mailing list an event's entrants join. Valid ids: `womens-run-club`, `couch-to-5k`, `run-club`, `stay-strong`, `weightlifting`. Spell it exactly; any other value is ignored (entrants still join `Newsletter` and the event's own list, just not a programme list). Leave it blank if the event belongs to no programme.
+   - `date` on `Events`: enter as `YYYY-MM-DD` (for example `2026-11-21`).
+   - Free events need two cells set to `0`:
+     - the tier's `price_gbp` on the `Ticket_Types` tab. **This is what skips payment**: only a tier priced `0` confirms entries without Stripe.
+     - `price` on the `Events` tab, so the listing shows the event as Free. On its own this does not skip payment.
+   - Free entries are saved in the private `Event_Entries` tab with status `paid`, amount `0.00` and Stripe session `free`. When reconciling entries with Stripe, filter on the amount (or the session column): free entries have no Stripe payment.
 3. Edit the cell. Keep the first row (headers) exactly as it is. Do not rename tabs.
 4. Reload the website. Changes appear straight away, with no deploy step. If it does not change, hard refresh (Cmd+Shift+R).
 
 To remove a programme's override, delete its row and the site falls back to the wording in `programmes.ts`.
 
 > **Never put personal data in this sheet.** It is public by design. Registrations and feedback go to a separate private sheet.
+
+---
+
+## 2b. How to email a group
+
+People only appear in Brevo if they ticked the email updates box on a form (or used the newsletter form), so you can email everyone on these lists.
+
+1. Sign in to Brevo and go to **Contacts**, then **Lists**.
+2. Pick the list: `Event: <event id>` for people who entered one event (for example `Event: Nov_WTR`), `Programme: <programme id>` for a programme (for example `Programme: womens-run-club`), `Newsletter` for everyone who opted in, or `Guardians: youth-weightlifting` for Youth Weightlifting parents and guardians.
+3. Go to **Campaigns**, create an email campaign, and choose that list as the recipient.
+4. Send a test to yourself first. Every campaign must include the unsubscribe link (Brevo adds it by default; do not remove it).
+
+Event lists only exist once someone has opted in at that event. Event entrants also join the programme list named in the Events sheet `programme` column, so fill that column.
 
 ---
 
@@ -150,4 +169,4 @@ Example prompt: "In the Lift Flintshire website, change X to Y on the Z page, th
 
 ---
 
-*Last updated: 6 October 2026.*
+*Last updated: 13 October 2026.*

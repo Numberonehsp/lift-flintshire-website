@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom'
 import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Button } from '../components/ui/Button'
+import { MarketingConsent } from '../components/forms/MarketingConsent'
 import { useContentSheets } from '../hooks/useContentSheets'
 import { useTicketAvailability } from '../hooks/useTicketAvailability'
 
@@ -105,7 +106,8 @@ export default function EventEntry() {
     )
   }
 
-  const priceLabel = (availableTier.pricePence / 100).toFixed(2)
+  const isFree = availableTier.pricePence === 0
+  const priceLabel = isFree ? 'Free' : `£${(availableTier.pricePence / 100).toFixed(2)}`
   const isTeam = availableTier.tierId === TEAM_TIER_ID
 
   return (
@@ -122,19 +124,21 @@ export default function EventEntry() {
           ← Back to event
         </Link>
         <h1 className="font-display font-black text-h1 text-white uppercase mb-2">{event.title}</h1>
-        <p className="font-body text-white/70">{availableTier.label}, £{priceLabel}</p>
+        <p className="font-body text-white/70">{availableTier.label}, {priceLabel}</p>
       </SectionWrapper>
 
       <SectionWrapper variant="light" innerClassName="max-w-2xl">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="relative">
           <div className="bg-teal-pale rounded-card p-4 border border-teal/20 mb-6 flex items-center justify-between">
             <div>
               <p className="font-display font-bold text-ink">{availableTier.label}</p>
               <p className="font-body text-xs text-ink-light">
-                Price includes all card and booking fees, no extras at checkout.
+                {isFree
+                  ? 'No payment needed, your place is confirmed as soon as you submit.'
+                  : 'Price includes all card and booking fees, no extras at checkout.'}
               </p>
             </div>
-            <p className="font-display font-black text-teal text-2xl">£{priceLabel}</p>
+            <p className="font-display font-black text-teal text-2xl">{priceLabel}</p>
           </div>
 
           {isTeam && (
@@ -335,6 +339,15 @@ export default function EventEntry() {
             </div>
           </div>
 
+          {/* Marketing consent: optional and unticked; separate from GDPR consent. Only the
+              person filling in the form (the captain, for a team) is added, never teammates. */}
+          <div className="bg-surface-muted rounded-card p-4 border border-border mb-4">
+            <p className="font-body font-semibold text-xs text-ink uppercase tracking-wide mb-2">
+              Email updates
+            </p>
+            <MarketingConsent id="entry-marketing" topic="news about this event and other Lift Flintshire sessions" />
+          </div>
+
           <div className="bg-surface-muted rounded-card p-4 border border-border mb-6">
             <p className="font-body font-semibold text-xs text-ink uppercase tracking-wide mb-2">
               Data protection (GDPR)
@@ -353,8 +366,16 @@ export default function EventEntry() {
             </div>
           </div>
 
+          {/* Honeypot: hidden from people and assistive tech. The server ignores entries that fill it. */}
+          <div aria-hidden="true" className="absolute left-[-10000px] top-auto w-px h-px overflow-hidden">
+            <label htmlFor="entry-website">Website</label>
+            <input id="entry-website" type="text" name="website" tabIndex={-1} autoComplete="off" defaultValue="" />
+          </div>
+
           <Button type="submit" variant="primary" size="lg" className="w-full" disabled={state === 'submitting'}>
-            {state === 'submitting' ? 'Redirecting to secure payment…' : `Pay £${priceLabel} and confirm entry`}
+            {isFree
+              ? (state === 'submitting' ? 'Confirming your entry…' : 'Enter for free')
+              : (state === 'submitting' ? 'Redirecting to secure payment…' : `Pay ${priceLabel} and confirm entry`)}
           </Button>
 
           {state === 'conflict' && (
@@ -367,7 +388,7 @@ export default function EventEntry() {
           )}
           {state === 'error' && (
             <p className="font-body text-xs text-red-600 text-center mt-3">
-              Something went wrong starting checkout. Please try again or email{' '}
+              Something went wrong {isFree ? 'saving your entry' : 'starting checkout'}. Please try again or email{' '}
               <a href="mailto:hello@liftflintshire.co.uk" className="underline">hello@liftflintshire.co.uk</a>.
             </p>
           )}

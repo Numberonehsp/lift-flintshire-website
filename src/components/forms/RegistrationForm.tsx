@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, ChangeEvent } from 'react'
 import { Button } from '../ui/Button'
+import { MarketingConsent } from './MarketingConsent'
 
 export type RegistrationProgramme = 'couch-to-5k' | 'womens-run-club'
 
@@ -533,6 +534,12 @@ export function RegistrationForm({ programme, formName, programmeLabel, intro, e
               <span className="text-ink-light font-normal">(Optional)</span>
             </label>
           </div>
+        </div>
+
+        {/* Marketing consent: optional and unticked; separate from GDPR consent */}
+        <div className="bg-surface-muted rounded-card p-4 border border-border mb-4">
+          <p className="font-body font-semibold text-xs text-ink uppercase tracking-wide mb-2">Email updates</p>
+          <MarketingConsent id={`${formName}-marketing`} />
         </div>
 
         {/* Waiver */}

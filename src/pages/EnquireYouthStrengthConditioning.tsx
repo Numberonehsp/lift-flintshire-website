@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Button } from '../components/ui/Button'
+import { MarketingConsent } from '../components/forms/MarketingConsent'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
 
@@ -132,7 +133,7 @@ function EnquiryFormContent() {
 
       <div className="bg-surface-muted rounded-card p-4 border border-border">
         <p className="font-body text-xs text-ink-light leading-relaxed mb-3">
-          Lift Flintshire CIC will use these details only to reply to your enquiry and tell you about Youth Weightlifting sessions.
+          Lift Flintshire CIC will use these details only to reply to your enquiry.
           We won't share them with third parties except where required by law. You can ask us to access, correct, or delete them at any time by emailing{' '}
           <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
             hello@liftflintshire.co.uk
@@ -151,6 +152,11 @@ function EnquiryFormContent() {
             I'm the parent or guardian, and I consent to Lift Flintshire CIC contacting me about this enquiry. <span className="text-teal font-medium">(Required)</span>
           </label>
         </div>
+      </div>
+
+      {/* Optional marketing opt-in: only the parent or guardian's email goes to the mailing list */}
+      <div className="bg-surface-muted rounded-card p-4 border border-border">
+        <MarketingConsent id="youth-marketing" guardian topic="news about Youth Weightlifting" />
       </div>
 
       <Button type="submit" variant="primary" size="lg" className="w-full mt-2" disabled={formState === 'submitting'}>
