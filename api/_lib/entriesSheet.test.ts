@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { ENTRY_COLUMNS, buildEntryRow, parseEntryRow, findPaidEntryRef } from './entriesSheet.js'
+import { ENTRY_COLUMNS, buildEntryRow, parseEntryRow, findPaidEntryRef, paidRank, countTakenFromRows } from './entriesSheet.js'
 import type { PendingEntry } from './entriesSheet.js'
 
 const entry: PendingEntry = {
@@ -108,5 +108,47 @@ describe('findPaidEntryRef', () => {
   it('returns undefined for a blank email or empty sheet', () => {
     expect(findPaidEntryRef(bToE, emails, 'Nov_WTR', '  ')).toBeUndefined()
     expect(findPaidEntryRef([], [], 'Nov_WTR', 'ann@example.com')).toBeUndefined()
+  })
+})
+
+describe('paidRank', () => {
+  // A:E -> timestamp, event id, tier id, status, entry ref (header first).
+  const rows = [
+    ['Timestamp', 'Event ID', 'Tier ID', 'Status', 'Entry Ref'],
+    ['t', 'Nov_WTR', 'entry', 'paid', 'LF26-AAAAAA'],
+    ['t', 'Nov_WTR', 'entry', 'pending', 'LF26-PENDNG'],
+    ['t', 'Other', 'entry', 'paid', 'LF26-OTHERX'],
+    ['t', 'Nov_WTR', 'team', 'paid', 'LF26-TEAMXX'],
+    ['t', 'Nov_WTR', 'entry', 'oversold', 'LF26-OVERSD'],
+    ['t', 'Nov_WTR', 'entry', 'paid', 'LF26-BBBBBB'],
+  ]
+
+  it('ranks this entry among paid rows for the same event and tier, in sheet order', () => {
+    expect(paidRank(rows, 'Nov_WTR', 'entry', 'LF26-AAAAAA')).toEqual({ rank: 1, rowNumber: 2 })
+    expect(paidRank(rows, 'Nov_WTR', 'entry', 'LF26-BBBBBB')).toEqual({ rank: 2, rowNumber: 7 })
+    expect(paidRank(rows, 'Nov_WTR', 'team', 'LF26-TEAMXX')).toEqual({ rank: 1, rowNumber: 5 })
+  })
+
+  it('returns undefined when the entry is missing or not paid', () => {
+    expect(paidRank(rows, 'Nov_WTR', 'entry', 'LF26-PENDNG')).toBeUndefined()
+    expect(paidRank(rows, 'Nov_WTR', 'entry', 'LF26-OVERSD')).toBeUndefined()
+    expect(paidRank(rows, 'Nov_WTR', 'entry', 'LF26-NOPE00')).toBeUndefined()
+    expect(paidRank([], 'Nov_WTR', 'entry', 'LF26-AAAAAA')).toBeUndefined()
+  })
+})
+
+describe('countTakenFromRows', () => {
+  const now = Date.parse('2026-11-01T12:00:00Z')
+  const rows = [
+    ['Timestamp', 'Event ID', 'Tier ID', 'Status'],
+    ['2026-11-01T11:00:00Z', 'Nov_WTR', 'entry', 'paid'],
+    ['2026-11-01T11:50:00Z', 'Nov_WTR', 'entry', 'pending'],
+    ['2026-11-01T10:00:00Z', 'Nov_WTR', 'entry', 'pending'],
+    ['2026-11-01T11:00:00Z', 'Nov_WTR', 'entry', 'oversold'],
+    ['2026-11-01T11:00:00Z', 'Other', 'entry', 'paid'],
+  ]
+
+  it('counts paid and still-held pending rows, and ignores oversold and expired rows', () => {
+    expect(countTakenFromRows(rows, 'Nov_WTR', now)).toEqual({ entry: 2 })
   })
 })

@@ -51,7 +51,12 @@ export async function countTaken(eventId: string, now = Date.now()): Promise<Tak
   const res = await sheets().spreadsheets.values.get({
     spreadsheetId: sheetId(), range: `${ENTRIES_TAB}!A:D`,
   })
-  const rows = (res.data.values as string[][] | undefined) ?? []
+  return countTakenFromRows((res.data.values as string[][] | undefined) ?? [], eventId, now)
+}
+
+/** Pure part of countTaken. Only `paid` and still-held `pending` rows count; `oversold`
+ *  (and any other status) does not. Index 0 is the header row. */
+export function countTakenFromRows(rows: string[][], eventId: string, now: number): TakenCounts {
   const counts: TakenCounts = {}
   for (const [timestamp, rowEvent, tierId, status] of rows.slice(1)) {
     if (rowEvent !== eventId || !tierId) continue
@@ -60,6 +65,42 @@ export async function countTaken(eventId: string, now = Date.now()): Promise<Tak
     if (held) counts[tierId] = (counts[tierId] ?? 0) + 1
   }
   return counts
+}
+
+/**
+ * Where this entry falls among the `paid` rows for its event and tier, in sheet order
+ * (1 = first). `rows` is columns A:E with the header at index 0. Undefined when the entry
+ * is not found or is not `paid`. `rowNumber` is the 1-based sheet row.
+ */
+export function paidRank(
+  rows: string[][], eventId: string, tierId: string, entryRef: string,
+): { rank: number; rowNumber: number } | undefined {
+  let rank = 0
+  for (let i = 1; i < rows.length; i++) {
+    const [, rowEvent, rowTier, status, ref] = rows[i] ?? []
+    if (rowEvent !== eventId || rowTier !== tierId || status !== 'paid') continue
+    rank++
+    if (ref === entryRef) return { rank, rowNumber: i + 1 }
+  }
+  return undefined
+}
+
+/** Reads ONLY columns A:E (no personal data) and ranks this entry among paid rows. */
+export async function fetchPaidRank(
+  eventId: string, tierId: string, entryRef: string,
+): Promise<{ rank: number; rowNumber: number } | undefined> {
+  const res = await sheets().spreadsheets.values.get({
+    spreadsheetId: sheetId(), range: `${ENTRIES_TAB}!A:E`,
+  })
+  return paidRank((res.data.values as string[][] | undefined) ?? [], eventId, tierId, entryRef)
+}
+
+/** A free entry that lost a race for the last place. `countTaken` ignores this status. */
+export async function markEntryOversold(rowNumber: number): Promise<void> {
+  await sheets().spreadsheets.values.update({
+    spreadsheetId: sheetId(), range: `${ENTRIES_TAB}!D${rowNumber}`,
+    valueInputOption: 'RAW', requestBody: { values: [['oversold']] },
+  })
 }
 
 /**

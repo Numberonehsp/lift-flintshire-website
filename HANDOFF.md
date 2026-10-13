@@ -389,6 +389,8 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 - A ticket tier with price 0 skips Stripe: `api/create-entry.ts` writes the row straight to `Event_Entries` as `paid` with amount £0.00 and session id `free`, runs the same `finaliseEntry` (confirmation email to the entrant, notification to the organisers, Brevo) and returns the entry-confirmed URL. Free entries count against capacity. If the row cannot be saved the entrant sees an error.
 - The event title in emails and at Stripe comes from the Events sheet (`title`, column B), never from the browser. If the Events sheet cannot be read, a free entry fails with a generic error; a paid entry uses the event id as the title.
 - A free entry from an email that already has a `paid` row for the same event (case-insensitive) is sent to the existing confirmation page: no new row, no new email.
+- Overbooking guard: after writing a free row, create-entry re-reads columns A:E and, if the row is beyond the tier's capacity among `paid` rows (in sheet order), changes its status to `oversold`, sends no email and tells the entrant the event is fully booked. `oversold` rows do not count against capacity and can be ignored or deleted. If that re-check itself fails, the entry stands.
+- The confirmation emails and Brevo step still run before the free-entry response is sent: `@vercel/functions` (`waitUntil`) is not a dependency, so there is no safe way to run them after responding.
 - The entry form has a hidden honeypot field `website`. If it is filled, `/api/create-entry` returns a normal-looking success and writes nothing. Free events are price `0` in the Events sheet.
 
 **Private sheet change**

@@ -3,7 +3,8 @@ import { randomBytes } from 'node:crypto'
 import Stripe from 'stripe'
 import { parseTicketTypesSheet, pickAvailableTier } from './_lib/tickets.js'
 import {
-  countTaken, appendPendingEntry, appendFreeEntry, findPaidEntryForEmail, HOLD_MS,
+  countTaken, appendPendingEntry, appendFreeEntry, findPaidEntryForEmail, fetchPaidRank, markEntryOversold,
+  HOLD_MS,
 } from './_lib/entriesSheet.js'
 import type { PendingEntry } from './_lib/entriesSheet.js'
 import { finaliseEntry, describeError } from './_lib/finaliseEntry.js'
@@ -150,6 +151,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // Fails closed: if the row can't be saved, the user sees an error and is not confirmed.
       await appendFreeEntry({ ...entry, sessionId: 'free' })
+
+      // Two free entries at once can both pass the availability check above. Re-read A:E and,
+      // if this row is beyond the tier's capacity among paid rows (sheet order), withdraw it.
+      // If the re-read or the status update fails the entry stands (confirmed, possibly one
+      // over capacity) so the sheet and what the entrant is told always agree.
+      try {
+        const placed = await fetchPaidRank(f.eventId, tier.tierId, entryRef)
+        if (placed && placed.rank > tier.capacity) {
+          await markEntryOversold(placed.rowNumber)
+          return res.status(409).json({ error: 'This event is now fully booked.' })
+        }
+      } catch (rankErr) {
+        console.error(`create-entry: capacity re-check failed for ${entryRef}; entry stands:`, describeError(rankErr))
+      }
       try {
         await finaliseEntry({
           entryRef, eventId: f.eventId, eventTitle, tierLabel: tier.label,
