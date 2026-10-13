@@ -31,7 +31,7 @@ export default function Privacy() {
             This Privacy Policy explains how <strong>Lift Flintshire Community Interest Company</strong> ("Lift Flintshire CIC", "we", "us", "our") collects and uses your personal data when you visit our website or use our services. It applies to all personal data we process and reflects our obligations under the <strong>UK General Data Protection Regulation (UK GDPR)</strong> and the <strong>Data Protection Act 2018</strong>.
           </p>
           <p className={bodyClass}>
-            Last updated: <strong>July 2026</strong>
+            Last updated: <strong>October 2026</strong>
           </p>
 
           {/* Who we are */}
@@ -83,6 +83,7 @@ export default function Privacy() {
           <ul className={listClass}>
             <li><strong>Vercel</strong> — our website and form submission service are hosted on Vercel's infrastructure (USA). Vercel Inc. participates in the EU–US Data Privacy Framework and provides appropriate safeguards for international transfers.</li>
             <li><strong>Resend</strong> — form submissions are emailed to us via Resend, an email delivery service (USA). Resend relies on Standard Contractual Clauses to provide appropriate safeguards for international transfers.</li>
+            <li><strong>Brevo</strong> — if you choose to receive email updates from us (see section 6), your email address and the details listed there are held by Brevo, the email service we use to send them. We send Brevo only those details, and nothing from health, waiver or emergency contact forms.</li>
             <li><strong>Google Sheets</strong> — participant registration records are also saved to a private Google Sheet accessible only to authorised Lift Flintshire CIC staff. Google LLC participates in the EU–US Data Privacy Framework. Contact enquiries are not saved to this sheet.</li>
           </ul>
           <p className={bodyClass}>
@@ -95,6 +96,7 @@ export default function Privacy() {
             <li><strong>Contact enquiries:</strong> deleted after 12 months</li>
             <li><strong>Registration and health data:</strong> retained for the duration of your participation and deleted 3 years after your last session, unless you request earlier deletion</li>
             <li><strong>Session feedback:</strong> anonymised responses kept indefinitely; identified responses deleted after 12 months</li>
+            <li><strong>Email updates:</strong> your email address stays on our mailing lists until you unsubscribe or ask us to remove it (see section 6)</li>
           </ul>
 
           {/* Sharing */}
@@ -103,13 +105,58 @@ export default function Privacy() {
             We do not sell, rent, or share your personal data with third parties for marketing purposes. We may share data in the following limited circumstances:
           </p>
           <ul className={listClass}>
-            <li>With our technology providers (Vercel, Resend, Google) as described above, for the purposes of operating our website and storing records</li>
+            <li>With our technology providers (Vercel, Resend, Brevo, Google) as described above, for the purposes of operating our website and storing records</li>
             <li>Where required by law, for example in response to a court order or regulatory obligation</li>
             <li>In an emergency, with emergency services if we need to share your emergency contact or medical information</li>
           </ul>
 
+          {/* Email updates */}
+          <h2 className={headingClass}>6. Email updates</h2>
+          <p className={bodyClass}>
+            If you want to hear from us, we can email you news about our programmes and events. This is optional and we only do it if you ask us to.
+          </p>
+
+          <h3 className={subheadingClass}>How you opt in</h3>
+          <ul className={listClass}>
+            <li>By ticking the unticked email updates box on a registration form, an event entry form or the Youth Weightlifting enquiry form, or</li>
+            <li>By entering your email address in the newsletter sign-up form on our website and confirming the tick box.</li>
+          </ul>
+          <p className={bodyClass}>
+            We never add anyone to our mailing lists automatically. Ticking the privacy or health consent boxes on a form is separate and does not sign you up. The legal basis is your <strong>consent</strong>, and registering or entering an event works the same whether or not you tick the box.
+          </p>
+
+          <h3 className={subheadingClass}>What we send to Brevo, and what we record</h3>
+          <p className={bodyClass}>
+            Our email service provider is <strong>Brevo</strong>, which acts as a data processor on our behalf. When you opt in, we send Brevo:
+          </p>
+          <ul className={listClass}>
+            <li>Your email address, and your first name and last name where the form collected them (the newsletter form collects only an email address)</li>
+            <li>The date and time you gave consent, and which form it came from (for example the newsletter sign-up, a programme registration or an event entry)</li>
+            <li>The mailing lists you are on: the general newsletter, plus the programme or event you registered or entered, so we can email people about that programme or event</li>
+          </ul>
+          <p className={bodyClass}>
+            We do not send Brevo any health, medical, emergency contact, date of birth or waiver information.
+          </p>
+          <p className={bodyClass}>
+            If something goes wrong when we pass your details to Brevo, your registration or event entry is still saved and confirmed, but you will not receive email updates until we have fixed it.
+          </p>
+
+          <h3 className={subheadingClass}>Youth Weightlifting</h3>
+          <p className={bodyClass}>
+            For Youth Weightlifting, only a parent or guardian can opt in, using a separate tick box on the enquiry form. We send Brevo the parent or guardian's email address only. We do not send Brevo the young person's name or school year, or the parent or guardian's name. Their address goes on its own guardians list, not the general newsletter.
+          </p>
+
+          <h3 className={subheadingClass}>Unsubscribing and how long we keep your address</h3>
+          <p className={bodyClass}>
+            Every email we send includes an unsubscribe link. You can also email{' '}
+            <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
+              hello@liftflintshire.co.uk
+            </a>{' '}
+            at any time and we will remove you. We keep your address on our mailing lists until you unsubscribe or ask us to remove it. Withdrawing consent does not affect your registration, entry or any other service.
+          </p>
+
           {/* Photography */}
-          <h2 className={headingClass}>6. Photography and video</h2>
+          <h2 className={headingClass}>7. Photography and video</h2>
           <p className={bodyClass}>
             We may take photographs or video footage during sessions for use on our website and social media. We only do this for participants who have given explicit consent via the registration form. You may withdraw consent at any time by emailing{' '}
             <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
@@ -119,13 +166,13 @@ export default function Privacy() {
           </p>
 
           {/* Cookies */}
-          <h2 className={headingClass}>7. Cookies</h2>
+          <h2 className={headingClass}>8. Cookies</h2>
           <p className={bodyClass}>
             Our website uses only essential cookies required for basic functionality. We do not currently use analytics, advertising, or tracking cookies. If this changes, we will update this policy and, where required, ask for your consent.
           </p>
 
           {/* Your rights */}
-          <h2 className={headingClass}>8. Your rights</h2>
+          <h2 className={headingClass}>9. Your rights</h2>
           <p className={bodyClass}>Under UK GDPR you have the right to:</p>
           <ul className={listClass}>
             <li><strong>Access</strong> — request a copy of the personal data we hold about you</li>
@@ -144,7 +191,7 @@ export default function Privacy() {
           </p>
 
           {/* Complaints */}
-          <h2 className={headingClass}>9. Complaints</h2>
+          <h2 className={headingClass}>10. Complaints</h2>
           <p className={bodyClass}>
             If you believe we have mishandled your personal data, you have the right to lodge a complaint with the <strong>Information Commissioner's Office (ICO)</strong>:
           </p>
@@ -155,7 +202,7 @@ export default function Privacy() {
           <p className={bodyClass}>We would always prefer to resolve any concerns directly — please contact us first.</p>
 
           {/* Changes */}
-          <h2 className={headingClass}>10. Changes to this policy</h2>
+          <h2 className={headingClass}>11. Changes to this policy</h2>
           <p className={bodyClass}>
             We may update this Privacy Policy from time to time. The "last updated" date at the top of this page will reflect any changes. We encourage you to review this page periodically.
           </p>
