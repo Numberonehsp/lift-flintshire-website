@@ -4,11 +4,14 @@
 //   POST /v3/contacts/lists { name, folderId } -> 201 { id }
 //   POST /v3/contacts { email, attributes, listIds, updateEnabled } -> 201 { id } (new) or 204 (updated)
 //   Errors: 4xx { code, message }. Auth: `api-key` header.
-// Never log the email address or the API key. Callers must treat a thrown error as non-fatal.
+// Never log the email address or the API key. Callers must treat a thrown error (including a
+// TimeoutError after BREVO_TIMEOUT_MS) as non-fatal.
 
 const BASE_URL = 'https://api.brevo.com/v3'
 const PAGE_SIZE = 50
 const INVALID_PARAMETER = 'invalid_parameter'
+/** Every Brevo request is abandoned after this long; the abort rejects like any other error. */
+export const BREVO_TIMEOUT_MS = 5000
 
 export interface UpsertContactParams {
   email: string
@@ -50,6 +53,7 @@ async function brevoFetch(apiKey: string, what: string, path: string, init: { me
       'content-type': 'application/json',
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
+    signal: AbortSignal.timeout(BREVO_TIMEOUT_MS),
   })
   if (!res.ok) {
     let code: string | undefined

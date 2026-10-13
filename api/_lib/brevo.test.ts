@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { upsertContact, resetListCache } from './brevo.js'
+import { upsertContact, resetListCache, BREVO_TIMEOUT_MS } from './brevo.js'
 
 type Call = { url: string; init?: RequestInit }
 
@@ -221,6 +221,26 @@ describe('upsertContact', () => {
       expect(line).not.toContain('a@example.com')
       expect(line).not.toContain('test-key')
     }
+  })
+
+  it('bounds every Brevo request with a 5 second abort signal', async () => {
+    const timeoutSpy = vi.spyOn(AbortSignal, 'timeout')
+    const { calls } = stubBrevo({ lists: [], nextListId: 9 })
+    await upsertContact({ email: 'a@example.com', lists: ['Newsletter'] })
+    expect(BREVO_TIMEOUT_MS).toBe(5000)
+    expect(calls.length).toBeGreaterThan(1)
+    for (const c of calls) expect(c.init?.signal).toBeInstanceOf(AbortSignal)
+    expect(timeoutSpy).toHaveBeenCalledTimes(calls.length)
+    expect(timeoutSpy.mock.calls.every(([ms]) => ms === 5000)).toBe(true)
+  })
+
+  it('rejects with an ordinary error on timeout, without retrying', async () => {
+    const fetchMock = vi.fn(async () => { throw new DOMException('The operation was aborted due to timeout', 'TimeoutError') })
+    vi.stubGlobal('fetch', fetchMock)
+    const err = await upsertContact({ email: 'a@example.com', lists: ['Newsletter'] }).catch((e: unknown) => e)
+    expect(err).toBeInstanceOf(Error)
+    expect((err as Error).name).toBe('TimeoutError')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
   it('does nothing when BREVO_API_KEY is not set', async () => {

@@ -74,8 +74,9 @@ function defaultDeps(): FinaliseEntryDeps {
 }
 
 export interface FinaliseEntryOptions {
-  /** The Brevo step (programme lookup plus contact upsert) is abandoned after this long, so a
-   *  slow Brevo cannot hold up the free-entry response or time the function out. */
+  /** Overall cap on the Brevo step (programme lookup plus contact upsert). Each Brevo request
+   *  already times out after 5 s (brevo.ts), but one upsert can make several requests and the
+   *  programme lookup has no timeout of its own, so this keeps the whole step bounded. */
   brevoTimeoutMs?: number
 }
 

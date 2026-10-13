@@ -119,6 +119,17 @@ describe('finaliseEntry Brevo', () => {
 })
 
 describe('finaliseEntry Brevo time limit', () => {
+  it('treats a Brevo request timeout as a normal non-fatal error', async () => {
+    const errors: unknown[][] = []
+    vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { errors.push(args) })
+    const d = deps({
+      addContact: vi.fn(async () => { throw new DOMException('The operation was aborted due to timeout', 'TimeoutError') }),
+    })
+    await expect(finaliseEntry({ ...entry, marketingConsent: true }, d)).resolves.toBeUndefined()
+    expect(d.sent).toHaveLength(2)
+    expect(JSON.stringify(errors)).toContain('TimeoutError')
+  })
+
   it('gives up on a hung Brevo call so a confirmed entry still gets its response', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     const d = deps({ addContact: vi.fn(() => new Promise<void>(() => {})) })
