@@ -436,3 +436,22 @@ Also check where Brevo holds data (UK, EEA or elsewhere) and that Brevo's terms 
 - The original JPGs were removed from `public/images` (still in git history before commit `db40d96`). Exception: `frc-castle.jpeg` stays, because `index.html` and `Seo.tsx` use it as the social sharing (og:image) picture and some platforms do not accept WebP there.
 - `public/images` went from 6.9 MB to 5.1 MB; the Home hero photo from 3.8 MB to 97 KB on phones / 357 KB on desktop. Photos that were already 800px wide have identical `-800` and `-1600` files.
 - Adding a photo: see the SOP (`docs/SOP-editing-website-content.md`, Photos row).
+
+## 2026-10-19 — Newsletter double opt-in (optional) and Impact chart labels
+
+**Double opt-in (newsletter form only)**
+- Off by default. When the Vercel env var `BREVO_DOI_TEMPLATE_ID` is a positive whole number, `/api/subscribe` asks Brevo to email a confirmation link (`POST /v3/contacts/doubleOptinConfirmation`) instead of adding the contact straight away. Brevo adds the person to the `Newsletter` list only after they click the link, then sends them to `liftflintshire.co.uk/newsletter?confirmed=1` (built from `SITE_URL`, default `https://liftflintshire.co.uk`), which shows "Thanks, you're confirmed". The form says "Check your inbox to confirm your email address." instead of "Thanks, you're on the list."
+- Unset, blank or not a positive whole number: the old direct add is unchanged.
+- Registrations, the Youth Weightlifting enquiry and event entries do not use double opt-in; they still add contacts directly when the box is ticked.
+- The request sends `CONSENT_DATE`, `CONSENT_SOURCE` (`newsletter-signup`) and `FIRSTNAME` when known (the newsletter form does not collect a name). It uses the same 5 second timeout, error handling (status and Brevo code only, never the email) and retries as the direct add, including `BREVO_CONSENT_ATTRS_DROPPED` if the consent attributes do not exist in Brevo.
+- Code: `requestDoubleOptin` in `api/_lib/brevo.ts`, `doubleOptinConfig` in `api/_lib/subscription.ts`, `api/subscribe.ts`. Tests: `api/_lib/brevo.test.ts`, `api/_lib/subscription.test.ts`, `api/_lib/subscribeHandler.test.ts` (kept in `_lib` so Vercel does not deploy it as a function).
+- Not tested against a live Brevo account. Brevo's reference documents only a 201 (empty body) and a 400 for this endpoint; what it does for an address that is already a contact is not documented.
+
+**To switch it on (Ed, in Brevo then Vercel)**
+1. In Brevo: Contacts, Settings, Double opt-in confirmation template. Create or edit the confirmation template, keeping the confirmation link Brevo puts in it (the person must click it to be added). This menu path was not checked against Brevo's help pages (they blocked automated access on 2026-10-19); if it has moved, search Brevo's help for "double opt-in confirmation template".
+2. Note the template's numeric id.
+3. In Vercel: Project, Settings, Environment Variables, add `BREVO_DOI_TEMPLATE_ID` with that number for Production (and Preview if wanted). Check `SITE_URL` is the live address for Production.
+4. Redeploy, then sign up on `/newsletter` with your own address and check the confirmation email arrives and the link lands on the confirmed notice.
+
+**Impact chart labels**
+- The stacked monthly bars on `/impact` now show "Name value" inside each segment that is at least 14% of the track, or just the value when the name will not fit (CSS container queries in `src/styles/global.css`, so it also works when printing). Narrower segments rely on the legend and the hover tooltip. Label colour is white, ink or black per segment, whichever meets WCAG AA (`src/lib/contrast.ts`, tested). Programme Reach values are now in ink rather than the bar colour.
