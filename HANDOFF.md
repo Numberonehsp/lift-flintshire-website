@@ -40,7 +40,7 @@ Website for Lift Flintshire CIC, a not-for-profit community fitness organisation
 | `src/pages/RegisterWomensRunClub.tsx` | Women's Run Club registration page (monthly, first Saturday) |
 | `src/pages/Questionnaire.tsx` | Post-programme feedback form with star ratings and wellbeing impact |
 | `src/components/forms/RegistrationForm.tsx` | Shared waiver component (GDPR, photo consent, injury declaration, initials) |
-| `public/images/` | run-club-1.jpeg, run-club-2.jpeg (only programme with photos; others use ImagePlaceholder) |
+| `public/images/` | Photos as `<name>-800.webp` / `<name>-1600.webp` (made by `scripts/optimise-images.py`), the Run Club and Weightlifting Club SVG logos, and `frc-castle.jpeg` (kept as the og:image) |
 | `public/logo-white.png` | White logo on black background — rendered with `mix-blend-mode: screen` |
 
 ---
@@ -428,3 +428,11 @@ Also check where Brevo holds data (UK, EEA or elsewhere) and that Brevo's terms 
 
 **Newsletter page**
 - `/newsletter` (`src/pages/Newsletter.tsx`) is a standalone sign-up page for QR codes and posters, using the existing `NewsletterSignup` form (same `/api/subscribe` and Brevo `Newsletter` list). It is in `public/sitemap.xml` but not linked from the menu or footer.
+
+## 2026-10-19 — Image optimisation
+
+- Photos are now served as resized WebP. `scripts/optimise-images.py` (Python 3 + Pillow, no other tools needed) applies EXIF rotation, strips metadata and writes `<name>-800.webp` and `<name>-1600.webp` (quality 78, never upscaled). Run it from the repo root in Terminal: `python3 scripts/optimise-images.py <folder of originals>`.
+- Code still refers to photos by their original name (`'/images/foo.jpg'`); `responsiveImage()` in `src/lib/images.ts` turns that into the WebP `src` + `srcSet`. Use it with a `sizes` attribute on every new photo `<img>`. `src/lib/images.test.ts` fails if a photo referenced in `src/` is missing either WebP file.
+- The original JPGs were removed from `public/images` (still in git history before commit `db40d96`). Exception: `frc-castle.jpeg` stays, because `index.html` and `Seo.tsx` use it as the social sharing (og:image) picture and some platforms do not accept WebP there.
+- `public/images` went from 6.9 MB to 5.1 MB; the Home hero photo from 3.8 MB to 97 KB on phones / 357 KB on desktop. Photos that were already 800px wide have identical `-800` and `-1600` files.
+- Adding a photo: see the SOP (`docs/SOP-editing-website-content.md`, Photos row).

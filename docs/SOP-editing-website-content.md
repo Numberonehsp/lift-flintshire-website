@@ -17,7 +17,7 @@
 | Programme descriptions, "Who is it for?", "What to expect", badges | **Method B: GitHub** → `src/data/programmes.ts` | Yes |
 | Next Women's Run Club date or next Couch to 5K cohort date | **Method B: GitHub** → `src/data/nextSessionDates.ts` **and** `api/submit-form.ts` (both) | Yes |
 | Home page, About page, Contact page, Privacy page wording | **Method B: GitHub** → the file listed in section 5 | Yes |
-| Photos | Ask Claude Code (images need to be added to the project) | n/a |
+| Photos | Ask Claude Code, or: put the original JPG in a temporary folder outside the project, run `python3 scripts/optimise-images.py <that folder>` in Terminal from the project folder, commit the two generated `.webp` files in `public/images`, and reference the photo in code as `/images/<name>.jpg` via `responsiveImage()` | Yes |
 
 **Check the Google Sheet first for anything about session times.** If a row exists there for a programme, it overrides what is written in the code (see section 7, "Gotchas").
 
