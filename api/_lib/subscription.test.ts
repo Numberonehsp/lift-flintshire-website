@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { validateSubscription, isBodyTooLarge, parseStringBody, MAX_SUBSCRIBE_BODY_BYTES } from './subscription.js'
+import { validateSubscription, isBodyTooLarge, parseStringBody, doubleOptinConfig, MAX_SUBSCRIBE_BODY_BYTES } from './subscription.js'
 
 describe('validateSubscription', () => {
   const good = { email: 'a@example.com', 'marketing-consent': 'yes', website: '' }
@@ -71,5 +71,25 @@ describe('parseStringBody', () => {
 
   it('returns undefined for broken JSON', () => {
     expect(parseStringBody('{"email":')).toBeUndefined()
+  })
+})
+
+describe('doubleOptinConfig', () => {
+  it('is off when BREVO_DOI_TEMPLATE_ID is absent, blank or not a positive integer', () => {
+    for (const v of [undefined, '', '  ', '0', '-3', '1.5', 'abc', '12abc']) {
+      expect(doubleOptinConfig({ BREVO_DOI_TEMPLATE_ID: v })).toBeUndefined()
+    }
+  })
+
+  it('uses the template id and the live site URL by default', () => {
+    expect(doubleOptinConfig({ BREVO_DOI_TEMPLATE_ID: ' 12 ' })).toEqual({
+      templateId: 12,
+      redirectionUrl: 'https://liftflintshire.co.uk/newsletter?confirmed=1',
+    })
+  })
+
+  it('uses SITE_URL when set, without a doubled slash', () => {
+    expect(doubleOptinConfig({ BREVO_DOI_TEMPLATE_ID: '4', SITE_URL: 'http://localhost:5173/' })?.redirectionUrl)
+      .toBe('http://localhost:5173/newsletter?confirmed=1')
   })
 })

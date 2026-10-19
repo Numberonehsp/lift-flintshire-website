@@ -17,3 +17,13 @@ export function newsletterInputError(email: string, consent: boolean): Newslette
   if (!consent) return { field: 'consent', message: 'Please tick the box so we know you want our emails.' }
   return null
 }
+
+export const SUBSCRIBED_MESSAGE = "Thanks, you're on the list."
+export const CONFIRM_EMAIL_MESSAGE = 'Check your inbox to confirm your email address.'
+
+/** /api/subscribe answers `confirmEmail: true` when Brevo double opt-in is on. */
+export function subscribeSuccessMessage(response: unknown): string {
+  const confirm =
+    typeof response === 'object' && response !== null && (response as { confirmEmail?: unknown }).confirmEmail === true
+  return confirm ? CONFIRM_EMAIL_MESSAGE : SUBSCRIBED_MESSAGE
+}

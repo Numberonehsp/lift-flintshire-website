@@ -6,6 +6,9 @@
 //        limit defaults to 10, no maximum is documented, so the same page size as lists is used)
 //   POST /v3/contacts/folders { name } -> 201 { id }  (checked 2026-10-19)
 //   POST /v3/contacts { email, attributes, listIds, updateEnabled } -> 201 { id } (new) or 204 (updated)
+//   POST /v3/contacts/doubleOptinConfirmation { email, includeListIds, templateId, redirectionUrl,
+//        attributes? } -> 201 {}  (checked 2026-10-19; includeListIds, templateId and redirectionUrl
+//        are required; excludeListIds and contactPixelTrackingConsent are optional and unused here)
 //   Errors: 4xx { code, message }. Auth: `api-key` header.
 // Never log the email address or the API key. Callers must treat a thrown error (including a
 // TimeoutError after BREVO_TIMEOUT_MS) as non-fatal.
@@ -147,16 +150,12 @@ async function resolveListIds(apiKey: string, names: string[]): Promise<number[]
   return unique.map(n => listCache.get(n)!)
 }
 
-/**
- * Add or update a contact and put it on the named lists.
- * No-op when BREVO_API_KEY is not set. Throws on any non-2xx response.
- */
-export async function upsertContact(params: UpsertContactParams): Promise<void> {
-  const apiKey = process.env.BREVO_API_KEY
-  if (!apiKey) return
-
-  let listIds = await resolveListIds(apiKey, params.lists)
-
+function consentAttributes(params: {
+  source?: string
+  firstName?: string
+  lastName?: string
+  attributes?: Record<string, string | number | boolean>
+}): Record<string, string | number | boolean> {
   const attributes: Record<string, string | number | boolean> = {
     ...(params.attributes ?? {}),
     CONSENT_DATE: new Date().toISOString(),
@@ -164,11 +163,25 @@ export async function upsertContact(params: UpsertContactParams): Promise<void> 
   if (params.source) attributes.CONSENT_SOURCE = params.source
   if (params.firstName) attributes.FIRSTNAME = params.firstName
   if (params.lastName) attributes.LASTNAME = params.lastName
+  return attributes
+}
 
-  const base = { email: params.email, listIds, updateEnabled: true }
-
+/**
+ * POST a contact-shaped body built from the resolved list ids, with the two shared retries:
+ * once without attributes on `invalid_parameter`, once after reloading list ids on any other
+ * 400/404. `body(listIds, attributes)` must omit `attributes` when it is undefined.
+ */
+async function postContact(
+  apiKey: string,
+  what: string,
+  path: string,
+  lists: string[],
+  attributes: Record<string, string | number | boolean>,
+  body: (listIds: number[], attributes?: Record<string, string | number | boolean>) => Record<string, unknown>,
+): Promise<void> {
+  let listIds = await resolveListIds(apiKey, lists)
   try {
-    await brevoFetch(apiKey, 'contact upsert', '/contacts', { method: 'POST', body: { ...base, attributes } })
+    await brevoFetch(apiKey, what, path, { method: 'POST', body: body(listIds, attributes) })
   } catch (err) {
     // Brevo rejects attributes that do not exist in the account yet (CONSENT_DATE / CONSENT_SOURCE
     // must be created by hand) with `invalid_parameter` ("wrong format or type", per
@@ -179,19 +192,69 @@ export async function upsertContact(params: UpsertContactParams): Promise<void> 
         'BREVO_CONSENT_ATTRS_DROPPED: Brevo answered invalid_parameter; retrying without attributes. ' +
           'Check that CONSENT_DATE and CONSENT_SOURCE exist in Brevo.',
       )
-      await brevoFetch(apiKey, 'contact upsert (without attributes)', '/contacts', { method: 'POST', body: base })
+      await brevoFetch(apiKey, `${what} (without attributes)`, path, { method: 'POST', body: body(listIds) })
       return
     }
     // Any other 400/404 may be a cached list id that no longer exists (a list deleted in Brevo
     // while this instance was warm). Reload the list ids and retry once; a second failure throws.
     if (err instanceof BrevoError && (err.status === 400 || err.status === 404)) {
       resetListCache()
-      listIds = await resolveListIds(apiKey, params.lists)
-      await brevoFetch(apiKey, 'contact upsert (after list reload)', '/contacts', {
-        method: 'POST', body: { ...base, listIds, attributes },
+      listIds = await resolveListIds(apiKey, lists)
+      await brevoFetch(apiKey, `${what} (after list reload)`, path, {
+        method: 'POST', body: body(listIds, attributes),
       })
       return
     }
     throw err
   }
+}
+
+/**
+ * Add or update a contact and put it on the named lists.
+ * No-op when BREVO_API_KEY is not set. Throws on any non-2xx response.
+ */
+export async function upsertContact(params: UpsertContactParams): Promise<void> {
+  const apiKey = process.env.BREVO_API_KEY
+  if (!apiKey) return
+
+  await postContact(apiKey, 'contact upsert', '/contacts', params.lists, consentAttributes(params),
+    (listIds, attributes) => ({
+      email: params.email,
+      listIds,
+      updateEnabled: true,
+      ...(attributes ? { attributes } : {}),
+    }))
+}
+
+export interface DoubleOptinParams {
+  email: string
+  firstName?: string
+  /** Brevo list names the contact joins once they click the confirmation link. */
+  lists: string[]
+  /** Stored as CONSENT_SOURCE. */
+  source?: string
+  /** Numeric id of the Brevo double opt-in confirmation template. */
+  templateId: number
+  /** Where Brevo sends the person after they click the confirmation link. */
+  redirectionUrl: string
+}
+
+/**
+ * Ask Brevo to email a double opt-in confirmation; Brevo adds the contact to the lists only
+ * after the link is clicked. Same key, timeout, retry and no-leak rules as upsertContact.
+ * No-op when BREVO_API_KEY is not set. Throws on any non-2xx response.
+ */
+export async function requestDoubleOptin(params: DoubleOptinParams): Promise<void> {
+  const apiKey = process.env.BREVO_API_KEY
+  if (!apiKey) return
+
+  await postContact(apiKey, 'double opt-in request', '/contacts/doubleOptinConfirmation', params.lists,
+    consentAttributes(params),
+    (includeListIds, attributes) => ({
+      email: params.email,
+      includeListIds,
+      templateId: params.templateId,
+      redirectionUrl: params.redirectionUrl,
+      ...(attributes ? { attributes } : {}),
+    }))
 }

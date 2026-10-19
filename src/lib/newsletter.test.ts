@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { newsletterInputError } from './newsletter'
+import { newsletterInputError, subscribeSuccessMessage, SUBSCRIBED_MESSAGE, CONFIRM_EMAIL_MESSAGE } from './newsletter'
 
 describe('newsletterInputError', () => {
   it('returns null for a valid email with consent ticked', () => {
@@ -26,5 +26,18 @@ describe('newsletterInputError', () => {
       field: 'consent',
       message: 'Please tick the box so we know you want our emails.',
     })
+  })
+})
+
+describe('subscribeSuccessMessage', () => {
+  it('asks the person to confirm when the API says double opt-in is on', () => {
+    expect(subscribeSuccessMessage({ success: true, confirmEmail: true })).toBe(CONFIRM_EMAIL_MESSAGE)
+    expect(CONFIRM_EMAIL_MESSAGE).toBe('Check your inbox to confirm your email address.')
+  })
+  it('keeps the existing message otherwise', () => {
+    expect(subscribeSuccessMessage({ success: true })).toBe(SUBSCRIBED_MESSAGE)
+    expect(subscribeSuccessMessage({ success: true, confirmEmail: 'yes' })).toBe(SUBSCRIBED_MESSAGE)
+    expect(subscribeSuccessMessage(undefined)).toBe(SUBSCRIBED_MESSAGE)
+    expect(subscribeSuccessMessage(null)).toBe(SUBSCRIBED_MESSAGE)
   })
 })

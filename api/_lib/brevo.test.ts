@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { upsertContact, resetListCache, BREVO_TIMEOUT_MS } from './brevo.js'
+import { upsertContact, requestDoubleOptin, resetListCache, BREVO_TIMEOUT_MS } from './brevo.js'
 
 type Call = { url: string; init?: RequestInit }
 
@@ -21,6 +21,7 @@ function stubBrevo(opts: {
   nextListId?: number
   nextFolderId?: number
   contact?: (body: Record<string, unknown>, attempt: number) => Response
+  doi?: (body: Record<string, unknown>, attempt: number) => Response
 } = {}) {
   const calls: Call[] = []
   const lists = opts.lists ?? []
@@ -28,6 +29,7 @@ function stubBrevo(opts: {
   let nextListId = opts.nextListId ?? 100
   let nextFolderId = opts.nextFolderId ?? 500
   let contactAttempts = 0
+  let doiAttempts = 0
   const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input)
     calls.push({ url, init })
@@ -57,6 +59,11 @@ function stubBrevo(opts: {
       contactAttempts++
       const body = JSON.parse(init!.body as string)
       return opts.contact ? opts.contact(body, contactAttempts) : json({ id: 21 }, 201)
+    }
+    if (path === '/v3/contacts/doubleOptinConfirmation' && method(init) === 'POST') {
+      doiAttempts++
+      const body = JSON.parse(init!.body as string)
+      return opts.doi ? opts.doi(body, doiAttempts) : json({}, 201)
     }
     return json({ code: 'document_not_found', message: 'unexpected' }, 404)
   })
@@ -403,6 +410,103 @@ describe('upsertContact', () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
     await upsertContact({ email: 'a@example.com', lists: ['Newsletter'] })
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('requestDoubleOptin', () => {
+  const savedKey = process.env.BREVO_API_KEY
+  const savedFolder = process.env.BREVO_FOLDER_ID
+  const DOI = '/v3/contacts/doubleOptinConfirmation'
+  const params = {
+    email: 'd@example.com',
+    lists: ['Newsletter'],
+    source: 'newsletter-signup',
+    templateId: 12,
+    redirectionUrl: 'https://liftflintshire.co.uk/newsletter?confirmed=1',
+  }
+
+  beforeEach(() => {
+    resetListCache()
+    process.env.BREVO_API_KEY = 'test-key'
+    process.env.BREVO_FOLDER_ID = '1'
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    if (savedKey === undefined) delete process.env.BREVO_API_KEY
+    else process.env.BREVO_API_KEY = savedKey
+    if (savedFolder === undefined) delete process.env.BREVO_FOLDER_ID
+    else process.env.BREVO_FOLDER_ID = savedFolder
+  })
+
+  it('sends the DOI confirmation request instead of adding the contact', async () => {
+    const { calls } = stubBrevo({ lists: [{ id: 7, name: 'Newsletter' }] })
+
+    await requestDoubleOptin({ ...params, firstName: 'Dee' })
+
+    expect(contactCalls(calls)).toHaveLength(0)
+    const doi = callsTo(calls, DOI, 'POST')
+    expect(doi).toHaveLength(1)
+    const body = bodyOf(doi[0])
+    expect(body.email).toBe('d@example.com')
+    expect(body.includeListIds).toEqual([7])
+    expect(body.templateId).toBe(12)
+    expect(body.redirectionUrl).toBe('https://liftflintshire.co.uk/newsletter?confirmed=1')
+    expect(body).not.toHaveProperty('listIds')
+    expect(body).not.toHaveProperty('updateEnabled')
+    const attrs = body.attributes as Record<string, unknown>
+    expect(attrs.CONSENT_SOURCE).toBe('newsletter-signup')
+    expect(new Date(attrs.CONSENT_DATE as string).toISOString()).toBe(attrs.CONSENT_DATE)
+    expect(attrs.FIRSTNAME).toBe('Dee')
+    expect((doi[0].init!.headers as Record<string, string>)['api-key']).toBe('test-key')
+    expect(doi[0].init!.signal).toBeInstanceOf(AbortSignal)
+  })
+
+  it('resolves the Newsletter list with the shared helper, creating it when missing', async () => {
+    const { calls } = stubBrevo({ lists: [], nextListId: 31 })
+
+    await requestDoubleOptin(params)
+
+    expect(bodyOf(callsTo(calls, '/v3/contacts/lists', 'POST')[0])).toEqual({ name: 'Newsletter', folderId: 1 })
+    expect(bodyOf(callsTo(calls, DOI, 'POST')[0]).includeListIds).toEqual([31])
+  })
+
+  it('retries once without attributes on 400 invalid_parameter', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { calls } = stubBrevo({
+      lists: [{ id: 7, name: 'Newsletter' }],
+      doi: (_b, attempt) => (attempt === 1 ? json({ code: 'invalid_parameter', message: 'x' }, 400) : json({}, 201)),
+    })
+
+    await requestDoubleOptin(params)
+
+    const doi = callsTo(calls, DOI, 'POST')
+    expect(doi).toHaveLength(2)
+    expect(bodyOf(doi[1])).not.toHaveProperty('attributes')
+    expect(bodyOf(doi[1]).includeListIds).toEqual([7])
+  })
+
+  it('throws a BrevoError carrying only the status and code, never the email', async () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
+    stubBrevo({
+      lists: [{ id: 7, name: 'Newsletter' }],
+      doi: () => json({ code: 'unauthorized', message: 'Key not found for d@example.com' }, 401),
+    })
+
+    const err = await requestDoubleOptin(params).catch((e: unknown) => e)
+    expect(err).toBeInstanceOf(Error)
+    expect((err as Error).name).toBe('BrevoError')
+    expect((err as Error).message).toBe('Brevo double opt-in request failed: HTTP 401 (unauthorized)')
+    expect((err as Error).message).not.toContain('d@example.com')
+    for (const call of errors.mock.calls) expect(call.join(' ')).not.toContain('d@example.com')
+  })
+
+  it('does nothing without BREVO_API_KEY', async () => {
+    delete process.env.BREVO_API_KEY
+    const { fetchMock } = stubBrevo()
+    await requestDoubleOptin(params)
     expect(fetchMock).not.toHaveBeenCalled()
   })
 })

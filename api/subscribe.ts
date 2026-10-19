@@ -1,11 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { upsertContact } from './_lib/brevo.js'
+import { requestDoubleOptin, upsertContact } from './_lib/brevo.js'
 import { NEWSLETTER_LIST } from './_lib/marketing.js'
-import { isBodyTooLarge, parseStringBody, validateSubscription } from './_lib/subscription.js'
+import { doubleOptinConfig, isBodyTooLarge, parseStringBody, validateSubscription } from './_lib/subscription.js'
 
 // Newsletter sign-up. Body (JSON or urlencoded): { email, 'marketing-consent': 'yes', website: '' }.
 // `website` is a honeypot: filled means a bot, which gets a 200 and nothing else.
 // Error messages are deliberately generic, and the email address is never logged.
+// With BREVO_DOI_TEMPLATE_ID set (a positive integer), Brevo emails a double opt-in confirmation
+// and adds the contact only after the link is clicked; the response then carries
+// `confirmEmail: true` so the form asks the person to check their inbox.
 
 const GENERIC_INVALID = 'Please enter a valid email address and tick the box to sign up.'
 const GENERIC_FAILURE = 'Sorry, we could not sign you up just now. Please try again later.'
@@ -35,6 +38,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    const doi = doubleOptinConfig(process.env)
+    if (doi) {
+      await requestDoubleOptin({
+        email: check.email,
+        lists: [NEWSLETTER_LIST],
+        source: 'newsletter-signup',
+        templateId: doi.templateId,
+        redirectionUrl: doi.redirectionUrl,
+      })
+      return res.status(200).json({ success: true, confirmEmail: true })
+    }
     await upsertContact({ email: check.email, lists: [NEWSLETTER_LIST], source: 'newsletter-signup' })
     return res.status(200).json({ success: true })
   } catch (err) {

@@ -52,3 +52,23 @@ export function validateSubscription(body: unknown): SubscriptionCheck {
 
   return { kind: 'ok', email }
 }
+
+const DEFAULT_SITE_URL = 'https://liftflintshire.co.uk'
+
+export interface DoubleOptinConfig {
+  templateId: number
+  redirectionUrl: string
+}
+
+/**
+ * Double opt-in for the newsletter is on only when BREVO_DOI_TEMPLATE_ID is a positive integer
+ * (the Brevo confirmation template id). Anything else, including unset, keeps the direct add.
+ */
+export function doubleOptinConfig(env: Record<string, string | undefined>): DoubleOptinConfig | undefined {
+  const raw = env.BREVO_DOI_TEMPLATE_ID?.trim() ?? ''
+  if (!/^\d+$/.test(raw)) return undefined
+  const templateId = Number(raw)
+  if (!Number.isSafeInteger(templateId) || templateId <= 0) return undefined
+  const site = (env.SITE_URL?.trim() || DEFAULT_SITE_URL).replace(/\/+$/, '')
+  return { templateId, redirectionUrl: `${site}/newsletter?confirmed=1` }
+}
