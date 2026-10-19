@@ -19,6 +19,7 @@ import EnquireYouthStrengthConditioning from './pages/EnquireYouthStrengthCondit
 import Questionnaire from './pages/Questionnaire'
 import Privacy from './pages/Privacy'
 import Safeguarding from './pages/Safeguarding'
+import Newsletter from './pages/Newsletter'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -56,6 +57,7 @@ function Layout() {
           <Route path="/questionnaire" element={<Questionnaire />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/safeguarding" element={<Safeguarding />} />
+          <Route path="/newsletter" element={<Newsletter />} />
         </Routes>
       </main>
       <Footer />
