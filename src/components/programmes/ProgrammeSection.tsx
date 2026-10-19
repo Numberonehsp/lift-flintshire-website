@@ -3,6 +3,7 @@ import { SectionWrapper } from '../layout/SectionWrapper'
 import { Button } from '../ui/Button'
 import { Badge } from '../ui/Badge'
 import { ImagePlaceholder } from '../ui/ImagePlaceholder'
+import { responsiveImage } from '../../lib/images'
 import type { Programme } from '../../data/programmes'
 
 function SessionDetails({ sessions }: { sessions: Programme['sessions'] }) {
@@ -86,7 +87,10 @@ export function ProgrammeSection({
         images.map((src, i) => (
           <img
             key={i}
-            src={src}
+            {...responsiveImage(src)}
+            sizes="(min-width: 1024px) 512px, 100vw"
+            width={1600}
+            height={1200}
             alt={`${programme.title} session`}
             className="w-full aspect-[4/3] object-cover rounded-card"
             loading="lazy"
