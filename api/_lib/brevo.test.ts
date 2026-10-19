@@ -11,15 +11,22 @@ function method(init?: RequestInit): string {
   return (init?.method ?? 'GET').toUpperCase()
 }
 
-/** Stub fetch. `lists` is what GET /contacts/lists reports; `contact` decides the contact POST response. */
+/**
+ * Stub fetch. `lists` is what GET /contacts/lists reports, `folders` what GET /contacts/folders
+ * reports (POST /contacts/folders appends to it); `contact` decides the contact POST response.
+ */
 function stubBrevo(opts: {
   lists?: { id: number; name: string }[]
+  folders?: { id: number; name: string }[]
   nextListId?: number
+  nextFolderId?: number
   contact?: (body: Record<string, unknown>, attempt: number) => Response
 } = {}) {
   const calls: Call[] = []
   const lists = opts.lists ?? []
+  const folders = opts.folders ?? []
   let nextListId = opts.nextListId ?? 100
+  let nextFolderId = opts.nextFolderId ?? 500
   let contactAttempts = 0
   const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input)
@@ -33,6 +40,18 @@ function stubBrevo(opts: {
     }
     if (path === '/v3/contacts/lists' && method(init) === 'POST') {
       return json({ id: nextListId++ }, 201)
+    }
+    if (path === '/v3/contacts/folders' && method(init) === 'GET') {
+      const u = new URL(url)
+      const limit = Number(u.searchParams.get('limit') ?? 10)
+      const offset = Number(u.searchParams.get('offset') ?? 0)
+      return json({ folders: folders.slice(offset, offset + limit), count: folders.length })
+    }
+    if (path === '/v3/contacts/folders' && method(init) === 'POST') {
+      const { name } = JSON.parse(init!.body as string) as { name: string }
+      const id = nextFolderId++
+      folders.push({ id, name })
+      return json({ id }, 201)
     }
     if (path === '/v3/contacts' && method(init) === 'POST') {
       contactAttempts++
@@ -53,14 +72,20 @@ function bodyOf(call: Call): Record<string, unknown> {
   return JSON.parse(call.init!.body as string)
 }
 
+function callsTo(calls: Call[], path: string, verb: string): Call[] {
+  return calls.filter(c => new URL(c.url).pathname === path && method(c.init) === verb)
+}
+
 describe('upsertContact', () => {
   const savedKey = process.env.BREVO_API_KEY
   const savedFolder = process.env.BREVO_FOLDER_ID
+  const savedFolderName = process.env.BREVO_FOLDER_NAME
 
   beforeEach(() => {
     resetListCache()
     process.env.BREVO_API_KEY = 'test-key'
     process.env.BREVO_FOLDER_ID = '1'
+    delete process.env.BREVO_FOLDER_NAME
   })
 
   afterEach(() => {
@@ -70,6 +95,8 @@ describe('upsertContact', () => {
     else process.env.BREVO_API_KEY = savedKey
     if (savedFolder === undefined) delete process.env.BREVO_FOLDER_ID
     else process.env.BREVO_FOLDER_ID = savedFolder
+    if (savedFolderName === undefined) delete process.env.BREVO_FOLDER_NAME
+    else process.env.BREVO_FOLDER_NAME = savedFolderName
   })
 
   it('creates missing lists in the folder, then upserts the contact on all of them', async () => {
@@ -224,11 +251,106 @@ describe('upsertContact', () => {
     await expect(upsertContact({ email: 'a@example.com', lists: ['Newsletter'] })).rejects.toThrow(/401/)
   })
 
-  it('throws before creating a list when BREVO_FOLDER_ID is missing', async () => {
+  it('without BREVO_FOLDER_ID, finds the default folder by name (case-insensitive) and creates the list in it', async () => {
     delete process.env.BREVO_FOLDER_ID
-    const { calls } = stubBrevo({ lists: [] })
-    await expect(upsertContact({ email: 'a@example.com', lists: ['Newsletter'] })).rejects.toThrow(/BREVO_FOLDER_ID/)
-    expect(contactCalls(calls)).toHaveLength(0)
+    const folders = Array.from({ length: 55 }, (_, i) => ({ id: i + 1, name: `Folder ${i + 1}` }))
+    folders.push({ id: 77, name: 'LIFT FLINTSHIRE Website' })
+    const { calls } = stubBrevo({ lists: [], folders, nextListId: 9 })
+
+    await upsertContact({ email: 'a@example.com', lists: ['Newsletter'] })
+
+    const folderGets = callsTo(calls, '/v3/contacts/folders', 'GET')
+    expect(folderGets.length).toBeGreaterThan(1) // paged past the first 50
+    for (const g of folderGets) expect(new URL(g.url).searchParams.get('limit')).toBe('50')
+    expect(callsTo(calls, '/v3/contacts/folders', 'POST')).toHaveLength(0)
+    const created = callsTo(calls, '/v3/contacts/lists', 'POST')
+    expect(created.map(bodyOf)).toEqual([{ name: 'Newsletter', folderId: 77 }])
+    expect(bodyOf(contactCalls(calls)[0]).listIds).toEqual([9])
+  })
+
+  it('uses BREVO_FOLDER_NAME when set', async () => {
+    delete process.env.BREVO_FOLDER_ID
+    process.env.BREVO_FOLDER_NAME = 'Club lists'
+    const { calls } = stubBrevo({
+      lists: [],
+      folders: [{ id: 3, name: 'Lift Flintshire website' }, { id: 4, name: 'club lists' }],
+    })
+
+    await upsertContact({ email: 'a@example.com', lists: ['Newsletter'] })
+
+    expect(bodyOf(callsTo(calls, '/v3/contacts/lists', 'POST')[0]).folderId).toBe(4)
+  })
+
+  it('creates the folder when it is missing, then creates the list inside it', async () => {
+    delete process.env.BREVO_FOLDER_ID
+    const { calls } = stubBrevo({ lists: [], folders: [{ id: 3, name: 'Other' }], nextFolderId: 42, nextListId: 9 })
+
+    await upsertContact({ email: 'a@example.com', lists: ['Newsletter'] })
+
+    const folderPosts = callsTo(calls, '/v3/contacts/folders', 'POST')
+    expect(folderPosts.map(bodyOf)).toEqual([{ name: 'Lift Flintshire website' }])
+    const listPosts = callsTo(calls, '/v3/contacts/lists', 'POST')
+    expect(listPosts.map(bodyOf)).toEqual([{ name: 'Newsletter', folderId: 42 }])
+    const paths = calls.map(c => `${method(c.init)} ${new URL(c.url).pathname}`)
+    expect(paths.indexOf('POST /v3/contacts/folders')).toBeLessThan(paths.indexOf('POST /v3/contacts/lists'))
+    expect(bodyOf(contactCalls(calls)[0]).listIds).toEqual([9])
+  })
+
+  it('BREVO_FOLDER_ID wins: no folder lookup or creation when it is numeric', async () => {
+    process.env.BREVO_FOLDER_ID = '12'
+    process.env.BREVO_FOLDER_NAME = 'Lift Flintshire website'
+    const { calls } = stubBrevo({ lists: [], folders: [{ id: 3, name: 'Lift Flintshire website' }] })
+
+    await upsertContact({ email: 'a@example.com', lists: ['Newsletter'] })
+
+    expect(calls.filter(c => new URL(c.url).pathname === '/v3/contacts/folders')).toHaveLength(0)
+    expect(bodyOf(callsTo(calls, '/v3/contacts/lists', 'POST')[0]).folderId).toBe(12)
+  })
+
+  it('falls back to the folder name when BREVO_FOLDER_ID is not numeric', async () => {
+    process.env.BREVO_FOLDER_ID = 'your_brevo_folder_id_here'
+    const { calls } = stubBrevo({ lists: [], folders: [{ id: 3, name: 'Lift Flintshire website' }] })
+
+    await upsertContact({ email: 'a@example.com', lists: ['Newsletter'] })
+
+    expect(bodyOf(callsTo(calls, '/v3/contacts/lists', 'POST')[0]).folderId).toBe(3)
+  })
+
+  it('looks the folder up once per call and caches it across calls until resetListCache()', async () => {
+    delete process.env.BREVO_FOLDER_ID
+    const { calls } = stubBrevo({ lists: [], nextFolderId: 42 })
+    const folderCalls = () => calls.filter(c => new URL(c.url).pathname === '/v3/contacts/folders')
+
+    await upsertContact({ email: 'a@example.com', lists: ['Newsletter', 'Event: Nov_WTR', 'Programme: run-club'] })
+    expect(callsTo(calls, '/v3/contacts/lists', 'POST')).toHaveLength(3)
+    expect(callsTo(calls, '/v3/contacts/folders', 'GET')).toHaveLength(1)
+    expect(callsTo(calls, '/v3/contacts/folders', 'POST')).toHaveLength(1)
+    expect(callsTo(calls, '/v3/contacts/lists', 'POST').every(c => bodyOf(c).folderId === 42)).toBe(true)
+
+    await upsertContact({ email: 'b@example.com', lists: ['Event: Dec_XC'] })
+    expect(folderCalls()).toHaveLength(2)
+
+    resetListCache()
+    await upsertContact({ email: 'c@example.com', lists: ['Event: Jan_RR'] })
+    expect(callsTo(calls, '/v3/contacts/folders', 'GET')).toHaveLength(2)
+    expect(callsTo(calls, '/v3/contacts/folders', 'POST')).toHaveLength(1) // found the folder it made
+  })
+
+  it('throws a BrevoError (status only) when the folder lookup fails, before creating anything', async () => {
+    delete process.env.BREVO_FOLDER_ID
+    const fetchMock = vi.fn(async (input: string | URL | Request, _init?: RequestInit) => {
+      void _init
+      const path = new URL(String(input)).pathname
+      if (path === '/v3/contacts/lists') return json({ lists: [], count: 0 })
+      return json({ code: 'permission_denied', message: 'Key test-key cannot read folders' }, 403)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const err = await upsertContact({ email: 'a@example.com', lists: ['Newsletter'] }).catch((e: unknown) => e)
+    expect(err).toBeInstanceOf(Error)
+    expect((err as Error).message).toMatch(/folder lookup failed: HTTP 403 \(permission_denied\)/)
+    expect((err as Error).message).not.toContain('test-key')
+    expect(fetchMock.mock.calls.every(([, init]) => method(init) === 'GET')).toBe(true)
   })
 
   it('never logs the email address or the API key', async () => {

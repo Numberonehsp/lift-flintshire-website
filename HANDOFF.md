@@ -369,8 +369,8 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 **Brevo flow (opt-in only)**
 - Every form has an unticked "email me" checkbox (`marketing-consent` = `yes`); there is also a newsletter form (`POST /api/subscribe`). Nobody is added to Brevo without that exact value. Marketing consent is separate from `gdpr-consent`.
 - Code: `api/_lib/brevo.ts` (client), `api/_lib/marketing.ts` (who, which lists), `api/_lib/finaliseEntry.ts` (event entries, paid and free), `api/_lib/eventLookup.ts` (reads the Events sheet `programme` column), `api/subscribe.ts`, `api/submit-form.ts` (registrations and youth enquiry), `api/create-entry.ts`.
-- Env vars (server-only, set in Vercel, see `.env.example`): `BREVO_API_KEY`, `BREVO_FOLDER_ID`. Without the key the client does nothing; `/api/subscribe` returns an error instead of pretending it worked.
-- Lists are found or created by name inside the `BREVO_FOLDER_ID` folder:
+- Env vars (server-only, set in Vercel, see `.env.example`): `BREVO_API_KEY` (required). Optional: `BREVO_FOLDER_NAME` (default `Lift Flintshire website`) and `BREVO_FOLDER_ID` (a numeric folder id; if set it overrides the name). Without the key the client does nothing; `/api/subscribe` returns an error instead of pretending it worked.
+- New lists are created in one Brevo folder. With no `BREVO_FOLDER_ID`, the client looks for a folder whose name matches `BREVO_FOLDER_NAME` (ignoring case) and creates it the first time a list is needed if it does not exist. The folder id is cached while the function is warm. Lists are found by name anywhere in the account and created in that folder when missing:
 
 | Who | List name |
 |---|---|
@@ -403,8 +403,8 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 
 **Steps only Ed can do**
 1. In Brevo: Contacts, Settings, Contact attributes, create two text attributes: `CONSENT_DATE` and `CONSENT_SOURCE`. Check that `FIRSTNAME` and `LASTNAME` exist (Brevo normally has them).
-2. In Brevo: Contacts, Lists, create a folder (for example "Website") and note its numeric id.
-3. In Brevo: SMTP and API, create an API key. Copy it straight into Vercel (Project, Settings, Environment Variables) as `BREVO_API_KEY` for Production and Preview. Do not paste it into chat, a file in the repo, or a `VITE_` variable. Add `BREVO_FOLDER_ID` the same way.
+2. Nothing to do for the folder: the site creates a Brevo folder called "Lift Flintshire website" the first time it needs a list (or uses one with that name if it already exists, ignoring case). To use a different folder name, add `BREVO_FOLDER_NAME` in Vercel. `BREVO_FOLDER_ID` is only needed to force a specific folder by its numeric id.
+3. In Brevo: SMTP and API, API keys, create an API key with **Restricted access**, and set **Contacts** to **All** with every other permission off (the site only reads and creates contacts, lists and folders). If the key screen offers no Restricted option, the key has full account access, so guard it like the account password. Copy it straight into Vercel (Project, Settings, Environment Variables) as `BREVO_API_KEY` for Production and Preview. Do not paste it into chat, a file in the repo, or a `VITE_` variable. Brevo expires an API key after 90 consecutive days without use, so on a quiet site it can lapse between events: set a calendar reminder (for example every 60 days) to check the key is still active in Brevo and rotate it if needed.
 4. In Brevo: Senders, domains and dedicated IPs, add and authenticate `liftflintshire.co.uk` (DKIM and DMARC records) before sending campaigns. Resend's existing records on that domain do not cover Brevo.
 5. In the private sheet, `Event_Entries` tab: add a header `Marketing Consent` in column AH, the next free column after `Runner 4 Email`.
 5b. In the private sheet, `Registrations` tab: add a header `Marketing Consent` in column W, the next free column after `Referral Source`. New registrations write `yes` or blank there (the row layout lives in `api/_lib/registrationSheet.ts`). The code only writes the header itself when the tab is empty, so an existing tab needs this by hand.

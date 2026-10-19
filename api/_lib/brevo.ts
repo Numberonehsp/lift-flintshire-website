@@ -2,6 +2,9 @@
 // Brevo REST API v3 (developers.brevo.com, checked 2026-10-13):
 //   GET  /v3/contacts/lists?limit=&offset=  -> 200 { lists: [{ id, name, folderId, ... }], count }
 //   POST /v3/contacts/lists { name, folderId } -> 201 { id }
+//   GET  /v3/contacts/folders?limit=&offset= -> 200 { folders: [{ id, name, ... }], count }  (checked 2026-10-19;
+//        limit defaults to 10, no maximum is documented, so the same page size as lists is used)
+//   POST /v3/contacts/folders { name } -> 201 { id }  (checked 2026-10-19)
 //   POST /v3/contacts { email, attributes, listIds, updateEnabled } -> 201 { id } (new) or 204 (updated)
 //   Errors: 4xx { code, message }. Auth: `api-key` header.
 // Never log the email address or the API key. Callers must treat a thrown error (including a
@@ -9,6 +12,8 @@
 
 const BASE_URL = 'https://api.brevo.com/v3'
 const PAGE_SIZE = 50
+/** Folder new lists go in when BREVO_FOLDER_ID is not set. Matched case-insensitively. */
+export const DEFAULT_FOLDER_NAME = 'Lift Flintshire website'
 const INVALID_PARAMETER = 'invalid_parameter'
 /** Every Brevo request is abandoned after this long; the abort rejects like any other error. */
 export const BREVO_TIMEOUT_MS = 5000
@@ -17,7 +22,7 @@ export interface UpsertContactParams {
   email: string
   firstName?: string
   lastName?: string
-  /** Brevo list names; missing lists are created in BREVO_FOLDER_ID. */
+  /** Brevo list names; missing lists are created in the folder (see resolveFolderId). */
   lists: string[]
   /** The form or page the consent came from; stored as CONSENT_SOURCE. */
   source?: string
@@ -27,9 +32,12 @@ export interface UpsertContactParams {
 
 /** List name -> Brevo list id. Module-level so warm serverless invocations reuse it. */
 const listCache = new Map<string, number>()
+/** Folder id found or created by name. Same lifetime as listCache. */
+let folderIdCache: number | undefined
 
 export function resetListCache(): void {
   listCache.clear()
+  folderIdCache = undefined
 }
 
 class BrevoError extends Error {
@@ -84,6 +92,42 @@ async function loadAllLists(apiKey: string): Promise<void> {
   }
 }
 
+async function findFolderByName(apiKey: string, wanted: string): Promise<number | undefined> {
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const page = (await brevoFetch(apiKey, 'folder lookup', `/contacts/folders?limit=${PAGE_SIZE}&offset=${offset}`, {
+      method: 'GET',
+    })) as { folders?: { id: number; name: string }[]; count?: number } | undefined
+    const folders = page?.folders ?? []
+    const match = folders.find(f => typeof f.name === 'string' && f.name.trim().toLowerCase() === wanted)
+    if (match) return match.id
+    const total = page?.count ?? 0
+    if (folders.length < PAGE_SIZE || offset + folders.length >= total) return undefined
+  }
+}
+
+/**
+ * Folder new lists are created in: a numeric BREVO_FOLDER_ID if set, otherwise the folder named
+ * BREVO_FOLDER_NAME (default DEFAULT_FOLDER_NAME), created if it does not exist yet.
+ */
+async function resolveFolderId(apiKey: string): Promise<number> {
+  const fromEnv = Number.parseInt(process.env.BREVO_FOLDER_ID ?? '', 10)
+  if (Number.isFinite(fromEnv)) return fromEnv
+  if (folderIdCache !== undefined) return folderIdCache
+
+  const name = process.env.BREVO_FOLDER_NAME?.trim() || DEFAULT_FOLDER_NAME
+  let id = await findFolderByName(apiKey, name.toLowerCase())
+  if (id === undefined) {
+    const created = (await brevoFetch(apiKey, 'folder creation', '/contacts/folders', {
+      method: 'POST',
+      body: { name },
+    })) as { id?: unknown } | undefined
+    if (typeof created?.id !== 'number') throw new BrevoError('folder creation', 201, 'no_id')
+    id = created.id
+  }
+  folderIdCache = id
+  return id
+}
+
 async function resolveListIds(apiKey: string, names: string[]): Promise<number[]> {
   const unique = [...new Set(names)]
   if (unique.some(n => !listCache.has(n))) {
@@ -91,10 +135,7 @@ async function resolveListIds(apiKey: string, names: string[]): Promise<number[]
   }
   const missing = unique.filter(n => !listCache.has(n))
   if (missing.length > 0) {
-    const folderId = Number.parseInt(process.env.BREVO_FOLDER_ID ?? '', 10)
-    if (!Number.isFinite(folderId)) {
-      throw new Error('BREVO_FOLDER_ID is not set to a numeric folder id; cannot create Brevo lists')
-    }
+    const folderId = await resolveFolderId(apiKey)
     for (const name of missing) {
       const created = (await brevoFetch(apiKey, 'list creation', '/contacts/lists', {
         method: 'POST',
