@@ -7,3 +7,7 @@ export const YOUTH_BEGINNERS_JOIN_URL =
 
 export const WEIGHTLIFTING_CONSULTATION_URL =
   'https://numberonehsp.gymmasteronline.com/portal/book/service?serviceid=698033'
+
+// Social accounts.
+export const LIFT_FLINTSHIRE_INSTAGRAM_URL = 'https://instagram.com/LiftFlintshire'
+export const RUN_CLUB_INSTAGRAM_URL = 'https://instagram.com/FlintshireRunClub'

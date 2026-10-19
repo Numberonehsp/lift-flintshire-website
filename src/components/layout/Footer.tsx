@@ -1,17 +1,8 @@
 import { Link } from 'react-router-dom'
 import { footerNav } from '../../data/navigation'
 import { NewsletterSignup } from '../forms/NewsletterSignup'
-
-function InstagramIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-      <rect x="2" y="2" width="20" height="20" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-    </svg>
-  )
-}
-
+import { InstagramIcon } from '../ui/InstagramIcon'
+import { LIFT_FLINTSHIRE_INSTAGRAM_URL, RUN_CLUB_INSTAGRAM_URL } from '../../data/links'
 
 export function Footer() {
   return (
@@ -61,17 +52,32 @@ export function Footer() {
           {/* Col 3: Social + contact */}
           <div>
             <h3 className="font-display font-bold text-base text-white mb-4 uppercase tracking-wider">Connect</h3>
-            <div className="flex gap-4 mb-4">
-              <a
-                href="https://instagram.com/LiftFlintshire"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/70 hover:text-teal-light transition-colors min-h-[44px] flex items-center"
-                aria-label="Lift Flintshire on Instagram"
-              >
-                <InstagramIcon />
-              </a>
-            </div>
+            <ul className="flex flex-col gap-1 mb-4">
+              <li>
+                <a
+                  href={LIFT_FLINTSHIRE_INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-[44px] items-center gap-2 font-body text-sm text-white/70 hover:text-teal-light transition-colors"
+                >
+                  <InstagramIcon />
+                  @LiftFlintshire
+                  <span className="sr-only">, Lift Flintshire on Instagram (opens in a new tab)</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={RUN_CLUB_INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-[44px] items-center gap-2 font-body text-sm text-white/70 hover:text-teal-light transition-colors"
+                >
+                  <InstagramIcon />
+                  @FlintshireRunClub
+                  <span className="sr-only">, Flintshire Run Club on Instagram (opens in a new tab)</span>
+                </a>
+              </li>
+            </ul>
             <a
               href="mailto:hello@liftflintshire.co.uk"
               className="inline-flex min-h-[32px] items-center font-body text-sm text-white/70 hover:text-white transition-colors"
