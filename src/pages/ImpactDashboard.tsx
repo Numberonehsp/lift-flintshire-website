@@ -10,7 +10,7 @@ import type { MonthPoint } from '../hooks/useGoogleSheets'
 
 // Distinct hues so adjacent series stay separable for low-vision and colour-blind
 // readers (no two near-identical teals). Colour is always paired with a text label.
-const PROGRAMME_COLOURS = ['#376A6B', '#E8713C', '#B8860B', '#8A6BB0', '#4A6FA5', '#B5556D']
+const PROGRAMME_COLOURS = ['#376A6B', '#E8713C', '#B8860B', '#8A6BB0', '#4A6FA5', '#B5556D', '#7A4B2A']
 
 const AREA_COLOURS: Record<string, string> = {
   Running:       '#E8713C',
