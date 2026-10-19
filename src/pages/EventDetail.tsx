@@ -21,6 +21,7 @@ export default function EventDetail() {
   const event = events.find(e => e.id === id)
   const cancelled = searchParams.get('cancelled') === '1'
   const anyAvailable = statuses.some(s => s.status === 'available')
+  const allFree = statuses.length > 0 && statuses.every(s => s.tier.pricePence === 0)
 
   if (eventsLoading) {
     return (
@@ -97,10 +98,14 @@ export default function EventDetail() {
               >
                 <div>
                   <p className="font-display font-bold text-ink">{tier.label}</p>
-                  <p className="font-body text-sm text-ink-light">£{(tier.pricePence / 100).toFixed(2)}</p>
+                  <p className="font-body text-sm text-ink-light">
+                    {tier.pricePence === 0 ? 'Free' : `£${(tier.pricePence / 100).toFixed(2)}`}
+                  </p>
                 </div>
                 {status === 'available' ? (
-                  <Button variant="primary" href={`/events/${event.id}/enter`}>Enter now</Button>
+                  <Button variant="primary" href={`/events/${event.id}/enter`}>
+                    {tier.pricePence === 0 ? 'Enter for free' : 'Enter now'}
+                  </Button>
                 ) : status === 'sold_out' ? (
                   <Badge>Sold out</Badge>
                 ) : (
@@ -113,13 +118,23 @@ export default function EventDetail() {
           </div>
         )}
 
-        <p className="font-body text-xs text-ink-light mt-6">
-          Prices include all card and booking fees, no extras at checkout. Tickets are
-          non-refundable but may be transferred to another runner; contact{' '}
-          <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
-            hello@liftflintshire.co.uk
-          </a>.
-        </p>
+        {allFree ? (
+          <p className="font-body text-xs text-ink-light mt-6">
+            Entry is free. If you can no longer make it, please let us know at{' '}
+            <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
+              hello@liftflintshire.co.uk
+            </a>{' '}
+            so your place can go to someone else.
+          </p>
+        ) : (
+          <p className="font-body text-xs text-ink-light mt-6">
+            Prices include all card and booking fees, no extras at checkout. Tickets are
+            non-refundable but may be transferred to another runner; contact{' '}
+            <a href="mailto:hello@liftflintshire.co.uk" className="text-teal hover:underline">
+              hello@liftflintshire.co.uk
+            </a>.
+          </p>
+        )}
       </SectionWrapper>
     </>
   )

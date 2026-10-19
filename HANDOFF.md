@@ -363,3 +363,53 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 - Events sheet dates are normalised by `src/lib/eventDate.ts`: `YYYY-MM-DD` and `DD/MM/YYYY` are accepted, and `YYYY-DD-MM` is corrected when the middle part cannot be a month (for example `2026-21-11` becomes `2026-11-21`). A date that cannot be read is skipped with a console warning. Before this, an invalid date made the event vanish from the site with no message. Enter dates as `YYYY-MM-DD`.
 - Run Club logo is the transparent vector cropped to the artwork (`public/images/logo-run-club.svg`).
 - September 2026 low attendance figure confirmed as correct for now; the "How we count" wording is approved.
+
+## 2026-10-13 — Brevo mailing lists and free event entries
+
+**Brevo flow (opt-in only)**
+- Every form has an unticked "email me" checkbox (`marketing-consent` = `yes`); there is also a newsletter form (`POST /api/subscribe`). Nobody is added to Brevo without that exact value. Marketing consent is separate from `gdpr-consent`.
+- Code: `api/_lib/brevo.ts` (client), `api/_lib/marketing.ts` (who, which lists), `api/_lib/finaliseEntry.ts` (event entries, paid and free), `api/_lib/eventLookup.ts` (reads the Events sheet `programme` column), `api/subscribe.ts`, `api/submit-form.ts` (registrations and youth enquiry), `api/create-entry.ts`.
+- Env vars (server-only, set in Vercel, see `.env.example`): `BREVO_API_KEY` (required). Optional: `BREVO_FOLDER_NAME` (default `Lift Flintshire website`) and `BREVO_FOLDER_ID` (a numeric folder id; if set it overrides the name). Without the key the client does nothing; `/api/subscribe` returns an error instead of pretending it worked.
+- New lists are created in one Brevo folder. With no `BREVO_FOLDER_ID`, the client looks for a folder whose name matches `BREVO_FOLDER_NAME` (ignoring case) and creates it the first time a list is needed if it does not exist. The folder id is cached while the function is warm. Lists are found by name anywhere in the account and created in that folder when missing:
+
+| Who | List name |
+|---|---|
+| Anyone who opts in on registration, event entry or the newsletter form | `Newsletter` |
+| Programme registrants | `Programme: couch-to-5k`, `Programme: womens-run-club` |
+| Event entrants | `Event: <event id>`, for example `Event: Nov_WTR` |
+| Event entrants, by programme | `Programme: <Events sheet programme column>` when that column is filled |
+| Parent or guardian of a Youth Weightlifting enquirer | `Guardians: youth-weightlifting` (only this list, not `Newsletter`) |
+
+- Programme lists are limited to the ids in `PROGRAMME_IDS` (`api/_lib/marketing.ts`): `couch-to-5k`, `womens-run-club`, `run-club`, `stay-strong`, `weightlifting`. A registration form with any other id adds nobody to Brevo, and an Events sheet `programme` value outside the set is dropped (Newsletter and the event list are still used). Add a new programme there before using its id.
+- Youth Weightlifting: only the guardian's email goes to Brevo, never the young person's name or school year or the guardian's name.
+- Attributes sent: `FIRSTNAME`, `LASTNAME` (when collected), `CONSENT_DATE`, `CONSENT_SOURCE` (`newsletter-signup`, `event-entry`, or the form name such as `register-couch-to-5k`).
+- Failures are non-fatal: a Brevo error is logged (status and Brevo error code only, never the email) and the registration or entry still succeeds. Every Brevo request is abandoned after 5 seconds, and the whole event-entry Brevo step after 8 seconds. A failed programme lookup still adds the contact to `Newsletter` and the event list, just not the programme list.
+- **Attribute-name caveat:** the client sends `FIRSTNAME`, `LASTNAME`, `CONSENT_DATE`, `CONSENT_SOURCE` and, when Brevo answers HTTP 400 with code `invalid_parameter`, retries once WITHOUT attributes. If those names do not exist in the Brevo account, contacts are still added to their lists but without consent attributes, and the Vercel logs show `BREVO_CONSENT_ATTRS_DROPPED`. Search the logs for that tag after the first few sign-ups. Any other 400 or 404 on the contact upsert reloads the cached list ids and retries once (covers a list deleted in Brevo while the function was warm). Ed must check the exact names under Brevo, Contacts, Settings, Contact attributes (`CONSENT_DATE` and `CONSENT_SOURCE` need creating as text attributes).
+
+**Free event entries**
+- A ticket tier with price 0 skips Stripe: `api/create-entry.ts` writes the row straight to `Event_Entries` as `paid` with amount £0.00 and session id `free`, runs the same `finaliseEntry` (confirmation email to the entrant, notification to the organisers, Brevo) and returns the entry-confirmed URL. Free entries count against capacity. If the row cannot be saved the entrant sees an error.
+- The event title in emails and at Stripe comes from the Events sheet (`title`, column B), never from the browser. If the Events sheet cannot be read, a free entry fails with a generic error; a paid entry uses the event id as the title.
+- A free entry from an email that already has a `paid` row for the same event (case-insensitive) is sent to the existing confirmation page: no new row, no new email.
+- Overbooking guard: after writing a free row, create-entry re-reads columns A:E and, if the row is beyond the tier's capacity among `paid` rows (in sheet order), changes its status to `oversold`, sends no email and tells the entrant the event is fully booked. `oversold` rows do not count against capacity and can be ignored or deleted. If that re-check itself fails, the entry stands.
+- The confirmation emails and Brevo step still run before the free-entry response is sent: `@vercel/functions` (`waitUntil`) is not a dependency, so there is no safe way to run them after responding.
+- The entry form has a hidden honeypot field `website`. If it is filled, `/api/create-entry` returns a normal-looking success and writes nothing.
+- **Setting up a free event:** set the tier's `price_gbp` to `0` in `Ticket_Types`. That alone is what skips Stripe. Also set the Events sheet `price` to `0` so the listing shows Free; the Events `price` by itself does not skip payment.
+- **Reconciling with Stripe:** free entries are stored with status `paid`, Amount `0.00` and Stripe Session ID `free`. Filter on the amount (or session `free`) when matching `Event_Entries` against Stripe payouts, or free entries will look like missing payments.
+
+**Private sheet change**
+- `Event_Entries` has a new last column `Marketing Consent` (column AH): `yes` or blank. It must be added to the header row by hand (step 5 below). The Stripe webhook reads it so paid entries are added to Brevo only after payment is confirmed.
+
+- `Registrations` has a new last column `Marketing Consent` (column W): `yes` or blank. Add the header by hand (step 5b below).
+
+**Steps only Ed can do**
+1. In Brevo: Contacts, Settings, Contact attributes, create two text attributes: `CONSENT_DATE` and `CONSENT_SOURCE`. Check that `FIRSTNAME` and `LASTNAME` exist (Brevo normally has them).
+2. Nothing to do for the folder: the site creates a Brevo folder called "Lift Flintshire website" the first time it needs a list (or uses one with that name if it already exists, ignoring case). To use a different folder name, add `BREVO_FOLDER_NAME` in Vercel. `BREVO_FOLDER_ID` is only needed to force a specific folder by its numeric id.
+3. In Brevo: SMTP and API, API keys, create an API key with **Restricted access**, and set **Contacts** to **All** with every other permission off (the site only reads and creates contacts, lists and folders). If the key screen offers no Restricted option, the key has full account access, so guard it like the account password. Copy it straight into Vercel (Project, Settings, Environment Variables) as `BREVO_API_KEY` for Production and Preview. Do not paste it into chat, a file in the repo, or a `VITE_` variable. Brevo expires an API key after 90 consecutive days without use, so on a quiet site it can lapse between events: set a calendar reminder (for example every 60 days) to check the key is still active in Brevo and rotate it if needed.
+4. In Brevo: Senders, domains and dedicated IPs, add and authenticate `liftflintshire.co.uk` (DKIM and DMARC records) before sending campaigns. Resend's existing records on that domain do not cover Brevo.
+5. In the private sheet, `Event_Entries` tab: add a header `Marketing Consent` in column AH, the next free column after `Runner 4 Email`.
+5b. In the private sheet, `Registrations` tab: add a header `Marketing Consent` in column W, the next free column after `Referral Source`. New registrations write `yes` or blank there (the row layout lives in `api/_lib/registrationSheet.ts`). The code only writes the header itself when the tab is empty, so an existing tab needs this by hand.
+6. In the Events sheet: fill the `programme` column (H) for each event, for example `womens-run-club` for the Nov_WTR event.
+7. Redeploy after the env vars are set.
+8. Recommended: add a Vercel Firewall rate-limit rule on `/api/create-entry` (Vercel, Project, Firewall, add a rate-limit rule, for example a small number of requests per minute per IP). This does not exist yet. Free entries skip Stripe, so without a rate limit a script could use up a free event's places or trigger many confirmation emails. The honeypot and the duplicate-email check reduce this but do not stop a determined script.
+
+Also check where Brevo holds data (UK, EEA or elsewhere) and that Brevo's terms give an appropriate transfer mechanism; the privacy policy deliberately does not state a location.
