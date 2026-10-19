@@ -2,54 +2,12 @@ import { useState, useEffect } from 'react'
 import { events as staticEvents } from '../data/events'
 import type { Event } from '../data/events'
 import type { SessionDetail } from '../data/programmes'
-import { normaliseEventDate } from '../lib/eventDate'
+import { readSheetValues, parseEventsSheet, parseSessionsSheet } from '../lib/contentSheets'
 
 interface ContentSheetsData {
   events: Event[]
   sessionsByProgramme: Record<string, SessionDetail[]>
   loading: boolean
-}
-
-function parseEventsSheet(values: string[][]): Event[] {
-  if (!values || values.length < 2) return staticEvents
-  const [, ...rows] = values
-  const parsed = rows
-    .filter(row => row[0] && row[1] && row[2])
-    .flatMap(row => {
-      const date = normaliseEventDate(row[2])
-      if (!date) {
-        // An unreadable date would hide the event with no explanation, so say why in the console.
-        console.warn(`Events sheet: skipped "${row[0]}" because "${row[2]}" is not a valid date (use YYYY-MM-DD).`)
-        return []
-      }
-      return [{ row, date }]
-    })
-    .map(({ row, date }) => ({
-      id: row[0],
-      title: row[1],
-      date,
-      time: row[3] || '',
-      location: row[4] || '',
-      price: parseFloat(row[5]) || 0,
-      description: row[6] || '',
-      programme: (row[7] as Event['programme']) || undefined,
-      bookingLink: row[8] || undefined,
-    }))
-  return parsed.length > 0 ? parsed : staticEvents
-}
-
-function parseSessionsSheet(values: string[][]): Record<string, SessionDetail[]> {
-  if (!values || values.length < 2) return {}
-  const [, ...rows] = values
-  const map: Record<string, SessionDetail[]> = {}
-  rows
-    .filter(row => row[0] && row[1])
-    .forEach(row => {
-      const id = row[0]
-      if (!map[id]) map[id] = []
-      map[id].push({ day: row[1], time: row[2] || '', location: row[3] || '', cost: row[4] || '' })
-    })
-  return map
 }
 
 // Credentials are inlined by Vite at build time, so whether there's a sheet to
@@ -73,16 +31,14 @@ export function useContentSheets(): ContentSheetsData {
 
     const base = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values`
 
-    Promise.all([
-      fetch(`${base}/Events?key=${API_KEY}`).then(r => r.json()),
-      fetch(`${base}/Programme_Sessions?key=${API_KEY}`).then(r => r.json()),
-    ])
-      .then(([eventsJson, sessionsJson]) => {
-        setEvents(parseEventsSheet(eventsJson.values))
-        setSessionsByProgramme(parseSessionsSheet(sessionsJson.values))
-      })
-      .catch(() => { /* fall back to static data */ })
-      .finally(() => setLoading(false))
+    // Each tab is read independently: a missing or failing tab (for example an
+    // HTTP 400 when it does not exist) leaves only that part on static data.
+    const eventsDone = readSheetValues(fetch(`${base}/Events?key=${API_KEY}`))
+      .then(values => setEvents(parseEventsSheet(values, staticEvents)))
+    const sessionsDone = readSheetValues(fetch(`${base}/Programme_Sessions?key=${API_KEY}`))
+      .then(values => setSessionsByProgramme(parseSessionsSheet(values)))
+
+    Promise.allSettled([eventsDone, sessionsDone]).then(() => setLoading(false))
   }, [])
 
   return { events, sessionsByProgramme, loading }
