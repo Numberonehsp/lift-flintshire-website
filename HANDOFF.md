@@ -413,3 +413,18 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 8. Recommended: add a Vercel Firewall rate-limit rule on `/api/create-entry` (Vercel, Project, Firewall, add a rate-limit rule, for example a small number of requests per minute per IP). This does not exist yet. Free entries skip Stripe, so without a rate limit a script could use up a free event's places or trigger many confirmation emails. The honeypot and the duplicate-email check reduce this but do not stop a determined script.
 
 Also check where Brevo holds data (UK, EEA or elsewhere) and that Brevo's terms give an appropriate transfer mechanism; the privacy policy deliberately does not state a location.
+
+## 2026-10-19 — Run Club details, Programme_Sessions tab and newsletter page
+
+**Run Club**
+- Membership is free to try, then £30 a year. The £30 includes a £20 voucher for Run Club merch, two scheduled runs a week (Tuesday 18:00 at Hawarden, Tinkersdale Car Park; Thursday 18:00 at Number One HSP, CH5 2TF, unless stated in the WhatsApp group), regular socials and weekend club runs.
+- The Sunday 09:00 session is gone. It is replaced by weekend club runs announced in the WhatsApp group (no fixed time).
+- `src/data/programmes.ts` (`run-club` description, whatToExpect, sessions) and `src/pages/RunClub.tsx` (hero copy, Seo description, "What membership includes" block under the Run Club section, @FlintshireRunClub Instagram link under the hero buttons) are updated. The page does not link the WhatsApp group; it says the group details are shared when you join.
+- The Run Club timetable lives in the `Programme_Sessions` tab of the public content sheet. Rows there override the sessions in `programmes.ts`, so keep the two in sync. The tab now exists, with rows for `run-club`, `weightlifting` and `stay-strong`; the `run-club` rows match the code (Tuesday, Thursday, Weekends).
+- Instagram links live in `src/data/links.ts` (`LIFT_FLINTSHIRE_INSTAGRAM_URL`, `RUN_CLUB_INSTAGRAM_URL`). The footer Connect column shows both accounts as labelled links (@LiftFlintshire and @FlintshireRunClub).
+
+**Content sheet resilience**
+- Before the tab existed, `useContentSheets` logged an HTTP 400 on every page load. Parsing now lives in `src/lib/contentSheets.ts` (tested in `contentSheets.test.ts`). Events and Programme_Sessions are read independently: if either tab is missing or returns an error, only that part falls back to the static data, and nothing is logged by the code (the request URL contains the API key). The browser's own network panel will still show a failed request if a tab is missing.
+
+**Newsletter page**
+- `/newsletter` (`src/pages/Newsletter.tsx`) is a standalone sign-up page for QR codes and posters, using the existing `NewsletterSignup` form (same `/api/subscribe` and Brevo `Newsletter` list). It is in `public/sitemap.xml` but not linked from the menu or footer.

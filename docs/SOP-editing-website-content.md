@@ -40,6 +40,18 @@
 
 To remove a programme's override, delete its row and the site falls back to the wording in `programmes.ts`.
 
+### Run Club timetable
+
+The Run Club timetable lives in the `Programme_Sessions` tab. The tab exists and has rows for `run-club`, `weightlifting` and `stay-strong`. The `run-club` rows are:
+
+| programme id | day | time | location | cost |
+|---|---|---|---|---|
+| run-club | Tuesday | 18:00 | Hawarden - Tinkersdale Car Park | Free to try, then £30 annually |
+| run-club | Thursday | 18:00 | Number One HSP, CH5 2TF | Free to try, then £30 annually |
+| run-club | Weekends | See the WhatsApp group | Varies, announced in the group | Included in membership |
+
+These rows override the sessions in `src/data/programmes.ts`. When the timetable changes, change both so they stay in sync (the code is the fallback if the sheet cannot be read). The "What membership includes" box on the Run Club page (£30 a year, £20 merch voucher, two scheduled runs, socials, weekend club runs) is in `src/pages/RunClub.tsx`, not the sheet, so update it there too.
+
 > **Never put personal data in this sheet.** It is public by design. Registrations and feedback go to a separate private sheet.
 
 ---
@@ -118,7 +130,7 @@ If you want to see a change before it goes live, choose **Create a new branch** 
 | Text | File |
 |---|---|
 | Programme titles, taglines, badges, descriptions, "Who is it for?", "What to expect", default session lines | `src/data/programmes.ts` |
-| Run Club page (intro, Couch to 5K and Women's Track Running sections), page title/SEO | `src/pages/RunClub.tsx` |
+| Run Club page (intro, "What membership includes" box, Run Club Instagram link, Couch to 5K and Women's Track Running sections), page title/SEO | `src/pages/RunClub.tsx` |
 | Weightlifting Club page (includes Youth Weightlifting enquiry link), page title/SEO | `src/pages/WeightliftingClub.tsx` |
 | Wellbeing page (Stay Strong, Girls Gym Session), page title/SEO | `src/pages/Wellbeing.tsx` |
 | The three GymMaster links (Run Club join, Youth Beginners join, Weightlifting consultation booking) | `src/data/links.ts` (edit the URL string only; every page and button that uses it updates) |
@@ -133,6 +145,8 @@ If you want to see a change before it goes live, choose **Create a new branch** 
 | Privacy policy | `src/pages/Privacy.tsx` |
 | Safeguarding page | `src/pages/Safeguarding.tsx` |
 | Footer (all pages) | `src/components/layout/Footer.tsx` |
+| Instagram links (@LiftFlintshire, @FlintshireRunClub), used in the footer and on the Run Club page | `src/data/links.ts` |
+| Newsletter sign-up page for QR codes and posters (`liftflintshire.co.uk/newsletter`) | `src/pages/Newsletter.tsx` |
 | Next Women's Run Club date, next Couch to 5K start | `src/data/nextSessionDates.ts` **and** the same two dates near the top of `api/submit-form.ts` (change both, they must match) |
 | Confirmation emails sent to people who register | `api/submit-form.ts` (search for `CONFIRMATION_TEMPLATES`) |
 
@@ -169,4 +183,4 @@ Example prompt: "In the Lift Flintshire website, change X to Y on the Z page, th
 
 ---
 
-*Last updated: 13 October 2026.*
+*Last updated: 19 October 2026.*
