@@ -5,6 +5,7 @@ import { Testimonial } from '../components/ui/Testimonial'
 import { useGoogleSheets } from '../hooks/useGoogleSheets'
 import { useCountUp } from '../hooks/useCountUp'
 import { isInProgressMonth } from '../lib/months'
+import { labelColourOn } from '../lib/contrast'
 import type { MonthPoint } from '../hooks/useGoogleSheets'
 
 // Distinct hues so adjacent series stay separable for low-vision and colour-blind
@@ -19,6 +20,19 @@ const AREA_COLOURS: Record<string, string> = {
 }
 
 const IMPACT_AREAS = ['Running', 'Weightlifting', 'Community']
+
+// Direct labels inside stacked segments. A segment narrower than this share
+// of the track gets no label (the legend and the native tooltip cover it).
+const MIN_LABEL_PCT = 14
+
+// Rough rendered width of "Name 123" at the label's 11px semibold, rounded up
+// to a 32px tier. global.css shows the full label only when the segment (a
+// size container) is at least that wide, else just the value, so nothing is
+// clipped on phones or on paper.
+function labelFitTier(text: string): number {
+  const estimate = text.length * 6.6 + 10
+  return Math.min(Math.max(Math.ceil(estimate / 32) * 32, 32), 320)
+}
 
 // Screen-reader-only equivalent of a chart: the same numbers as a real table.
 function ChartDataTable({
@@ -149,15 +163,27 @@ function StackedBarChart({
                 {keys.map((key, i) => {
                   const val = typeof m[key] === 'number' ? (m[key] as number) : 0
                   const pct = (val / maxTotal) * 100
+                  const bg = colours(key, i)
                   return pct > 0 ? (
                     <div
                       key={key}
                       title={`${key}: ${val}`}
+                      className="chart-seg"
                       style={{
                         width: `${pct}%`,
-                        backgroundColor: colours(key, i),
+                        backgroundColor: bg,
+                        color: labelColourOn(bg),
                       }}
-                    />
+                    >
+                      {pct >= MIN_LABEL_PCT && (
+                        <span className="chart-seg-label">
+                          <span className="chart-seg-full" data-fit={labelFitTier(`${key} ${val}`)}>
+                            {key} <b>{val}</b>
+                          </span>
+                          <b className="chart-seg-short">{val}</b>
+                        </span>
+                      )}
+                    </div>
                   ) : null
                 })}
               </div>
@@ -271,14 +297,14 @@ function ProgrammeReach({ byProgramme, allProgrammes }: { byProgramme: { name: s
           const pct = (p.participants / max) * 100
           return (
             <div key={p.name} className="flex items-center gap-3">
-              <div className="w-44 flex-shrink-0 font-body text-sm text-ink text-right leading-tight">{p.name}</div>
+              <div className="w-28 sm:w-44 flex-shrink-0 font-body text-sm text-ink text-right leading-tight break-words">{p.name}</div>
               <div className="flex-1 h-8 bg-surface-muted rounded overflow-hidden">
                 <div
                   className="h-full w-full origin-left rounded"
                   style={{ transform: `scaleX(${pct / 100})`, backgroundColor: colour, transition: 'transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
                 />
               </div>
-              <div className="w-12 flex-shrink-0 font-display font-bold text-base text-right" style={{ color: colour }}>
+              <div className="w-12 flex-shrink-0 font-display font-bold text-base text-right text-ink">
                 {p.participants}
               </div>
             </div>
@@ -286,14 +312,14 @@ function ProgrammeReach({ byProgramme, allProgrammes }: { byProgramme: { name: s
         })}
       </div>
       <div className="flex items-center gap-3 mt-2" aria-hidden="true">
-        <div className="w-44" />
+        <div className="w-28 sm:w-44 flex-shrink-0" />
         <div className="flex-1 flex justify-between font-body text-[10px] text-ink-light">
           <span>0</span><span>{Math.round(max / 2)}</span><span>{max}</span>
         </div>
         <div className="w-12" />
       </div>
       <div className="flex items-center gap-3 mt-0.5" aria-hidden="true">
-        <div className="w-44" />
+        <div className="w-28 sm:w-44 flex-shrink-0" />
         <div className="flex-1 text-center font-body text-[10px] text-ink-light">Total participants</div>
         <div className="w-12" />
       </div>

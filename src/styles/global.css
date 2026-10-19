@@ -62,12 +62,81 @@ body {
   outline-offset: 2px;
 }
 
+/* Direct labels on the /impact stacked bars. Each segment is a size
+   container: it shows "Name value" when it is wide enough for that text
+   (data-fit, estimated in ImpactDashboard.tsx), else just the value, else
+   nothing. Pure CSS so it also re-flows for the printed page. */
+.chart-seg {
+  container-type: inline-size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-width: 0;
+}
+/* Thin divider so adjacent segments stay distinct in greyscale print. */
+.chart-seg + .chart-seg { border-left: 1px solid #FFFFFF; }
+.chart-seg-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  padding: 0 4px;
+}
+.chart-seg-full,
+.chart-seg-short { display: none; }
+@container (min-width: 22px) {
+  .chart-seg-short { display: inline; }
+}
+@container (min-width: 32px) {
+  .chart-seg-full[data-fit="32"] { display: inline; }
+  .chart-seg-full[data-fit="32"] + .chart-seg-short { display: none; }
+}
+@container (min-width: 64px) {
+  .chart-seg-full[data-fit="64"] { display: inline; }
+  .chart-seg-full[data-fit="64"] + .chart-seg-short { display: none; }
+}
+@container (min-width: 96px) {
+  .chart-seg-full[data-fit="96"] { display: inline; }
+  .chart-seg-full[data-fit="96"] + .chart-seg-short { display: none; }
+}
+@container (min-width: 128px) {
+  .chart-seg-full[data-fit="128"] { display: inline; }
+  .chart-seg-full[data-fit="128"] + .chart-seg-short { display: none; }
+}
+@container (min-width: 160px) {
+  .chart-seg-full[data-fit="160"] { display: inline; }
+  .chart-seg-full[data-fit="160"] + .chart-seg-short { display: none; }
+}
+@container (min-width: 192px) {
+  .chart-seg-full[data-fit="192"] { display: inline; }
+  .chart-seg-full[data-fit="192"] + .chart-seg-short { display: none; }
+}
+@container (min-width: 224px) {
+  .chart-seg-full[data-fit="224"] { display: inline; }
+  .chart-seg-full[data-fit="224"] + .chart-seg-short { display: none; }
+}
+@container (min-width: 256px) {
+  .chart-seg-full[data-fit="256"] { display: inline; }
+  .chart-seg-full[data-fit="256"] + .chart-seg-short { display: none; }
+}
+@container (min-width: 288px) {
+  .chart-seg-full[data-fit="288"] { display: inline; }
+  .chart-seg-full[data-fit="288"] + .chart-seg-short { display: none; }
+}
+@container (min-width: 320px) {
+  .chart-seg-full[data-fit="320"] { display: inline; }
+  .chart-seg-full[data-fit="320"] + .chart-seg-short { display: none; }
+}
+
 /* "Download summary (PDF)" on /impact uses the browser's print dialog. */
 @media print {
   header[class*="fixed"], footer, #mobile-menu, .skip-link { display: none !important; }
   main { padding-top: 0 !important; }
   .animate-pulse { animation: none; }
-  details > summary { display: none; }
+  /* !important: the summary's Tailwind `flex` class would otherwise win. */
+  details > summary { display: none !important; }
   details > div { display: block; }
   details:not([open]) > :not(summary) { display: block; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
