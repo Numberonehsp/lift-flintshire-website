@@ -29,15 +29,15 @@ export const programmes: Programme[] = [
     tagline: 'Running for every pace, every person',
     badge: 'All Abilities · Running',
     description:
-      "Flintshire Run Club is a welcoming, inclusive running group open to everyone, whether you've never run before or you're training for your next race. We focus on enjoyment, community, and getting outside together.",
+      "Flintshire Run Club is a welcoming, inclusive running group open to everyone, whether you've never run before or you're training for your next race. Membership is free to try, then £30 a year.",
     targetAudience:
       "Open to all abilities from complete beginners to experienced runners. We run as a group and no one gets left behind. Walkers are always welcome too.",
     whatToExpect:
-      "We meet twice a week for guided group runs across Flintshire's beautiful countryside and parks. Sessions include a warm-up, the run itself, and a cool-down. We always finish together and often for a well-earned coffee.",
+      "Two scheduled runs a week: Tuesday at 18:00 from Tinkersdale Car Park in Hawarden, and Thursday at 18:00 from Number One HSP (CH5 2TF), unless the WhatsApp group says otherwise. There are also weekend club runs and regular socials, announced in the WhatsApp group. The £30 annual membership includes a £20 voucher for Run Club merch.",
     sessions: [
-      { day: 'Tuesday', time: '18:00', location: 'Hawarden - Tinkersdale Car Park', cost: 'Free, then £30 annually' },
-      { day: 'Thursday', time: '18:00', location: 'Number One HSP, CH5 2TF', cost: 'Free, then £30 annually' },
-      { day: 'Sunday', time: '09:00', location: 'Number One HSP, CH5 2TF', cost: 'Free, then £30 annually' },
+      { day: 'Tuesday', time: '18:00', location: 'Hawarden - Tinkersdale Car Park', cost: 'Free to try, then £30 annually' },
+      { day: 'Thursday', time: '18:00', location: 'Number One HSP, CH5 2TF', cost: 'Free to try, then £30 annually' },
+      { day: 'Weekends', time: 'See the WhatsApp group', location: 'Varies, announced in the group', cost: 'Included in membership' },
     ],
   },
   {

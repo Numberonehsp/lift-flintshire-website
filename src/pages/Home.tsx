@@ -9,6 +9,9 @@ import { StatCard } from '../components/ui/StatCard'
 import { Testimonial } from '../components/ui/Testimonial'
 import { useGoogleSheets } from '../hooks/useGoogleSheets'
 import { buildHeroStats } from '../lib/heroStats'
+import { responsiveImage } from '../lib/images'
+
+const heroImage = responsiveImage('/images/women-run-club-1.jpeg')
 
 function HeroStats({ stats }: { stats: { value: string; label: string; period?: string }[] }) {
   const period = stats.find(s => s.period)?.period
@@ -42,9 +45,14 @@ export default function Home() {
       {/* Hero — atmospheric photo background */}
       <section className="relative bg-ink overflow-hidden">
         <img
-          src="/images/women-run-club-1.jpeg"
+          {...heroImage}
+          sizes="100vw"
+          width={1600}
+          height={2133}
           alt=""
           aria-hidden="true"
+          loading="eager"
+          fetchPriority="high"
           className="absolute inset-0 w-full h-full object-cover object-center opacity-20"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30" aria-hidden="true" />

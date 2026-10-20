@@ -35,4 +35,10 @@ describe('programmesByGroup', () => {
   it('does not use the old youth id anywhere', () => {
     expect(programmes.some(p => (p.id as string) === 'youth-strength-conditioning')).toBe(false)
   })
+
+  it('lists the two Run Club runs plus weekend club runs, with no Sunday session', () => {
+    const club = programmes.find(p => p.id === 'run-club')
+    expect(club?.sessions.map(s => s.day)).toEqual(['Tuesday', 'Thursday', 'Weekends'])
+    expect(club?.sessions.some(s => s.day === 'Sunday')).toBe(false)
+  })
 })

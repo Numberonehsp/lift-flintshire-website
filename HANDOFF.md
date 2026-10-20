@@ -40,7 +40,7 @@ Website for Lift Flintshire CIC, a not-for-profit community fitness organisation
 | `src/pages/RegisterWomensRunClub.tsx` | Women's Run Club registration page (monthly, first Saturday) |
 | `src/pages/Questionnaire.tsx` | Post-programme feedback form with star ratings and wellbeing impact |
 | `src/components/forms/RegistrationForm.tsx` | Shared waiver component (GDPR, photo consent, injury declaration, initials) |
-| `public/images/` | run-club-1.jpeg, run-club-2.jpeg (only programme with photos; others use ImagePlaceholder) |
+| `public/images/` | Photos as `<name>-800.webp` / `<name>-1600.webp` (made by `scripts/optimise-images.py`), the Run Club and Weightlifting Club SVG logos, and `frc-castle.jpeg` (kept as the og:image) |
 | `public/logo-white.png` | White logo on black background — rendered with `mix-blend-mode: screen` |
 
 ---
@@ -413,3 +413,45 @@ Ran `/impeccable audit` on the live site, then applied all 8 priority fixes. `np
 8. Recommended: add a Vercel Firewall rate-limit rule on `/api/create-entry` (Vercel, Project, Firewall, add a rate-limit rule, for example a small number of requests per minute per IP). This does not exist yet. Free entries skip Stripe, so without a rate limit a script could use up a free event's places or trigger many confirmation emails. The honeypot and the duplicate-email check reduce this but do not stop a determined script.
 
 Also check where Brevo holds data (UK, EEA or elsewhere) and that Brevo's terms give an appropriate transfer mechanism; the privacy policy deliberately does not state a location.
+
+## 2026-10-19 — Run Club details, Programme_Sessions tab and newsletter page
+
+**Run Club**
+- Membership is free to try, then £30 a year. The £30 includes a £20 voucher for Run Club merch, two scheduled runs a week (Tuesday 18:00 at Hawarden, Tinkersdale Car Park; Thursday 18:00 at Number One HSP, CH5 2TF, unless stated in the WhatsApp group), regular socials and weekend club runs.
+- The Sunday 09:00 session is gone. It is replaced by weekend club runs announced in the WhatsApp group (no fixed time).
+- `src/data/programmes.ts` (`run-club` description, whatToExpect, sessions) and `src/pages/RunClub.tsx` (hero copy, Seo description, "What membership includes" block under the Run Club section, @FlintshireRunClub Instagram link under the hero buttons) are updated. The page does not link the WhatsApp group; it says the group details are shared when you join.
+- The Run Club timetable lives in the `Programme_Sessions` tab of the public content sheet. Rows there override the sessions in `programmes.ts`, so keep the two in sync. The tab now exists, with rows for `run-club`, `weightlifting` and `stay-strong`; the `run-club` rows match the code (Tuesday, Thursday, Weekends).
+- Instagram links live in `src/data/links.ts` (`LIFT_FLINTSHIRE_INSTAGRAM_URL`, `RUN_CLUB_INSTAGRAM_URL`). The footer Connect column shows both accounts as labelled links (@LiftFlintshire and @FlintshireRunClub).
+
+**Content sheet resilience**
+- Before the tab existed, `useContentSheets` logged an HTTP 400 on every page load. Parsing now lives in `src/lib/contentSheets.ts` (tested in `contentSheets.test.ts`). Events and Programme_Sessions are read independently: if either tab is missing or returns an error, only that part falls back to the static data, and nothing is logged by the code (the request URL contains the API key). The browser's own network panel will still show a failed request if a tab is missing.
+
+**Newsletter page**
+- `/newsletter` (`src/pages/Newsletter.tsx`) is a standalone sign-up page for QR codes and posters, using the existing `NewsletterSignup` form (same `/api/subscribe` and Brevo `Newsletter` list). It is in `public/sitemap.xml` but not linked from the menu or footer.
+
+## 2026-10-19 — Image optimisation
+
+- Photos are now served as resized WebP. `scripts/optimise-images.py` (Python 3 + Pillow, no other tools needed) applies EXIF rotation, strips metadata and writes `<name>-800.webp` and `<name>-1600.webp` (quality 78, never upscaled). Run it from the repo root in Terminal: `python3 scripts/optimise-images.py <folder of originals>`.
+- Code still refers to photos by their original name (`'/images/foo.jpg'`); `responsiveImage()` in `src/lib/images.ts` turns that into the WebP `src` + `srcSet`. Use it with a `sizes` attribute on every new photo `<img>`. `src/lib/images.test.ts` fails if a photo referenced in `src/` is missing either WebP file.
+- The original JPGs were removed from `public/images` (still in git history before commit `db40d96`). Exception: `frc-castle.jpeg` stays, because `index.html` and `Seo.tsx` use it as the social sharing (og:image) picture and some platforms do not accept WebP there.
+- `public/images` went from 6.9 MB to 5.1 MB; the Home hero photo from 3.8 MB to 97 KB on phones / 357 KB on desktop. Photos that were already 800px wide have identical `-800` and `-1600` files.
+- Adding a photo: see the SOP (`docs/SOP-editing-website-content.md`, Photos row).
+
+## 2026-10-19 — Newsletter double opt-in (optional) and Impact chart labels
+
+**Double opt-in (newsletter form only)**
+- Off by default. When the Vercel env var `BREVO_DOI_TEMPLATE_ID` is a positive whole number, `/api/subscribe` asks Brevo to email a confirmation link (`POST /v3/contacts/doubleOptinConfirmation`) instead of adding the contact straight away. Brevo adds the person to the `Newsletter` list only after they click the link, then sends them to `liftflintshire.co.uk/newsletter?confirmed=1` (built from `SITE_URL`, default `https://liftflintshire.co.uk`), which shows "Thanks, you're confirmed". The form says "Check your inbox to confirm your email address." instead of "Thanks, you're on the list."
+- Unset, blank or not a positive whole number: the old direct add is unchanged.
+- Registrations, the Youth Weightlifting enquiry and event entries do not use double opt-in; they still add contacts directly when the box is ticked.
+- The request sends `CONSENT_DATE`, `CONSENT_SOURCE` (`newsletter-signup`) and `FIRSTNAME` when known (the newsletter form does not collect a name). It uses the same 5 second timeout, error handling (status and Brevo code only, never the email) and retries as the direct add, including `BREVO_CONSENT_ATTRS_DROPPED` if the consent attributes do not exist in Brevo.
+- Code: `requestDoubleOptin` in `api/_lib/brevo.ts`, `doubleOptinConfig` in `api/_lib/subscription.ts`, `api/subscribe.ts`. Tests: `api/_lib/brevo.test.ts`, `api/_lib/subscription.test.ts`, `api/_lib/subscribeHandler.test.ts` (kept in `_lib` so Vercel does not deploy it as a function).
+- Not tested against a live Brevo account. Brevo's reference documents only a 201 (empty body) and a 400 for this endpoint; what it does for an address that is already a contact is not documented.
+
+**To switch it on (Ed, in Brevo then Vercel)**
+1. In Brevo: Contacts, Settings, Double opt-in confirmation template. Create or edit the confirmation template, keeping the confirmation link Brevo puts in it (the person must click it to be added). This menu path was not checked against Brevo's help pages (they blocked automated access on 2026-10-19); if it has moved, search Brevo's help for "double opt-in confirmation template".
+2. Note the template's numeric id.
+3. In Vercel: Project, Settings, Environment Variables, add `BREVO_DOI_TEMPLATE_ID` with that number for Production (and Preview if wanted). Check `SITE_URL` is the live address for Production.
+4. Redeploy, then sign up on `/newsletter` with your own address and check the confirmation email arrives and the link lands on the confirmed notice.
+
+**Impact chart labels**
+- The stacked monthly bars on `/impact` now show "Name value" inside each segment that is at least 14% of the track, or just the value when the name will not fit (CSS container queries in `src/styles/global.css`, so it also works when printing). Narrower segments rely on the legend and the hover tooltip. Label colour is white, ink or black per segment, whichever meets WCAG AA (`src/lib/contrast.ts`, tested). Programme Reach values are now in ink rather than the bar colour.

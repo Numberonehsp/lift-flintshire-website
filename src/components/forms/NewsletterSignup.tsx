@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Button } from '../ui/Button'
-import { newsletterInputError } from '../../lib/newsletter'
+import { newsletterInputError, subscribeSuccessMessage } from '../../lib/newsletter'
 import type { NewsletterInputError } from '../../lib/newsletter'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error'
@@ -26,6 +26,9 @@ async function subscribe(email: string, website: string) {
     body: JSON.stringify({ email, 'marketing-consent': 'yes', website }),
   })
   if (!res.ok) throw new Error('Subscribe failed')
+  // Older or proxied responses may have no JSON body; that just means the plain success message.
+  const data: unknown = await res.json().catch(() => undefined)
+  return subscribeSuccessMessage(data)
 }
 
 export function NewsletterSignup({ tone = 'light', className = '', label = 'Newsletter sign-up' }: Props) {
@@ -37,6 +40,7 @@ export function NewsletterSignup({ tone = 'light', className = '', label = 'News
 
   const [formState, setFormState] = useState<FormState>('idle')
   const [inputError, setInputError] = useState<NewsletterInputError | null>(null)
+  const [successMessage, setSuccessMessage] = useState('')
   const successRef = useRef<HTMLDivElement>(null)
 
   // The form disappears on success, which would drop keyboard focus to the page; move it to the message.
@@ -71,7 +75,7 @@ export function NewsletterSignup({ tone = 'light', className = '', label = 'News
 
     setFormState('submitting')
     try {
-      await subscribe(email.trim(), website)
+      setSuccessMessage(await subscribe(email.trim(), website))
       setFormState('success')
     } catch {
       setFormState('error')
@@ -82,7 +86,7 @@ export function NewsletterSignup({ tone = 'light', className = '', label = 'News
     return (
       <div role="status" ref={successRef} tabIndex={-1} className={`focus:outline-none ${className}`}>
         <p className={`font-body font-semibold text-sm ${dark ? 'text-teal-light' : 'text-teal'}`}>
-          Thanks, you're on the list.
+          {successMessage}
         </p>
       </div>
     )

@@ -119,7 +119,7 @@ export default function Privacy() {
           <h3 className={subheadingClass}>How you opt in</h3>
           <ul className={listClass}>
             <li>By ticking the unticked email updates box on a registration form, an event entry form or the Youth Weightlifting enquiry form, or</li>
-            <li>By entering your email address in the newsletter sign-up form on our website and confirming the tick box.</li>
+            <li>By entering your email address in the newsletter sign-up form on our website and confirming the tick box. We may ask you to confirm your email address by clicking a link we email you before we add you to the list.</li>
           </ul>
           <p className={bodyClass}>
             We never add anyone to our mailing lists automatically. Ticking the privacy or health consent boxes on a form is separate and does not sign you up. The legal basis is your <strong>consent</strong>, and registering or entering an event works the same whether or not you tick the box.

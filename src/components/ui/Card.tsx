@@ -1,6 +1,7 @@
 import { Badge } from './Badge'
 import { Button } from './Button'
 import { ImagePlaceholder } from './ImagePlaceholder'
+import { responsiveImage } from '../../lib/images'
 
 // Programme card
 interface ProgrammeCardProps {
@@ -44,7 +45,10 @@ function ProgrammeCard({ title, description, badge, href, imageSrc, imagePositio
       {/* Background image */}
       {imageSrc ? (
         <img
-          src={imageSrc}
+          {...responsiveImage(imageSrc)}
+          sizes="(min-width: 1152px) 532px, (min-width: 768px) 50vw, 100vw"
+          width={1600}
+          height={1200}
           alt=""
           aria-hidden="true"
           className={`absolute inset-0 w-full h-full object-cover ${imagePosition} transition-transform duration-500 ease-out group-hover:scale-105`}

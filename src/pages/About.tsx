@@ -1,6 +1,7 @@
 import { Seo } from '../components/Seo'
 import { SectionWrapper } from '../components/layout/SectionWrapper'
 import { Badge } from '../components/ui/Badge'
+import { responsiveImage } from '../lib/images'
 
 const values = [
   {
@@ -85,13 +86,19 @@ export default function About() {
           </div>
           <div className="flex-1 w-full space-y-4">
             <img
-              src="/images/strong-paul-josh-coaching.jpg"
+              {...responsiveImage('/images/strong-paul-josh-coaching.jpg')}
+              sizes="(min-width: 1024px) 512px, 100vw"
+              width={1600}
+              height={1200}
               alt="Lift Flintshire coach working with a participant"
               className="w-full aspect-[4/3] object-cover rounded-card"
               loading="lazy"
             />
             <img
-              src="/images/frc-park-run.jpeg"
+              {...responsiveImage('/images/frc-park-run.jpeg')}
+              sizes="(min-width: 1024px) 512px, 100vw"
+              width={1600}
+              height={1200}
               alt="Flintshire Run Club at a local parkrun"
               className="w-full aspect-[4/3] object-cover rounded-card"
               loading="lazy"
