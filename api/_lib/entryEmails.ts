@@ -32,8 +32,9 @@ export function subjectText(value: string, max: number): string {
   return value.replace(/[\r\n\u2028\u2029]+/g, ' ').trim().slice(0, max).trim()
 }
 
-export function entryConfirmationSubject(eventTitle: string, ref: string): string {
-  return `Entry confirmed: ${subjectText(eventTitle, MAX_TITLE_IN_SUBJECT)} (${ref})`
+/** Generic across every event (free or paid) so the wording never needs touching event to event. */
+export function entryConfirmationSubject(): string {
+  return 'Welcome to Lift Flintshire!'
 }
 
 export function entryConfirmationHtml({ firstName, eventTitle, tierLabel, ref, amount }: EntryEmailDetails): string {
@@ -42,21 +43,25 @@ export function entryConfirmationHtml({ firstName, eventTitle, tierLabel, ref, a
   const tier = escapeHtml(tierLabel)
   const reference = escapeHtml(ref)
   const confirmedLine = isFreeAmount(amount)
-    ? `Your free entry is confirmed — <strong>${tier}</strong>.`
-    : `Your entry is confirmed — <strong>${tier}</strong>, £${escapeHtml(amount)} paid.`
+    ? `<strong>${title}</strong> — ${tier}.`
+    : `<strong>${title}</strong> — ${tier}, £${escapeHtml(amount)} paid.`
   return `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#376A6B;color:white;padding:20px 24px;border-radius:8px 8px 0 0">
-        <h2 style="margin:0;font-size:20px">You're in — ${title}</h2>
-        <p style="margin:4px 0 0;opacity:.85;font-size:14px">Entry reference: <strong>${reference}</strong></p>
+        <h2 style="margin:0;font-size:20px">Welcome to Lift Flintshire!</h2>
+        <p style="margin:4px 0 0;opacity:.85;font-size:14px">
+          You're in — thanks for registering your interest. We'll be in touch with info about upcoming events.
+        </p>
       </div>
       <div style="border:1px solid #e0e0e0;border-top:none;padding:20px 24px;border-radius:0 0 8px 8px">
         <p>Hi ${name},</p>
-        <p>${confirmedLine}</p>
-        <p>Keep your entry reference <strong>${reference}</strong> handy for event day. We'll email
-        final instructions (start time, parking, what to bring) closer to the date.</p>
-        <p>Any questions, just reply to this email.</p>
-        <p>— Lift Flintshire CIC</p>
+        <p>Thanks so much for getting involved — our aim is to increase opportunities and lower the
+        barriers so that anyone has the chance to move, exercise and feel more confident in North Wales.</p>
+        <p>You're confirmed for ${confirmedLine} Entry reference: <strong>${reference}</strong> — keep
+        it handy for event day.</p>
+        <p>We'll get in touch with event news, instructions and updates about what we do, but any
+        questions, just reply to this email.</p>
+        <p>See you soon,<br>The Lift Flintshire CIC Team</p>
       </div>
       <p style="font-size:11px;color:#999;margin-top:12px">liftflintshire.co.uk</p>
     </div>`

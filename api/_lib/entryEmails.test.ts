@@ -24,14 +24,14 @@ describe('isFreeAmount', () => {
 describe('entryConfirmationHtml', () => {
   it('says how much was paid for a paid entry', () => {
     const html = entryConfirmationHtml({ ...base, amount: '81.42' })
-    expect(html).toContain('Your entry is confirmed')
+    expect(html).toContain('Welcome to Lift Flintshire!')
     expect(html).toContain('£81.42 paid')
-    expect(html).not.toContain('free entry')
   })
 
-  it('says the entry is free and never shows £0.00 for a free entry', () => {
+  it('names the event and tier without £0.00 for a free entry', () => {
     const html = entryConfirmationHtml({ ...base, amount: '0.00' })
-    expect(html).toContain('Your free entry is confirmed')
+    expect(html).toContain('Track Run')
+    expect(html).toContain('Standard Entry')
     expect(html).not.toContain('£0.00')
     expect(html).not.toContain('paid')
   })
@@ -49,9 +49,8 @@ describe('entryConfirmationHtml', () => {
 })
 
 describe('entryConfirmationSubject', () => {
-  it('names the event and reference', () => {
-    expect(entryConfirmationSubject("Women's Track Run", 'LF26-ABCDEF'))
-      .toBe("Entry confirmed: Women's Track Run (LF26-ABCDEF)")
+  it('is a generic welcome, the same for every event', () => {
+    expect(entryConfirmationSubject()).toBe('Welcome to Lift Flintshire!')
   })
 })
 
@@ -82,12 +81,7 @@ describe('subject line safety', () => {
     expect(subjectText('a'.repeat(200), 20)).toHaveLength(20)
   })
 
-  it('applies to the entrant and organiser subjects', () => {
-    const subject = entryConfirmationSubject(`Run\r\n${'x'.repeat(300)}`, 'LF26-ABCDEF')
-    expect(subject).not.toMatch(/[\r\n]/)
-    expect(subject.length).toBeLessThanOrEqual(160)
-    expect(subject.endsWith('(LF26-ABCDEF)')).toBe(true)
-
+  it('applies to the organiser subject (the entrant subject is a fixed constant, no injection surface)', () => {
     const notice = organiserNotification({
       ...base, amount: '0.00', email: 'a@example.com',
       eventTitle: 'Run\nX', firstName: `Ann\r\n${'y'.repeat(200)}`,

@@ -100,7 +100,7 @@ export async function finaliseEntry(
     await deps.sendEmail({
       from: 'Lift Flintshire Events <events@liftflintshire.co.uk>',
       to: [p.email],
-      subject: entryConfirmationSubject(p.eventTitle, p.entryRef),
+      subject: entryConfirmationSubject(),
       html: entryConfirmationHtml(details),
     })
   } catch (err) {
